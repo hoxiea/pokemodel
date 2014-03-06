@@ -1,0 +1,166 @@
+Number, Name, Type, Category, Contest, PP, Power, Accuracy, Weird
+1, Pound, Normal, Physical, Tough, 35, 40, 100%, False
+2, Karate Chop, Fighting, Physical, Tough, 25, 50, 100%, True
+3, Double Slap, Normal, Physical, Tough, 10, 15, 85%, False
+4, Comet Punch, Normal, Physical, Tough, 15, 18, 85%, False
+5, Mega Punch, Normal, Physical, Tough, 20, 80, 85%, False
+6, Pay Day, Normal, Physical, Smart, 20, 40, 100%, False
+7, Fire Punch, Fire, Physical, Beauty, 15, 75, 100%, False
+8, Ice Punch, Ice, Physical, Beauty, 15, 75, 100%, False
+9, Thunder Punch, Electric, Physical, Cool, 15, 75, 100%, False
+10, Scratch, Normal, Physical, Tough, 35, 40, 100%, False
+11, Vice Grip, Normal, Physical, Tough, 30, 55, 100%, False
+12, Guillotine, Normal, Physical, Cool, 5, NA, NA, True
+13, Razor Wind, Normal, Special, Cool, 10, 80, 100%, True
+14, Swords Dance, Normal, Status, Beauty, 20, NA, NA, True
+15, Cut, Normal, Physical, Cool, 30, 50, 95%, False
+16, Gust, Flying, Special, Smart, 35, 40, 100%, True
+17, Wing Attack, Flying, Physical, Cool, 35, 60, 100%, True
+18, Whirlwind, Normal, Status, Smart, 20, NA, NA, True
+19, Fly, Flying, Physical, Smart, 15, 90, 95%, True
+20, Bind, Normal, Physical, Tough, 20, 15, 85%, True
+21, Slam, Normal, Physical, Tough, 20, 80, 75%, False
+22, Vine Whip, Grass, Physical, Cool, 25, 45, 100%, True
+23, Stomp, Normal, Physical, Tough, 20, 65, 100%, False
+24, Double Kick, Fighting, Physical, Cool, 30, 30, 100%, False
+25, Mega Kick, Normal, Physical, Cool, 5, 120, 75%, False
+26, Jump Kick, Fighting, Physical, Cool, 10, 100, 95%, True
+27, Rolling Kick, Fighting, Physical, Cool, 15, 60, 85%, False
+28, Sand Attack, Ground, Status, Cute, 15, NA, 100%, True
+29, Headbutt, Normal, Physical, Tough, 15, 70, 100%, False
+30, Horn Attack, Normal, Physical, Cool, 25, 65, 100%, False
+31, Fury Attack, Normal, Physical, Cool, 20, 15, 85%, False
+32, Horn Drill, Normal, Physical, Cool, 5, NA, NA, False
+33, Tackle, Normal, Physical, Tough, 35, 50, 100%, True
+34, Body Slam, Normal, Physical, Tough, 15, 85, 100%, False
+35, Wrap, Normal, Physical, Tough, 20, 15, 90%, True
+36, Take Down, Normal, Physical, Tough, 20, 90, 85%, False
+37, Thrash, Normal, Physical, Tough, 10, 120, 100%, True
+38, Double-Edge, Normal, Physical, Tough, 15, 120, 100%, True
+39, Tail Whip, Normal, Status, Cute, 30, NA, 100%, False
+40, Poison Sting, Poison, Physical, Smart, 35, 15, 100%, False
+41, Twineedle, Bug, Physical, Cool, 20, 25, 100%, False
+42, Pin Missile, Bug, Physical, Cool, 20, 25, 95%, True
+43, Leer, Normal, Status, Cool, 30, NA, 100%, False
+44, Bite, Dark, Physical, Tough, 25, 60, 100%, True
+45, Growl, Normal, Status, Cute, 40, NA, 100%, False
+46, Roar, Normal, Status, Cool, 20, NA, NA, True
+47, Sing, Normal, Status, Cute, 15, NA, 55%, False
+48, Supersonic, Normal, Status, Smart, 20, NA, 55%, False
+49, Sonic Boom, Normal, Special, Cool, 20, , 90%, True
+50, Disable, Normal, Status, Smart, 20, NA, 100%, True
+51, Acid, Poison, Special, Smart, 30, 40, 100%, False
+52, Ember, Fire, Special, Beauty, 25, 40, 100%, False
+53, Flamethrower, Fire, Special, Beauty, 15, 90, 100%, True
+54, Mist, Ice, Status, Beauty, 30, NA, NA, False
+55, Water Gun, Water, Special, Cute, 25, 40, 100%, False
+56, Hydro Pump, Water, Special, Beauty, 5, 110, 80%, True
+57, Surf, Water, Special, Beauty, 15, 90, 100%, True
+58, Ice Beam, Ice, Special, Beauty, 10, 90, 100%, True
+59, Blizzard, Ice, Special, Beauty, 5, 110, 70%, True
+60, Psybeam, Psychic, Special, Beauty, 20, 65, 100%, False
+61, Bubble Beam, Water, Special, Beauty, 20, 65, 100%, False
+62, Aurora Beam, Ice, Special, Beauty, 20, 65, 100%, False
+63, Hyper Beam, Normal, Special, Cool, 5, 150, 90%, False
+64, Peck, Flying, Physical, Cool, 35, 35, 100%, False
+65, Drill Peck, Flying, Physical, Cool, 20, 80, 100%, False
+66, Submission, Fighting, Physical, Cool, 25, 80, 80%, False
+67, Low Kick, Fighting, Physical, Tough, 20, NA, 100%, True
+68, Counter, Fighting, Physical, Tough, 20, NA, 100%, False
+69, Seismic Toss, Fighting, Physical, Tough, 20, NA, 100%, False
+70, Strength, Normal, Physical, Tough, 15, 80, 100%, False
+71, Absorb, Grass, Special, Smart, 25, 20, 100%, True
+72, Mega Drain, Grass, Special, Smart, 15, 40, 100%, True
+73, Leech Seed, Grass, Status, Smart, 10, NA, 90%, False
+74, Growth, Normal, Status, Beauty, 20, NA, NA, True
+75, Razor Leaf, Grass, Physical, Cool, 25, 55, 95%, False
+76, Solar Beam, Grass, Special, Cool, 10, 120, 100%, False
+77, Poison Powder, Poison, Status, Smart, 35, NA, 75%, False
+78, Stun Spore, Grass, Status, Smart, 30, NA, 75%, False
+79, Sleep Powder, Grass, Status, Smart, 15, NA, 75%, False
+80, Petal Dance, Grass, Special, Beauty, 10, 120, 100%, True
+81, String Shot, Bug, Status, Smart, 40, NA, 95%, False
+82, Dragon Rage, Dragon, Special, Cool, 10, , 100%, True
+83, Fire Spin, Fire, Special, Beauty, 15, 35, 85%, True
+84, Thunder Shock, Electric, Special, Cool, 30, 40, 100%, False
+85, Thunderbolt, Electric, Special, Cool, 15, 90, 100%, True
+86, Thunder Wave, Electric, Status, Cool, 20, NA, 100%, False
+87, Thunder, Electric, Special, Cool, 10, 110, 70%, True
+88, Rock Throw, Rock, Physical, Tough, 15, 50, 90%, True
+89, Earthquake, Ground, Physical, Tough, 10, 100, 100%, False
+90, Fissure, Ground, Physical, Tough, 5, NA, NA, False
+91, Dig, Ground, Physical, Smart, 10, 80, 100%, True
+92, Toxic, Poison, Status, Smart, 10, NA, 90%, True
+93, Confusion, Psychic, Special, Smart, 25, 50, 100%, False
+94, Psychic, Psychic, Special, Smart, 10, 90, 100%, False
+95, Hypnosis, Psychic, Status, Smart, 20, NA, 60%, True
+96, Meditate, Psychic, Status, Beauty, 40, NA, NA, False
+97, Agility, Psychic, Status, Cool, 30, NA, NA, False
+98, Quick Attack, Normal, Physical, Cool, 30, 40, 100%, False
+99, Rage, Normal, Physical, Cool, 20, 20, 100%, False
+100, Teleport, Psychic, Status, Cool, 20, NA, NA, False
+101, Night Shade, Ghost, Special, Smart, 15, NA, 100%, False
+102, Mimic, Normal, Status, Cute, 10, NA, 100%, False
+103, Screech, Normal, Status, Smart, 40, NA, 85%, False
+104, Double Team, Normal, Status, Cool, 15, NA, NA, False
+105, Recover, Normal, Status, Smart, 10, NA, NA, True
+106, Harden, Normal, Status, Tough, 30, NA, NA, False
+107, Minimize, Normal, Status, Cute, 10, NA, NA, True
+108, Smokescreen, Normal, Status, Smart, 20, NA, 100%, False
+109, Confuse Ray, Ghost, Status, Smart, 10, NA, 100%, False
+110, Withdraw, Water, Status, Cute, 40, NA, NA, False
+111, Defense Curl, Normal, Status, Cute, 40, NA, NA, False
+112, Barrier, Psychic, Status, Cool, 20, NA, NA, True
+113, Light Screen, Psychic, Status, Beauty, 30, NA, NA, False
+114, Haze, Ice, Status, Beauty, 30, NA, NA, False
+115, Reflect, Psychic, Status, Smart, 20, NA, NA, False
+116, Focus Energy, Normal, Status, Cool, 30, NA, NA, False
+117, Bide, Normal, Physical, Tough, 10, NA, 100%, False
+118, Metronome, Normal, Status, Cute, 10, NA, NA, False
+119, Mirror Move, Flying, Status, Smart, 20, NA, NA, False
+120, Self-Destruct, Normal, Physical, Beauty, 5, 200, 100%, True
+121, Egg Bomb, Normal, Physical, Tough, 10, 100, 75%, False
+122, Lick, Ghost, Physical, Tough, 30, 30, 100%, True
+123, Smog, Poison, Special, Tough, 20, 30, 70%, True
+124, Sludge, Poison, Special, Tough, 20, 65, 100%, False
+125, Bone Club, Ground, Physical, Tough, 20, 65, 85%, False
+126, Fire Blast, Fire, Special, Beauty, 5, 110, 85%, True
+127, Waterfall, Water, Physical, Tough, 15, 80, 100%, False
+128, Clamp, Water, Physical, Tough, 10, 35, 85%, True
+129, Swift, Normal, Special, Cool, 20, 60, NA, False
+130, Skull Bash, Normal, Physical, Tough, 10, 130, 100%, True
+131, Spike Cannon, Normal, Physical, Cool, 15, 20, 100%, False
+132, Constrict, Normal, Physical, Tough, 35, 10, 100%, False
+133, Amnesia, Psychic, Status, Cute, 20, NA, NA, False
+134, Kinesis, Psychic, Status, Smart, 15, NA, 80%, False
+135, Soft-Boiled, Normal, Status, Beauty, 10, NA, NA, False
+136, High Jump Kick, Fighting, Physical, Cool, 10, 130, 90%, True
+137, Glare, Normal, Status, Tough, 30, NA, 100%, True
+138, Dream Eater, Psychic, Special, Smart, 15, 100, 100%, False
+139, Poison Gas, Poison, Status, Smart, 40, NA, 90%, True
+140, Barrage, Normal, Physical, Tough, 20, 15, 85%, False
+141, Leech Life, Bug, Physical, Smart, 15, 20, 100%, False
+142, Lovely Kiss, Normal, Status, Beauty, 10, NA, 75%, False
+143, Sky Attack, Flying, Physical, Cool, 5, 140, 90%, False
+144, Transform, Normal, Status, Smart, 10, NA, NA, False
+145, Bubble, Water, Special, Cute, 30, 40, 100%, True
+146, Dizzy Punch, Normal, Physical, Cool, 10, 70, 100%, False
+147, Spore, Grass, Status, Beauty, 15, NA, 100%, False
+148, Flash, Normal, Status, Beauty, 20, NA, 100%, True
+149, Psywave, Psychic, Special, Smart, 15, NA, 100%, True
+150, Splash, Normal, Status, Cute, 40, NA, NA, False
+151, Acid Armor, Poison, Status, Tough, 20, NA, NA, True
+152, Crabhammer, Water, Physical, Tough, 10, 100, 90%, True
+153, Explosion, Normal, Physical, Beauty, 5, 250, 100%, True
+154, Fury Swipes, Normal, Physical, Tough, 15, 18, 80%, False
+155, Bonemerang, Ground, Physical, Tough, 10, 50, 90%, False
+156, Rest, Psychic, Status, Cute, 10, NA, NA, False
+157, Rock Slide, Rock, Physical, Tough, 10, 75, 90%, False
+158, Hyper Fang, Normal, Physical, Cool, 15, 80, 90%, False
+159, Sharpen, Normal, Status, Cute, 30, NA, NA, False
+160, Conversion, Normal, Status, Beauty, 30, NA, NA, False
+161, Tri Attack, Normal, Special, Beauty, 10, 80, 100%, False
+162, Super Fang, Normal, Physical, Tough, 10, NA, 90%, False
+163, Slash, Normal, Physical, Cool, 20, 70, 100%, False
+164, Substitute, Normal, Status, Smart, 10, NA, NA, False
+165, Struggle, Normal, Physical, Cool, 1, 50, 100%, True
