@@ -1,0 +1,8 @@
+- Get list of all moves each Pokemon can learn
+-
+
+Different Kinds of Move:
+-
+
+Same-type attack bonus
+

@@ -1,0 +1,71 @@
+Status Conditions:
+- Non-volative: lasts a certain number of turns
+- Volative
+- While Pokemon in battle
+
+
+Non-volative
+-- Burn (BRN):
+---- Damage dealt by physical moves is halved, unless Attack was modified either up or down; then burn has no effect
+---- Lose 1/16 of maxHP after attacking, unless it kills opponent Pokemon
+---- Fire-type Pokemon can't be burned
+---- Curing a BRN with Move:Rest doesn't cause the halved damage to disappear
+---- Moves that cause Burn:
+------ Ember (10%)
+------ Fire Blast (30%)
+------ Fire Punch (10%)
+------ Fire Punch (10%)
+------ Flamethrower (10%)
+
+-- Freeze (FRZ): 
+---- Pokemon unable to make a move
+---- Damaging Fire-type moves will remove the status, but that's it!  Lasts forever otherwise
+---- Ice Pokemon are immune
+---- Moves that can cause FRZ:
+------ Blizzard (10%)
+------ Ice Beam (10%)
+------ Ice Punch (10%)
+
+-- Paralysis (PAR)
+---- 25% of losing your turn due to full paralysis
+---- Speed decreases to 25%
+---- Anyone can be paralyzed, but Ground Pokemon can't be paralyzed by Electric-type moves
+---- Didn't understand this description: http://bulbapedia.bulbagarden.net/wiki/Paralysis_(status_condition)
+---- Cured by Move:Rest
+---- Moves that can cause PAR:
+------ Body Slam (30% chance + damage)
+------ Glare (75% chance, 100% accuracy, no damage)
+------ Lick (30% chance + damage)
+------ Spark (30% chance + damage)
+------ Stun Spore (75% accuracy, 100% chance if it connects)
+------ Thunder (10% chance + damage)
+------ Thunder Punch (10% chance + damage)
+------ Thunder Shock (10% chance + damage)
+------ Thunder Wave (100% chance, but only works when the opponent doesn't have another status)
+------ Thunderbolt (10% chance + damage)
+
+-- Poison (PSN)
+---- Lose 1/16 of maxHP at the end of every turn, unless you cause a Pokemon to faint
+---- Poison-type Pokemon are immune
+---- Moves that can cause PSN:
+------ Poison Gas (55% accuracy, 100% chance to Poison if it hits)
+------ Poison Powder (75% accuracy, 100% chance to Poison if it hits)
+------ Poison Sting (30% chance + damage)
+------ Sludge (30% chance + damage)
+------ Smog (40% chance + damage)
+------ Twineedle (weird move, make sure to get this right)
+
+
+-- Bad Poison (BPN)
+---- Poison-type Pokemon are immune
+---- dmgLost := 1/16
+---- Lose dmgLost HP at the end of each turn, unless you cause an opponent to faint
+---- Whenever damaged, dmgLost += 1/16
+---- Leech Seed means that dmgLost += 1/16 every turn, even if damage isn't dealt.  Other stuff happens too, see http://bulbapedia.bulbagarden.net/wiki/Poison_(status_condition)
+---- Haze does something, see link
+---- Rest removes the status, but dmgLost doesn't return to 1/16
+---- Moves that can cause BPN:
+------ Toxic (weird move, get this right)
+
+-- Sleep (SLP)
+---- 
