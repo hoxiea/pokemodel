@@ -16,3 +16,6 @@ project/plugins/project/
 .project
 .classpath
 .cache
+
+# Other
+.metadata/
