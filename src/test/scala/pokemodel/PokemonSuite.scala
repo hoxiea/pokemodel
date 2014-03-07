@@ -33,13 +33,13 @@ class PokemonSuite extends FunSuite {
     val pb = new PokemonBuilder("Pikachu", 81)
                  .attackIV(8)
                  .defenseIV(13)
-                 .specialIV(9)
                  .speedIV(5)
-                 .hpEV(22850)
+                 .specialIV(9)
                  .attackEV(23140)
                  .defenseEV(17280)
-                 .specialEV(19625)
                  .speedEV(24795)
+                 .specialEV(19625)
+                 .hpEV(22850)
     assert(pb.attackIV == 8)
     assert(pb.defenseIV == 13)
     assert(pb.specialIV == 9)
@@ -51,23 +51,22 @@ class PokemonSuite extends FunSuite {
     assert(pb.speedEV == 24795)
   }
 
-  test("specific Pokemon creation") {
+  test("specific Pokemon creation: level 81 Pikachu") {
     // http://bulbapedia.bulbagarden.net/wiki/Stats#Example
     val pb = new PokemonBuilder("Pikachu", 81)
                  .attackIV(8)
                  .defenseIV(13)
-                 .specialIV(9)
                  .speedIV(5)
-                 .hpEV(22850)
+                 .specialIV(9)
                  .attackEV(23140)
                  .defenseEV(17280)
-                 .specialEV(19625)
                  .speedEV(24795)
+                 .specialEV(19625)
+                 .hpEV(22850)
     assert(pb.maxHP == 189, "(HP)")
     assert(pb.attack == 137, "(Attack)")
-    assert(pb.defense == 189, "(Defense)")
-    assert(pb.special == 189, "(Special)")
-    assert(pb.speed == 189, "(Speed)")
-    
+    assert(pb.defense == 101, "(Defense)")
+    assert(pb.special == 128, "(Special)")
+    assert(pb.speed == 190, "(Speed)")
   }
 }

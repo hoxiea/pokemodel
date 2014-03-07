@@ -11,7 +11,7 @@ class PokemonBuilder (index : Int, level : Int){
   val indx = index
   val lvl = level
 
-  // Alt constructor: create a PokemonBuilder by specifying Pokemon's name instead of its index
+  // Alt. constructor: create a PokemonBuilder by specifying Pokemon's name instead of its index
   def this(name : String, level : Int) = this(PokeData.nameToID(name), level)
 
   /* Optional parameters - default to random values */
@@ -49,12 +49,23 @@ class PokemonBuilder (index : Int, level : Int){
   // Stats are determined by the level and that species's base stats
   // Types are determined exclusively by index
   // Determine this stuff below
+  
+  private def scaleHP(iv : Int, ev : Int, level : Int, baseHP : Int) : Int = {
+    val numerator = (iv + baseHP + (Math.sqrt(ev)/8) + 50) * level
+    ((numerator / 50) + 10).toInt
+  }
+  
+  private def scaleOtherStat(iv : Int, ev : Int, level : Int, baseStat : Int) : Int = {
+    val numerator = (iv + baseStat + (Math.sqrt(ev)/8)) * level
+    ((numerator / 50) + 5).toInt
+  }
+  
   def name    = PokeData.idToName(index)
-  val maxHP   = PokemonBuilder.scaleHP(hpIV, PokeData.getBaseHP(index), hpEV, level)
-  def attack  = PokemonBuilder.scaleOtherStat(attackIV, PokeData.getBaseAttack(index), attackEV, level)
-  def defense = PokemonBuilder.scaleOtherStat(defenseIV, PokeData.getBaseDefense(index), defenseEV, level)
-  def speed   = PokemonBuilder.scaleOtherStat(speedIV, PokeData.getBaseSpeed(index), speedEV, level)
-  def special = PokemonBuilder.scaleOtherStat(specialIV, PokeData.getBaseSpecial(index), specialEV, level)
+  def maxHP   = scaleHP(hpIV, hpEV, level, PokeData.getBaseHP(index))
+  def attack  = scaleOtherStat(attackIV,  attackEV,  level, PokeData.getBaseAttack(index))
+  def defense = scaleOtherStat(defenseIV, defenseEV, level, PokeData.getBaseDefense(index))
+  def speed   = scaleOtherStat(speedIV,   speedEV,   level, PokeData.getBaseSpeed(index))
+  def special = scaleOtherStat(specialIV, specialEV, level, PokeData.getBaseSpecial(index))
   def type1   = PokeData.getType1(index)
   def type2   = PokeData.getType2(index)
   
@@ -152,16 +163,5 @@ object PokemonBuilder {
     if (ev > maxEVValue) maxEVValue 
       else if (ev < 0) 0 
       else ev
-  }
-  
-  // Functions that scale up base stats to correct stats based on level, EV, IV, and base HP
-  private def scaleHP(iv : Int, ev : Int, level : Int, baseHP : Int) : Int = {
-    val numerator = (iv + baseHP + (Math.sqrt(ev)/8) + 50) * level
-    ((numerator / 50) + 10).toInt
-  }
-
-  private def scaleOtherStat(iv : Int, baseStat : Int, ev : Int, level : Int) : Int = {
-    val numerator = (iv + baseStat + (Math.sqrt(ev)/8) + 50) * level
-    ((numerator / 50) + 5).toInt
   }
 }

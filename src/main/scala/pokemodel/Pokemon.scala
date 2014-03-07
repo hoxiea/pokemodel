@@ -45,10 +45,10 @@ class Pokemon(val builder : PokemonBuilder) {
 
   override def toString : String = {
     val repr = new StringBuilder()
-    repr.append(s"$name, level $level")
-    repr.append(s"Type1 = $type1, Type2 = $type2")
-    repr.append(s"IV (A|D|Spd|Spcl|HP) = $attackIV $defenseIV $speedIV $specialIV $hpIV")
-    repr.append(s"EV (A|D|Spd|Spcl|HP) = $attackEV $defenseEV $speedEV $specialEV $hpEV")
+    repr.append(s"$name, level $level\n")
+    repr.append(s"Type1 = $type1, Type2 = $type2\n")
+    repr.append(s"IV (A|D|Spd|Spcl|HP) = $attackIV $defenseIV $speedIV $specialIV $hpIV\n")
+    repr.append(s"EV (A|D|Spd|Spcl|HP) = $attackEV $defenseEV $speedEV $specialEV $hpEV\n")
     repr.append(s"Moves: $move1, $move2, $move3, $move4")
     repr.toString()
   }

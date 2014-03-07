@@ -28,7 +28,6 @@ object PokeData {
   assert(idToName.size == PokemonBuilder.numPokemon)
   assert(nameToID.size == PokemonBuilder.numPokemon)
   assert(types.size == PokemonBuilder.numPokemon)
-  println("Made it here")
   
   def getBaseHP(index : Int) : Int = {
     require(1 <= index && index <= 151, s"invalid call $index to getBaseHP")
