@@ -1,9 +1,110 @@
 There are 3 categories of moves: Physical, Special, and Status
 
-Physical moves:
-Special moves:
+PHYSICAL MOVES:
+- Transfer HP from opponent to self
+= Leech Life
 
-Status moves:
+- Single-strike
+= Drill Peck: damage
+= Peck: damage
+= Wing Attack: damage
+= Vine Whip: damage
+= Cut: damage
+= Earthquake: damage
+= Dizzy Punch: damage
+= Egg Bomb: damage
+= Horn Attack: damage
+= Mega Kick: damage
+= Mega Punch: damage
+= Pay Day: damage
+= Pound: damage
+= Scratch: damage
+= Slam: damage
+= Strength: damage
+= Tackle: damage
+= Vice Grip: damage
+= Rock Slide: damage
+= Rock Throw: damage
+= Waterfall: damage
+
+- Single-strike, special
+= Quick Attack: damage, higher priority
+= Razor Leaf: damage, high crit hit rate
+= Slash: damage, high crit hit rate
+= Crabhammer: damage, high crit hit rate
+
+- Single-strike + recoil
+= Submission: do damage, receive 25% of damage done to target yourself
+= Double Edge: do damage, receive 25% of damage done to target yourself
+= Take Down: do damage, receive 25% of damage done to target yourself
+
+- Single-strike + potential status change
+= Bite: damage and 10% chance of causing a flinch
+= Bone Club: damage and 10% chance of causing a flinch
+= Hyper Fang: damage and 10% chance of causing a flinch
+= Low Kick: damage and 30% chance of causing a flinch
+= Headbutt: damage and 30% chance of causing a flinch
+= Stomp: damage and 30% chance of causing a flinch
+= Rolling Kick: damage and 30% chance of causing a flinch
+= Thunder Punch: damage and 10% chance of PAR
+= Ice Punch: damage and 10% chance of FRZ
+= Lick: damage and 30% chance of PAR
+= Body Slam: damage and 30% chance of PAR
+= Fire Punch: damage and 10% chance of BRN
+= Poison Sting: damage and 30% chance of PSN
+
+- Single-strike + potential stat change
+= Constrict: damage and 10% chance of lowering target's Speed stat by one level
+
+- Multi-strike
+= Pin Missile: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+= Barrage: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+= Comet Punch: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+= Double Slap: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+= Fury Attack: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+= Fury Swipes: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+= Spike Cannon: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+= Double Kick: 2x damage
+= Bonemerang: 2x damage
+
+- Multi-strike + potentially cause status change
+= Twineedle: 2x attack, each 20% change of PSN
+
+- Deal damage that's some function of the environment
+= Seismic Toss: inflict damage equal to the user's level; no STAB bonus
+= Super Fang: inflict damage equal to 50% of target's current HP, unaffected by Types (can hit Ghosts, for example)
+
+- One-hit KOs
+= Fissure: 30% accuracy, inflict damage equal to target's HP; will not affect target whose current Speed is faster than user's current Speed
+= Guillotine: 30% accuracy, inflict damage equal to target's HP; will not affect target whose current Speed is faster than user's current Speed
+= Horn Drill: 30% accuracy, inflict damage equal to target's HP; will not affect target whose current Speed is faster than user's current Speed
+
+- Multi-turn moves
+= Sky Attack: do nothing on turn it's used, then deal damage on next turn
+= Skull Bash: do nothing on turn it's used, then deal damage on next turn
+= Fly: disappear for a turn (affected by Bide, Swift, and Transform), then deal damage
+= Dig: disappear for a turn (affected by Bide, Swift, and Transform), then deal damage
+= Bind: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
+= Wrap: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
+= Clamp: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
+= Thrash: deal damage for 3-4 turns, user can't do anything else, then become confused
+
+- Other weird stuff
+= Counter: wait until opponent attacks (low priority), then return twice damage dealt from certain types, WSSC
+= Hi Jump Kick: damage with base power of 85; if you miss, lose 1 HP.  If you miss and then faint, the target doesn't attack and isn't subjected to recurrent damage during that round
+= Jump Kick: damage; if you miss, lose 1 HP.  If you miss and then faint, the target doesn't attack and isn't subjected to recurrent damage during that round
+= Karate Chop: damage, has increased critical hit rate
+= Bide: wait for 2-3 turns, then deal twice the damage you received during that waiting period. No STAB. Unaffected by accuracy, can hit Fly/Dug opponents, can hit Ghosts
+= Explosion: deal damage, kill the user, halve the opponent's defenses, etc.
+= Self-Destruct: deal damage, kill the user, halve the opponent's defenses, etc.
+= Rage: deals damage, user can't do anything except Rage until faint or battle ends. Every time user is damaged by Attack or targeted by Disable, Attack stat increases one stage (multiple times for multi-strike attacks). Stops increasing Attack stage at +6, and doesn't boost Attack stat past 999
+= Struggle: every Pokemon can use this if none of their other moves are usable, usually due to lack of PP. Struggle deals damage and user receives recoil damage equal to 1/2 damage dealt. Can get crit hits. Normal element, so Rock gets half damage and Ghost are unaffected, etc.
+
+
+SPECIAL MOVES:
+
+
+STATUS MOVES:
 - Do damage in a roundabout way:
 = Leech Seed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
 
