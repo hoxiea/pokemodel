@@ -1,5 +1,0 @@
-package pokemodel
-
-class Action {
-
-}
