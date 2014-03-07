@@ -1,0 +1,70 @@
+There are 3 categories of moves: Physical, Special, and Status
+
+Physical moves:
+Special moves:
+
+Status moves:
+- Do damage in a roundabout way:
+= Leech Seed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
+
+- Change your stats:
+= Sharpen: Attack +1 stage
+= Meditate: Attack +1 stage
+= Swords Dance: Attack +2 stages
+= Defense Curl: Defense +1 stage
+= Withdraw: Defense +1 stage
+= Harden: Defense +1 stage
+= Acid Armor: Defense +2 stages
+= Barrier: Defense +2 stages
+= Double Team: Evasion +1 stage
+= Minimize: Evasion +1 stage
+= Growth: Special +1 stage
+= Agility: Speed +2 stages
+= Amnesia: Special +2 stages
+= Focus Energy: multiply the user's Crit Hit ratio by 4 (except it was buggy in Gen 1 and divided by 4 instead)
+= Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC
+= Light Screen: double the user's Special when the opponent damages the user with a special move, WSSC
+
+- Change opponent's stats
+= String Shot: Speed stat -1 stage
+= Sand Attack: Accuracy stat -1 stage
+= Flash: Accuracy stat -1 stage
+= Smoke Screen: Accuracy stat -1 stage
+= Kinesis: Accuracy stat -1 stage
+= Growl: Attack stat -1 stage
+= Leer: Defense stat -1 stage
+= Tail Whip: Defense stat -1 stage
+= Screech: Defense stat -2 stages
+
+- Change opponent's status
+= Thunder Wave: paralyze
+= Stun Spore: paralyze
+= Glare: paralyze
+= Confuse Ray: confusion, WSSC
+= Supersonic: confusion, WSSC
+= Sleep Powder: sleep
+= Spore: sleep
+= Lovely Kiss: sleep
+= Sing: sleep
+= Hypnosis: sleep, WSSC
+= Poison Gas: poison
+= PoisonPowder: poison
+= Toxic: badly poison, WSSC
+
+- Other weird effect (pretty much all have various special conditions)
+= Mirror Move: use the last move used by the target, WSSC
+= Haze: seems to just reset all stat changes, and status changes, and other stuff
+= Mist: protect user from future stat mods until he's switched out or faints
+= Conversion: change the user's current types(s) to the target's current types(s) (Porygon unique move)
+= Disable: disable one randomly selected move of the opponent's with PP > 0 for 0-6 attempts to execute an attack
+= Metronome: randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
+= Mimic: copy a randomly selected move of the opponent's
+= Recover: restore up to 50% of user's maxHP, WSSC
+= Rest: restore max HP, fall asleep and awaken two turns after it's used, WSSC
+= Soft-boiled: restore up to 50% of user's maxHP, WSSC
+= Roar: no effect whatsoever in link battles (causes battle to end in wild encounters)
+= Whirlwind: no effect whatsoever in link battles (causes battle to end in wild encounters)
+= Teleport: no effect whatsoever in link battles (causes escape in wild encounters)
+= Splash: no effect whatsoever anywhere
+= Substitute: use 25% of maxHP to create a substitute with 1 HP more than the amount of HP lost by the user.  Duplicate the user's current stat modifiers, allow self-modification of stats, but disallow any stat-modifying attacks and side effects of opponent's moves.  Other weird stuff too
+= Transform: change the user's type, stats, stat mods, current moves, species, and cry to that of the target, WSSC
