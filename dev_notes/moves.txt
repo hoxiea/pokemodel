@@ -102,6 +102,42 @@ PHYSICAL MOVES:
 
 
 SPECIAL MOVES:
+= Dragon Rage: Inflict 40 damage if it hits; "it does not ignore type immunity"?
+= Sonic Boom: Inflict 20 damage if it hits; "it does not ignore type immunity"?
+= Thunder: damage, 10% chance PAR
+= Thunderbolt: damage, 10% chance PAR
+= Thunder Shock: damage, 10% chance PAR
+= Ember: damage, 10% chance BRN
+= Aurora Beam: damage, 10% chance opponent's Attack -1 stage
+= Acid: damage, 10% chance opponent's Defense -1 stage
+= Psychic: damage, 30% chance opponent's Special -1 stage
+= Bubble: damage, 10% chance opponent's Speed -1 stage
+= Bubble Beam: damage, 10% chance opponent's Speed -1 stage
+= Fire Blast: damage, 30% chance BRN
+= Sludge: damage, 30% chance PSN
+= Smog: damage, 40% chance PSN
+= Confusion: damage, 10% chance CONFUSE
+= Psybeam: damage, 10% chance CONFUSE
+= Fire Spin: 2-5 turns of damage, and traps the opponent
+= Flamethrower: damage, 10% chance BRN
+= Blizzard: damage, 10% chance FRZ
+= Ice Beam: damage, 10% chance FRZ
+= Gust: damage (Normal-type)
+= Night Shade: deal damage equal to user's level
+= Absorb: damage, and up to 50% of damage dealt is restored to the user
+= Mega Drain: damage, and up to 50% of damage dealt is restored to the user
+= Petal Dance: inflict damage for 3-4 turns; unable to use another move or switch Pokemon while it's going. Then confused
+= Solar Beam: nothing on Move 1, then deal damage
+= Gazor Wind: nothing on Move 1, then deal damage
+= Hyper Beam: deal damage, then idle for a turn
+= Swift: damage, unaffected by mods to accuracy and evasion; can hit Fly and Dug Pokemon
+= Dream Eater: if target asleep, inflict damage and restore 50% of that damage to the user; else, nothing
+= Psywave: deal between 0.5x and 1.5x the user's level of typeless damage
+= Tri Attack: damage
+= Hydro Pump: damage
+= Surf: damage
+= Water Gun: damage
+
 
 
 STATUS MOVES:
