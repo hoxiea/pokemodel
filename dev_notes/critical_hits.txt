@@ -1,0 +1,11 @@
+PROBABILITY OF GETTING A CRITICAL HIT
+From http://www.psypokes.com/lab/criticalhits.php
+
+For regular moves: ch% rate = (base Speed) * 100 / 512
+For Slash, Razor Leaf, Crabhammer, and Karate Chop = (base Speed) * 100 / 64
+
+Round down to 255/256 = 99.6% if above 100%
+
+Critical hits always ignore stat modifiers when they calculate damage dealt.
+
+DAMAGE DEALT BY A CRITICAL HIT

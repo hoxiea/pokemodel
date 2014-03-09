@@ -1,6 +1,6 @@
 There are 3 categories of moves: Physical, Special, and Status
 
-PHYSICAL MOVES:
+PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 - Transfer HP from opponent to self
 = Leech Life
 
@@ -101,7 +101,7 @@ PHYSICAL MOVES:
 = Struggle: every Pokemon can use this if none of their other moves are usable, usually due to lack of PP. Struggle deals damage and user receives recoil damage equal to 1/2 damage dealt. Can get crit hits. Normal element, so Rock gets half damage and Ghost are unaffected, etc.
 
 
-SPECIAL MOVES:
+SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 = Dragon Rage: Inflict 40 damage if it hits; "it does not ignore type immunity"?
 = Sonic Boom: Inflict 20 damage if it hits; "it does not ignore type immunity"?
 = Thunder: damage, 10% chance PAR
@@ -140,7 +140,7 @@ SPECIAL MOVES:
 
 
 
-STATUS MOVES:
+STATUS MOVES (any type, don't deal damage directly):
 - Do damage in a roundabout way:
 = Leech Seed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
 
