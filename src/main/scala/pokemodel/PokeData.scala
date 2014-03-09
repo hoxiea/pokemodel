@@ -5,13 +5,32 @@ import java.io.File
 
 object PokeData {
   val numPokemon = 151
-  
+
+  def stringToType(typeString : String) : Type =  typeString match {
+    case "Normal" => Normal
+    case "Fighting" => Fighting
+    case "Flying" => Flying
+    case "Poison" => Poison
+    case "Ground" => Ground
+    case "Rock" => Rock
+    case "Bug" => Bug
+    case "Ghost" => Ghost
+    case "Fire" => Fire
+    case "Water" => Water
+    case "Grass" => Grass
+    case "Electric" => Electric
+    case "Psychic" => Psychic
+    case "Ice" => Ice
+    case "Dragon" => Dragon
+    case _ => throw new IllegalArgumentException(s"type $typeString not found")
+  }
+
   // Read in base stats and make useful data structures
   var baseStats : Map[Int, (String, Int, Int, Int, Int, Int)] = Map()
   var types : Map[Int, (String, String)] = Map()
   var idToName : Map[Int, String] = Map()
   var nameToID : Map[String, Int] = Map()
-  
+
   val baseStatsPath = "/Users/hha/Dropbox/pokemodel/game_data/base_stats_types.csv"
   val baseStatsFile = new File(baseStatsPath)
   for (line <- Source.fromFile(baseStatsFile).getLines
@@ -24,11 +43,12 @@ object PokeData {
     baseStats += (id -> (name, hp, attack, defense, speed, special))
     types += (id -> (type1S, type2S))
   }
+
   assert(baseStats.size == PokemonBuilder.numPokemon)
   assert(idToName.size == PokemonBuilder.numPokemon)
   assert(nameToID.size == PokemonBuilder.numPokemon)
   assert(types.size == PokemonBuilder.numPokemon)
-  
+
   def getBaseHP(index : Int) : Int = {
     require(1 <= index && index <= 151, s"invalid call $index to getBaseHP")
     baseStats(index)._2
@@ -54,14 +74,14 @@ object PokeData {
     baseStats(index)._6    
   }
 
-  def getType1(index : Int) : Type.Value = {
+  def getType1(index : Int) : Type = {
     val typeStrings = types(index)
-    Type.stringToValue(typeStrings._1)
+    stringToType(typeStrings._1)
   }
 
-  def getType2(index : Int) : Type.Value = {
+  def getType2(index : Int) : Type = {
     val typeStrings = types(index)
-    Type.stringToValue(typeStrings._2)
+    stringToType(typeStrings._2)
   }
 
 }

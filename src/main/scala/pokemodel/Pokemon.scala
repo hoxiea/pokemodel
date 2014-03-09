@@ -3,7 +3,7 @@ package pokemodel
 import scala.Array.canBuildFrom
 import scala.io.Source
 
-class Pokemon(val builder : PokemonBuilder) {
+class Pokemon(builder : PokemonBuilder) {
   private val attackIV  = builder.attackIV
   private val defenseIV = builder.defenseIV
   private val speedIV   = builder.speedIV
@@ -20,13 +20,14 @@ class Pokemon(val builder : PokemonBuilder) {
   val name  = builder.name
   val level = builder.lvl
 
-  val type1 = builder.type1
-  val type2 = builder.type2
+  var type1 : Type = builder.type1
+  var type2 : Type = builder.type2
 
-  private val move1 = builder.move1
-  private val move2 = builder.move2
-  private val move3 = builder.move3
-  private val move4 = builder.move4
+  // These can change in battle, believe it or not
+  var move1 = builder.move1
+  var move2 = builder.move2
+  var move3 = builder.move3
+  var move4 = builder.move4
 
   // These can change in battle, believe it or not
   private var attack  = builder.attack
@@ -47,6 +48,7 @@ class Pokemon(val builder : PokemonBuilder) {
     val repr = new StringBuilder()
     repr.append(s"$name, level $level\n")
     repr.append(s"Type1 = $type1, Type2 = $type2\n")
+    repr.append(s"HP = $currentHP / $maxHP\n")
     repr.append(s"IV (A|D|Spd|Spcl|HP) = $attackIV $defenseIV $speedIV $specialIV $hpIV\n")
     repr.append(s"EV (A|D|Spd|Spcl|HP) = $attackEV $defenseEV $speedEV $specialEV $hpEV\n")
     repr.append(s"Moves: $move1, $move2, $move3, $move4")
@@ -59,6 +61,6 @@ class Pokemon(val builder : PokemonBuilder) {
 
   def heal() {
     currentHP = maxHP
-    // TODO : List(move1, move2, move3, move4).map(m => m.restorePP())
+    // List(move1, move2, move3, move4).filter(_ != null).map(_.restorePP())
   }
 }

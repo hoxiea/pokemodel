@@ -8,4 +8,10 @@ class PokemonTeam(team: List[Pokemon]) {
   def healAll() {
     team.map(_.heal())
   }
+  
+  def switch(index : Int) = {
+  
+  }
+  
+  def hasSomeoneAlive : Boolean = team.exists(_.currentHP > 0)
 }
