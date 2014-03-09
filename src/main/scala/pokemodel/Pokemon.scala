@@ -20,8 +20,8 @@ class Pokemon(builder : PokemonBuilder) {
   val name  = builder.name
   val level = builder.lvl
 
-  var type1 : Type = builder.type1
-  var type2 : Type = builder.type2
+  var type1 = builder.type1
+  var type2 = builder.type2
 
   // These can change in battle, believe it or not
   var move1 = builder.move1

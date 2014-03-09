@@ -1,53 +1,6 @@
 package pokemodel
 
-sealed abstract class Type {
-  val against : Map[Type, Double]
-}
-
-case object Normal extends Type {
-  val against = Map(Rock -> 0.5, Ghost -> 0.0).withDefaultValue(1.0)
-}
-
-case object Fighting extends Type {
-  val against = Map(Normal -> 2.0, 
-                    Flying -> 0.5,
-                    Poison -> 0.5,
-                    Rock -> 2.0,
-                    Bug -> 0.5,
-                    Ghost -> 0.0,
-                    Psychic -> 0.5,
-                    Ice -> 2.0).withDefaultValue(1.0)
-}
-
-case object Flying extends Type {
-  val against = Map(Fighting -> 2.0,
-                    Rock -> 0.5,
-                    Bug -> 2.0,
-                    Grass -> 2.0,
-                    Electric -> 0.5).withDefaultValue(1.0)
-}
-
-case object Poison extends Type {
-  val against = Map(Fighting -> 2.0,
-                    Rock -> 0.5,
-                    Bug -> 2.0,
-                    Grass -> 2.0,
-                    Electric -> 0.5).withDefaultValue(1.0)
-}
-case object Poison extends Type
-case object Ground extends Type
-case object Rock extends Type
-case object Bug extends Type
-case object Ghost extends Type
-case object Fire extends Type
-case object Water extends Type
-case object Grass extends Type
-case object Electric extends Type
-case object Psychic extends Type
-case object Ice extends Type
-case object Dragon extends Type
-
-object Type2 extends Enumeration {
+object Type extends Enumeration {
   type Type = Value
   val Normal = Value("Normal")
   val Fighting = Value("Fighting")
@@ -71,7 +24,7 @@ object Type2 extends Enumeration {
     Grass, Electric, Psychic, Ice, Dragon
   )
   
-  val stringToValue : Map[String, Type.Value] = Map(
+  val stringToType: Map[String, Type.Value] = Map(
     "Normal" -> Normal,
     "Fighting" -> Fighting,
     "Flying" -> Flying,

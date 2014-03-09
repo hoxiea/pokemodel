@@ -6,25 +6,6 @@ import java.io.File
 object PokeData {
   val numPokemon = 151
 
-  def stringToType(typeString : String) : Type =  typeString match {
-    case "Normal" => Normal
-    case "Fighting" => Fighting
-    case "Flying" => Flying
-    case "Poison" => Poison
-    case "Ground" => Ground
-    case "Rock" => Rock
-    case "Bug" => Bug
-    case "Ghost" => Ghost
-    case "Fire" => Fire
-    case "Water" => Water
-    case "Grass" => Grass
-    case "Electric" => Electric
-    case "Psychic" => Psychic
-    case "Ice" => Ice
-    case "Dragon" => Dragon
-    case _ => throw new IllegalArgumentException(s"type $typeString not found")
-  }
-
   // Read in base stats and make useful data structures
   var baseStats : Map[Int, (String, Int, Int, Int, Int, Int)] = Map()
   var types : Map[Int, (String, String)] = Map()
@@ -74,14 +55,14 @@ object PokeData {
     baseStats(index)._6    
   }
 
-  def getType1(index : Int) : Type = {
+  def getType1(index : Int) : Type.Value = {
     val typeStrings = types(index)
-    stringToType(typeStrings._1)
+    Type.stringToType(typeStrings._1)
   }
 
-  def getType2(index : Int) : Type = {
+  def getType2(index : Int) : Type.Value = {
     val typeStrings = types(index)
-    stringToType(typeStrings._2)
+    Type.stringToType(typeStrings._2)
   }
 
 }
