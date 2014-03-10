@@ -42,7 +42,7 @@ class Pokemon(builder : PokemonBuilder) {
   // These will probably be a part of the Battle, not the Pokemon per se
 
   var currentHP = maxHP
-  // var statusAilment : Status
+  var statusAilment : Option[StatusAilment.Value] = builder.statusAilment
 
   override def toString : String = {
     val repr = new StringBuilder()
