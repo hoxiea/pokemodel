@@ -19,3 +19,7 @@ project/plugins/project/
 
 # Other
 .metadata/
+
+# Scala worksheets
+.worksheet/
+*.sc
