@@ -24,6 +24,10 @@ object Type extends Enumeration {
     Grass, Electric, Psychic, Ice, Dragon
   )
   
+  val superEffective = 2.0
+  val notVeryEffective = 0.5
+  val notEffective = 0.0
+  
   val stringToType: Map[String, Type.Value] = Map(
     "Normal" -> Normal,
     "Fighting" -> Fighting,
@@ -43,20 +47,20 @@ object Type extends Enumeration {
   )
   
   val typeMap : Map[Type.Value, Map[Type.Value, Double]] = Map(
-    Normal   -> Map(Rock -> 0.5, 
-                    Ghost -> 0.0).withDefaultValue(1.0),
-    Fighting -> Map(Normal -> 2.0, 
-                    Flying -> 0.5,
-                      Poison -> 0.5,
-                      Rock -> 2.0,
-                      Bug -> 0.5,
-                      Ghost -> 0.0,
-                      Psychic -> 0.5,
-                      Ice -> 2.0).withDefaultValue(1.0),
-    Flying -> Map(Fighting -> 2.0,
-                  Rock -> 0.5,
-                  Bug -> 2.0,
-                  Grass -> 2.0,
-                  Electric -> 0.5).withDefaultValue(1.0)
+    Normal   -> Map(Rock -> notVeryEffective, 
+                    Ghost -> notEffective).withDefaultValue(1.0),
+    Fighting -> Map(Normal -> superEffective, 
+                    Flying -> notVeryEffective,
+                      Poison -> notVeryEffective,
+                      Rock -> superEffective,
+                      Bug -> notVeryEffective,
+                      Ghost -> notEffective,
+                      Psychic -> notVeryEffective,
+                      Ice -> superEffective).withDefaultValue(1.0),
+    Flying -> Map(Fighting -> superEffective,
+                  Rock -> notVeryEffective,
+                  Bug -> superEffective,
+                  Grass -> superEffective,
+                  Electric -> notVeryEffective).withDefaultValue(1.0)
       ).withDefaultValue(Map().withDefaultValue(1.0))  // TODO: remove this, fill in the rest!
 }
