@@ -45,6 +45,8 @@ class PokemonBuilder (index : Int, level : Int){
   var move3 = null   // TODO: pick a random move this Pokemon can learn as default
   var move4 = null   // TODO: pick a random move this Pokemon can learn as default
   
+  var statusAilment : Option[StatusAilment.Value] = None
+  
   // Those are actually the only values that the user can input...
   // Stats are determined by the level and that species's base stats
   // Types are determined exclusively by index
@@ -132,6 +134,11 @@ class PokemonBuilder (index : Int, level : Int){
     this
   }
   
+  def statusAilment(value : StatusAilment.Value) : PokemonBuilder = {
+    statusAilment = Some(value)
+    this
+  }
+  
   def maxOut() : PokemonBuilder = {
     attackIV(PokemonBuilder.maxIVValue)
     defenseIV(PokemonBuilder.maxIVValue)
@@ -163,5 +170,11 @@ object PokemonBuilder {
     if (ev > maxEVValue) maxEVValue 
       else if (ev < 0) 0 
       else ev
+  }
+  
+  def generateRandomPokemonBuilder() : PokemonBuilder = {
+    val index = Utils.intBetween(1, numPokemon + 1)  // upper end exclusive
+    val level = Utils.intBetween(minLevel, maxLevel + 1)
+    new PokemonBuilder(index, level)
   }
 }
