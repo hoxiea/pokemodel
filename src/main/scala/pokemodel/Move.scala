@@ -10,8 +10,8 @@ abstract class Move {
   val accuracy : Double       // in [0.0, 1.0]
   val critHitRate : Double    // in [0.0, 1.0]
   val type1 : Type.Value
-  // val action : Action
   val power : Int
+  val priority : Int
   
   val maxPP : Int
   var currentPP : Int
