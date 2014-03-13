@@ -1,4 +1,4 @@
-package pokemodel 
+package pokemodel
 
 import scala.Array.canBuildFrom
 import scala.io.Source
@@ -23,11 +23,30 @@ class Pokemon(builder : PokemonBuilder) {
   var type1 = builder.type1
   var type2 = builder.type2
 
-  // These can change in battle, believe it or not
-  var move1 = builder.move1
-  var move2 = builder.move2
-  var move3 = builder.move3
-  var move4 = builder.move4
+  /* Moves can change in battle, believe it or not
+   * And though a Pokemon with <4 moves seems inferior to a Pokemon with 4
+   * moves, I still gave Pokemon the Option of not-having 4 moves via PokemonBuilder
+   */
+  var move1 : Move = builder.move1 match {
+    case Some(m: Move) => m
+    case None => new NoMove(this)
+  }
+
+  var move2 : Move = builder.move2 match {
+    case Some(m: Move) => m
+    case None => new NoMove(this)
+  }
+
+  var move3 : Move = builder.move3 match {
+    case Some(m: Move) => m
+    case None => new NoMove(this)
+  }
+
+  var move4 : Move = builder.move4 match {
+    case Some(m: Move) => m
+    case None => new NoMove(this)
+  }
+
 
   // These can change in battle, believe it or not
   private var attack  = builder.attack
@@ -36,14 +55,10 @@ class Pokemon(builder : PokemonBuilder) {
   private var special = builder.special
   private var maxHP   = builder.maxHP
 
-  // http://www.serebii.net/games/stats.shtml
-  // val evasionStage = 0    
-  // val accuracyStage = 0
-  // These will probably be a part of the Battle, not the Pokemon per se
-
   var currentHP = maxHP
   var statusAilment : Option[StatusAilment.Value] = builder.statusAilment
 
+  /* METHODS */
   override def toString : String = {
     val repr = new StringBuilder()
     repr.append(s"$name, level $level\n")
@@ -61,6 +76,27 @@ class Pokemon(builder : PokemonBuilder) {
 
   def heal() {
     currentHP = maxHP
-    // List(move1, move2, move3, move4).filter(_ != null).map(_.restorePP())
+    statusAilment = None
+    List(move1, move2, move3, move4).map(_.restorePP())
+  }
+
+  def getMove(index: Int) : Move = {
+    require(1 <= index && index <= 4, s"illegal index $index passed to useMove - $name $level")
+    index match {
+      case 1 => move1
+      case 2 => move2
+      case 3 => move3
+      case 4 => move4      
+    }
+  }
+
+  def useMove(index : Int, enemy : Pokemon, battle : Battle) : Unit = {
+    require(1 <= index && index <= 4, s"illegal index $index passed to useMove - $name $level")
+    index match {
+      case 1 => move1.use(enemy, battle)
+      case 2 => move2.use(enemy, battle)
+      case 3 => move3.use(enemy, battle)
+      case 4 => move4.use(enemy, battle)
+    }
   }
 }
