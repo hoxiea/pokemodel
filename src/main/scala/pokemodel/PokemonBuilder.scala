@@ -179,18 +179,18 @@ class PokemonBuilder (index : Int, level : Int){
 
 object PokemonBuilder {
   val numPokemon = 151
-  private val minLevel = 1
-  private val maxLevel = 100
-  private val minEVValue = 0
-  private val maxEVValue = 65535
-  private val minIVValue = 0
-  private val maxIVValue = 15
-  private val evSD = 3000  // SD of EV values generated
+  val minLevel = 1
+  val maxLevel = 100
+  val minEVValue = 0
+  val maxEVValue = 65535
+  val minIVValue = 0
+  val maxIVValue = 15
+  val evSD = 3000  // SD of EV values generated
 
-  private def generateRandomScaledEV(level : Int) : Int = {
+  def generateRandomScaledEV(level : Int) : Int = {
     val mean = (level.toFloat / maxLevel) * maxEVValue
     val sd = evSD
-    val ev = (Random.nextGaussian() * mean + sd).toInt
+    val ev = (Random.nextGaussian * sd + mean).toInt
     if (ev > maxEVValue) maxEVValue
       else if (ev < 0) 0
       else ev
@@ -198,7 +198,7 @@ object PokemonBuilder {
 
   def generateRandomPokemonBuilder() : PokemonBuilder = {
     val index = Utils.intBetween(1, numPokemon + 1)  // upper end exclusive
-    val level = Utils.intBetween(minLevel, maxLevel + 1)
+    val level = Utils.intBetween(minLevel + 49, maxLevel + 1)  // between 50 and 100
     new PokemonBuilder(index, level)
   }
 }

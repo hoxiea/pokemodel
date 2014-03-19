@@ -1,25 +1,27 @@
 package pokemodel
 
+import StatusAilment._
+import Type._
+
 object Battle {
-  // Customize the battle
+  // Battle customizations
   
   /*
    * In Gen1, teams weren't actually healed before link battles started, and some
    * players took advantage of this fact by poisoning some or all of their Pokemon.
-   * Though counter-intuitive, actually protects them from all the other non-volatile
+   * Though counter-intuitive, it actually protects them from all the other non-volatile
    * status effects, since Pokemon can only have one non-volatile status effect at any 
-   * point in time, and newer ones don't displace older ones.
+   * point in time, and newer ones don't displace older ones. This was fixed in later
+   * Generations.
    */
   val healBefore : Boolean = false
 }
 
-class Battle(val team1 : PokemonTeam, 
-			 val player1 : Player, 
-             val team2 : PokemonTeam, 
-             val player2 : Player) {
+class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
+  val team1 = trainer1.team
+  val team2 = trainer2.team
   
   var time : Int = 0
-  
 
   /* Various moves cause a stat to change up/down by one level
    * This will keep track of those levels for each Pokemon, and the values
@@ -44,7 +46,7 @@ class Battle(val team1 : PokemonTeam,
    * Partially trapped (caused by Wrap, Clamp, and Fire Spin, lasts 2-5 turns)
    * Seeded (leech seed, damage transfered from target to opponent's active Pokemon)
    */
-  val volativeStatuses = Map()  
+  val volativeStatuses = Map()
   
   /* THIRD KIND
    * Sky Attack -> glowing
@@ -57,22 +59,28 @@ class Battle(val team1 : PokemonTeam,
   val weirdStatuses = Map()
   
   if (Battle.healBefore) {
-    team1.healAll()
-    team2.healAll()
+    trainer1.healAll()
+    trainer2.healAll()
   }
   
   def nextTurn() : Unit = {
-    // Process any status ailments that take effect at the beginning of the round
+    println(this)
+    var team1Fainted = false
+    var team2Fainted = false
+    
+    // Process any status ailments that take effect at the beginning of the round: SLP, PAR
        
-    // Check to see if player1 gets to select a BattleAction; process whatever if not
+    // Check volativeStatuses and weirdStatuses to see if player1 gets to select a BattleAction
+    // Process the status if not
 
-    // Check to see if player2 gets to select a BattleAction; process whatever if not
+    // Check volativeStatuses and weirdStatuses to see if player2 gets to select a BattleAction
+    // Process the status if not
 
     // Get submitted Actions from both players
-    val team1Action = player1.getDecision(team1, team2)
-    val team2Action = player2.getDecision(team1, team2)
+    val team1Action = trainer1.getDecision(this)
+    val team2Action = trainer2.getDecision(this)
 
-    // Switches get the highest priority, so process those
+    // Switches get the highest priority, so process those first in all cases where they appear
     (team1Action, team2Action) match {
       case (SwitchPokemon(i), SwitchPokemon(j)) => {
         team1.switch(i)
@@ -83,26 +91,47 @@ class Battle(val team1 : PokemonTeam,
         team2.activePokemon.useMove(j, team1.activePokemon, this)
       }
       case (UseMove(i), SwitchPokemon(j)) => {
-        team1.activePokemon.useMove(i, team2.activePokemon, this)
         team2.switch(j)
+        team1.activePokemon.useMove(i, team2.activePokemon, this)
       }
       case (UseMove(i), UseMove(j)) => {
         /*
          * Both Pokemon chose to use a Move. Higher-priority moves go first, though there aren't many moves
          * with varying priorities in Gen1. Speed is used next to determine who goes first.
+         * TODO: flesh out all the battle details
          */
-        val team1Move : Move = team1.activePokemon.getMove(i)
+          team1.activePokemon.useMove(i, team2.activePokemon, this)
+          if (team2.activePokemon.isAlive) {
+            team2.activePokemon.useMove(j, team1.activePokemon, this)
+          }
+        
       }
     }
-    // Process any status ailments that take effect at the end of the round
+    
+    // Process any status ailments that take effect at the end of the round, assuming the opponent
+    // didn't faint, in which case status ailments don't kick in
+    if (!team2Fainted) { team1.activePokemon.takeStatusAilmentDamage() }
+    
+    if (!team1Fainted) { team2.activePokemon.takeStatusAilmentDamage() }
     
     // Another turn passes
     time = time + 1
   }
  
   def runBattle() : Unit = {
-    while (team1.hasSomeoneAlive && team2.hasSomeoneAlive) {
+    while (!battleIsOver) {
       nextTurn()
     }
+  }
+  
+  def battleIsOver: Boolean = { !(team1.hasSomeoneAlive && team2.hasSomeoneAlive) }
+  
+  override def toString() : String = {
+    val s = new StringBuilder()
+    s.append(team1.activePokemon)
+    s.append("\n")
+    s.append(team2.activePokemon)
+    s.append("----------------------")
+    s.toString()
   }
 }

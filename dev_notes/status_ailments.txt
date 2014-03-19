@@ -1,3 +1,11 @@
+RANDOM NOTES
+Poison kicks in every time you try to attack, immediately after you use your attack.
+If you're Wrapped, for example, it'll hurt you each time you sit there spazzing out.
+Burn damage also kicks in after you attack.
+Both burn and poison also kick in if you switch in, on the same turn that you appear in battle.
+Confusion wears off at the beginning of the turn, at which point your Pokemon uses his move unaffected by CFN
+
+
 Status Conditions:
 - Non-volative: lasts a certain number of turns
 - Volative
@@ -17,7 +25,7 @@ Non-volative
 ------ Fire Punch (10%)
 ------ Flamethrower (10%)
 
--- Freeze (FRZ): 
+-- Freeze (FRZ):
 ---- Pokemon unable to make a move
 ---- Damaging Fire-type moves will remove the status, but that's it!  Lasts forever otherwise
 ---- Ice Pokemon are immune
@@ -68,4 +76,4 @@ Non-volative
 ------ Toxic (weird move, get this right)
 
 -- Sleep (SLP)
----- 
+----
