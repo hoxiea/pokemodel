@@ -9,7 +9,21 @@ import Type._
 
 // TODO: There are really just two critHitRates: normal, and high. Make a little Enum for them
 // TODO: I think that traits are the way to go for at least some of the moves
-abstract class Move (val pokemon : Pokemon) extends Ordered[Move]
+
+/* In the game, each Move is stored exactly once in memory, and the Pokemon Data Structure keeps
+ * track of which Moves the Pokemon knows and how many PP are left for each Move the Pokemon has.
+ * 
+ * I modeled Moves as objects that maintain their own statistics and state, and know how to do things
+ * like use themselves against another Pokemon.
+ * 
+ * I originally made the constructor value a Pokemon, but this became a Builder/Pokemon issue:
+ * if a Move really needs a Pokemon to be created, then you can't really load a Move into a PokemonBuilder,
+ * since the Builder hasn't built the Pokemon yet. 
+ * With the constructor value an Option[Pokemon], the Move can start without a Pokemon (which kind of makes sense
+ * to think about anyway), and then when a Pokemon is created from a Builder, it can pass itself as the Move owner.
+ */
+
+abstract class Move (val pokemon : Option[Pokemon]) extends Ordered[Move]
 {
   /* ABSTRACT STUFF */
   val accuracy : Double          // in [0.0, 1.0]
@@ -33,10 +47,18 @@ abstract class Move (val pokemon : Pokemon) extends Ordered[Move]
      */
     if (priority > that.priority) -1
     else if (priority < that.priority) 1
+    
     // priorities are equal, check Pokemon speeds
-    else if (pokemon.speed > that.pokemon.speed) -1
-    else if (pokemon.speed > that.pokemon.speed) 1
-    else 0
+    else (this.pokemon, that.pokemon) match {
+      case (None, None) => 0
+      case (Some(p1), None) => throw new Exception("compared move with a Pokemon to move without a Pokemon")
+      case (None, Some(p2)) => throw new Exception("compared move with a Pokemon to move without a Pokemon")
+      case (Some(p1), Some(p2)) => {
+        if (p1.speed > p2.speed) -1
+        else if (p1.speed < p2.speed) 1
+      	else 0
+      }
+    }
   }
   
   override def toString() = {
@@ -47,19 +69,22 @@ abstract class Move (val pokemon : Pokemon) extends Ordered[Move]
   }
 }
 
-class Deal40Damage(override val pokemon: Pokemon) extends Move (pokemon){
+class DragonRage(override val pokemon: Option[Pokemon]) extends Move (pokemon){
   val accuracy = 1.0          // in [0.0, 1.0]
   val critHitRate = 0.0       // in [0.0, 1.0]
-  val type1 = Normal
-  val power = 40
+  val type1 = Dragon
+  val power = 0
   val priority = 0
-  val maxPP = 20
+  val maxPP = 10
   var currentPP = maxPP
 
-  def use(enemy: Pokemon, pb: Battle) = { enemy.takeDamage(40) }
+  def use(enemy: Pokemon, pb: Battle) = { 
+    enemy.takeDamage(40)
+    currentPP -= 1
+  }
 }
 
-class Attack(override val pokemon: Pokemon) extends Move (pokemon){
+class Attack(override val pokemon: Option[Pokemon]) extends Move (pokemon){
   val accuracy = 1.0          // in [0.0, 1.0]
   val critHitRate = 0.1       // in [0.0, 1.0]
   val type1 = Normal
@@ -71,7 +96,7 @@ class Attack(override val pokemon: Pokemon) extends Move (pokemon){
   def use(enemy: Pokemon, pb: Battle) = {}
 }
 
-class NoMove(override val pokemon : Pokemon) extends Move(pokemon) {
+class NoMove(override val pokemon : Option[Pokemon]) extends Move(pokemon) {
   val accuracy = 0.0
   val critHitRate = 0.0
   val type1 = Normal
@@ -83,7 +108,7 @@ class NoMove(override val pokemon : Pokemon) extends Move(pokemon) {
   override def use(enemy: Pokemon, pb: Battle) = {}
 }
 
-class Struggle(override val pokemon : Pokemon) extends Move(pokemon) {
+class Struggle(override val pokemon : Option[Pokemon]) extends Move(pokemon) {
   val accuracy = 0.0
   val critHitRate = 0.0
   val type1 = Normal
