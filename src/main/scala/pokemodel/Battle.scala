@@ -63,8 +63,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     trainer2.healAll()
   }
   
-  def nextTurn() : Unit = {
-    println(this)
+  def takeNextTurn() : Unit = {
     var team1Fainted = false
     var team2Fainted = false
     
@@ -120,7 +119,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
  
   def runBattle() : Unit = {
     while (!battleIsOver) {
-      nextTurn()
+      takeNextTurn()
     }
   }
   
@@ -128,9 +127,11 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   
   override def toString() : String = {
     val s = new StringBuilder()
+    s.append("----------------------\n")
     s.append(team1.activePokemon)
-    s.append("\n")
+    s.append("\n\n")
     s.append(team2.activePokemon)
+    s.append("\n")
     s.append("----------------------")
     s.toString()
   }

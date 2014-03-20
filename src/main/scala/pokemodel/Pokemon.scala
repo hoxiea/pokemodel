@@ -18,19 +18,18 @@ class Pokemon(builder : PokemonBuilder) {
   private val speedEV   = builder.speedEV
   private val specialEV = builder.specialEV
 
-  val index = builder.indx
+  val index = builder.index
   val name  = builder.name
-  val level = builder.lvl
+  val level = builder.level
 
-  var type1 = builder.type1
-  var type2 = builder.type2
+  // These can technically change with some really strange moves (Porygon, Ditto, etc.),
+  // but I'll implement that in the battle
+  val type1 = builder.type1
+  val type2 = builder.type2
 
-  /* Moves can change in battle, believe it or not
-   * And though a Pokemon with <4 moves seems inferior to a Pokemon with 4
-   * moves, I still gave Pokemon the Option of not-having 4 moves via PokemonBuilder
-   */
-  var move1 : Move = builder.move1 match {
-    case Some(m: Move) => m
+  // Moves can change in battle too, believe it or not
+  val move1 : Move = builder.move1 match {
+    case Some(m: Move) => { m }
     case None => new NoMove(Some(this))
   }
 
@@ -49,6 +48,7 @@ class Pokemon(builder : PokemonBuilder) {
     case None => new NoMove(Some(this))
   }
   
+  // Every Pokemon knows how to Struggle
   val move5 : Move = new Struggle(Some(this))
 
   val attack  = builder.attack
@@ -58,11 +58,13 @@ class Pokemon(builder : PokemonBuilder) {
   val maxHP   = builder.maxHP
 
   var currentHP = maxHP
-  def isAlive: Boolean = currentHP > 0
-  
   var statusAilment : Option[StatusAilment.Value] = builder.statusAilment
+  
+
 
   /* METHODS */
+  def isAlive: Boolean = currentHP > 0
+  
   def takeDamage(damage : Int) {
     currentHP = if (damage >= currentHP) 0 else currentHP - damage
   }
@@ -120,7 +122,7 @@ class Pokemon(builder : PokemonBuilder) {
   }
   
   override def toString : String = {
-    basicInfoString
+    allInfoString
   }
 
 }

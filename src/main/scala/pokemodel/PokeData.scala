@@ -64,5 +64,7 @@ object PokeData {
     val typeStrings = types(index)
     Type.stringToType(typeStrings._2)
   }
+  
+  // Read in what moves each Pokemon can learn
 
 }

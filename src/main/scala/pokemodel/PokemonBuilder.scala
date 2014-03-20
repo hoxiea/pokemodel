@@ -2,14 +2,11 @@ package pokemodel
 
 import scala.util.Random
 
-class PokemonBuilder (index : Int, level : Int){
+class PokemonBuilder (val index: Int, val level: Int) {
   require(1 <= index && index <= PokemonBuilder.numPokemon,
       s"invalid index $index passed to PokemonBuilder constructor")
   require(1 <= level && level <= PokemonBuilder.maxLevel,
       s"invalid level $level passed to PokemonBuilder constructor")
-
-  val indx = index
-  val lvl = level
 
   // Alt. constructor: create a PokemonBuilder by specifying Pokemon's name instead of its index
   // TODO: This will crash if a name is misspelled; make more resilient?
@@ -40,10 +37,11 @@ class PokemonBuilder (index : Int, level : Int){
   var speedEV   = PokemonBuilder.generateRandomScaledEV(level)
   var specialEV = PokemonBuilder.generateRandomScaledEV(level)
 
-  var move1: Option[Move] = None // TODO: pick a random move this Pokemon can learn as default
-  var move2: Option[Move] = None // TODO: pick a random move this Pokemon can learn as default
-  var move3: Option[Move] = None // TODO: pick a random move this Pokemon can learn as default
-  var move4: Option[Move] = None // TODO: pick a random move this Pokemon can learn as default
+  // TODO: Could pick a random move the Pokemon can learn for easier test creation
+  var move1: Option[Move] = None
+  var move2: Option[Move] = None
+  var move3: Option[Move] = None
+  var move4: Option[Move] = None
 
   var statusAilment : Option[StatusAilment.Value] = None
 
