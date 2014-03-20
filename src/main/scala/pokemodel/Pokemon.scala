@@ -31,25 +31,25 @@ class Pokemon(builder : PokemonBuilder) {
    */
   var move1 : Move = builder.move1 match {
     case Some(m: Move) => m
-    case None => new NoMove(this)
+    case None => new NoMove(Some(this))
   }
 
   var move2 : Move = builder.move2 match {
     case Some(m: Move) => m
-    case None => new NoMove(this)
+    case None => new NoMove(Some(this))
   }
 
   var move3 : Move = builder.move3 match {
     case Some(m: Move) => m
-    case None => new NoMove(this)
+    case None => new NoMove(Some(this))
   }
 
   var move4 : Move = builder.move4 match {
     case Some(m: Move) => m
-    case None => new NoMove(this)
+    case None => new NoMove(Some(this))
   }
   
-  val move5 : Move = new Struggle(this)
+  val move5 : Move = new Struggle(Some(this))
 
   val attack  = builder.attack
   val defense = builder.defense
