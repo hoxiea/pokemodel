@@ -201,4 +201,10 @@ object PokemonBuilder {
     val level = Utils.intBetween(minLevel + 49, maxLevel + 1)  // between 50 and 100
     new PokemonBuilder(index, level)
   }
+  
+  def generateRandomPokemonBuilder(level: Int) : PokemonBuilder = {
+    val index = Utils.intBetween(1, numPokemon + 1)  // upper end exclusive
+    new PokemonBuilder(index, level)
+  }
+
 }
