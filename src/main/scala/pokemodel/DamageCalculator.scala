@@ -12,15 +12,7 @@ object DamageCalculator {
     // TODO: the order is Type Effectiveness, then STAB, then critical hit... but shouldn't really matter?
     require(1 <= moveIndex && moveIndex <= 4, 
         s"invalid moveIndex $moveIndex passed to DamageCalculator.calc")
-
-    val move = attacker.move1  // TODO: change to use moveIndex!
-    val A = if (criticalHit(move)) attacker.level * 2 else attacker.level 
-    // val B = 1
-    // val C = move.power
-    val X = stabBonus(attacker, move)
-    val Y = 0 
-    val Z = 0
-    0
+    return 0
   }
   
   def calculateTypeMultiplier(attack : Move, d : Pokemon) : Double = {

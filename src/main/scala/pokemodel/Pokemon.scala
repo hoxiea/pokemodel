@@ -28,28 +28,14 @@ class Pokemon(builder : PokemonBuilder) {
   val type2 = builder.type2
 
   // Moves can change in battle too, believe it or not
-  val move1 : Move = builder.move1 match {
-    case Some(m: Move) => { m }
-    case None => new NoMove(Some(this))
-  }
+  var move1 : Option[Move] = builder.move1
+  var move2 : Option[Move] = builder.move2
+  var move3 : Option[Move] = builder.move3
+  var move4 : Option[Move] = builder.move4
 
-  var move2 : Move = builder.move2 match {
-    case Some(m: Move) => m
-    case None => new NoMove(Some(this))
-  }
-
-  var move3 : Move = builder.move3 match {
-    case Some(m: Move) => m
-    case None => new NoMove(Some(this))
-  }
-
-  var move4 : Move = builder.move4 match {
-    case Some(m: Move) => m
-    case None => new NoMove(Some(this))
-  }
-  
-  // Every Pokemon knows how to Struggle
-  val move5 : Move = new Struggle(Some(this))
+  // Every Pokemon knows how to Struggle, but can only do so if
+  // they're out of PP / disabled with every other move
+  val move5 : Move = new Struggle()
 
   val attack  = builder.attack
   val defense = builder.defense
@@ -59,12 +45,11 @@ class Pokemon(builder : PokemonBuilder) {
 
   var currentHP = maxHP
   var statusAilment : Option[StatusAilment.Value] = builder.statusAilment
-  
 
 
   /* METHODS */
   def isAlive: Boolean = currentHP > 0
-  
+
   def takeDamage(damage : Int) {
     currentHP = if (damage >= currentHP) 0 else currentHP - damage
   }
@@ -72,36 +57,43 @@ class Pokemon(builder : PokemonBuilder) {
   def heal() {
     currentHP = maxHP
     statusAilment = None
-    List(move1, move2, move3, move4).map(_.restorePP())
-  }
-
-  def getMove(index: Int) : Move = {
-    require(1 <= index && index <= 4, s"illegal index $index passed to useMove - $name $level")
-    index match {
-      case 1 => move1
-      case 2 => move2
-      case 3 => move3
-      case 4 => move4      
+    for (m <- List(move1, move2, move3, move4)) {
+      m match {
+        case Some(move) => move.restorePP
+        case None => {}
+      }
     }
   }
 
   def useMove(index : Int, enemy : Pokemon, battle : Battle) : Unit = {
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
     index match {
-      case 1 => move1.use(enemy, battle)
-      case 2 => move2.use(enemy, battle)
-      case 3 => move3.use(enemy, battle)
-      case 4 => move4.use(enemy, battle)
-      case 5 => move5.use(enemy, battle)
+      case 1 => move1 match {
+        case None => {}
+        case Some(m) => m.use(this, enemy, battle)
+      }
+      case 2 => move2 match {
+        case None => {}
+        case Some(m) => m.use(this, enemy, battle)
+      }
+      case 3 => move3 match {
+        case None => {}
+        case Some(m) => m.use(this, enemy, battle)
+      }
+      case 4 => move4 match {
+        case None => {}
+        case Some(m) => m.use(this, enemy, battle)
+      }
+      case 5 => move5.use(this, enemy, battle)
     }
   }
-  
+
   def takeStatusAilmentDamage() : Unit = statusAilment match {
     case PSN => takeDamage(maxHP / 16)
     case BRN => takeDamage(maxHP / 16)
     case _ => {}
   }
-  
+
   /* NICETIES */
   private def allInfoString : String = {
     val repr = new StringBuilder()
@@ -113,14 +105,14 @@ class Pokemon(builder : PokemonBuilder) {
     repr.append(s"Moves: $move1, $move2, $move3, $move4")
     repr.toString()
   }
-  
+
   private def basicInfoString : String = {
     val repr = new StringBuilder()
     repr.append(s"$name, level $level\n")
     repr.append(s"HP = $currentHP / $maxHP, Status = $statusAilment\n")
     repr.toString()
   }
-  
+
   override def toString : String = {
     allInfoString
   }

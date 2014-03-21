@@ -11,11 +11,19 @@ abstract class Trainer(val team: PokemonTeam) {
 
 class UseFirstAvailableMove(override val team: PokemonTeam) extends Trainer(team: PokemonTeam) {
   override def getDecision(battle : Battle) : BattleDecision = {
-    if      (team.activePokemon.move1.currentPP > 0) return new UseMove(1)
-    else if (team.activePokemon.move2.currentPP > 0) return new UseMove(2)
-    else if (team.activePokemon.move3.currentPP > 0) return new UseMove(3)
-    else if (team.activePokemon.move4.currentPP > 0) return new UseMove(4)
-    else return new UseMove(5)
+    team.activePokemon.move1 match {
+      case Some(move) if (move.currentPP > 0) => return new UseMove(1)
+      case None => team.activePokemon.move2 match {
+        case Some(move) if (move.currentPP > 0) => return new UseMove(2)
+        case None => team.activePokemon.move3 match {
+          case Some(move) if (move.currentPP > 0) => return new UseMove(3)
+          case None => team.activePokemon.move4 match {
+            case Some(move) if (move.currentPP > 0) => return new UseMove(4)
+            case None => return new UseMove(5)
+          }
+        } 
+      }
+    } 
   }
 }
 
