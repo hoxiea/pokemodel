@@ -49,28 +49,13 @@ abstract class Move {
   }
 }
 
+/* PHYSICAL MOVES */
 abstract class PhysicalMove extends Move {
-  def getAttackStat
+  def getAttackStat(attacker: Pokemon) = attacker.attack
+  def getDefenseStat(defender: Pokemon) = defender.defense
 }
 
-class DragonRage extends Move {
-  val index = 82
-  val accuracy = 1.0          // in [0.0, 1.0]
-  val critHitRate = 0.0       // in [0.0, 1.0]
-  val type1 = Dragon
-  val power = 0
-  val priority = 0
-  val maxPP = 10
-  var currentPP = maxPP
-
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = { 
-    defender.takeDamage(40)
-    currentPP -= 1
-  }
-}
-
-class Pound extends Move {
-  // Physical Move - uses Attack and Defense stats
+class Pound extends PhysicalMove {
   val index = 1
   val accuracy = 1.0          // in [0.0, 1.0]
   val critHitRate = 0.1       // in [0.0, 1.0]
@@ -109,29 +94,59 @@ class Pound extends Move {
     }      
   }
 }
-  
-class NoMove extends Move {
-  val index = -1
-  val accuracy = 0.0
-  val critHitRate = 0.0
+
+
+/* SPECIAL MOVES */
+abstract class SpecialMove extends Move {
+  def getAttackStat(attacker: Pokemon) = attacker.special
+  def getDefenseStat(defender: Pokemon) = defender.special
+}
+
+class DragonRage extends SpecialMove {
+  val index = 82
+  val accuracy = 1.0          // in [0.0, 1.0]
+  val critHitRate = 0.0       // in [0.0, 1.0]
+  val type1 = Dragon
+  val power = 0
+  val priority = 0
+  val maxPP = 10
+  var currentPP = maxPP
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = { 
+    defender.takeDamage(40)
+    currentPP -= 1
+  }
+}
+
+class SonicBoom extends SpecialMove {
+  val index = 49
+  val accuracy = 0.9          // in [0.0, 1.0]
+  val critHitRate = 0.0       // in [0.0, 1.0]
   val type1 = Normal
   val power = 0
   val priority = 0
-  val maxPP = 35
-  var currentPP = 0
+  val maxPP = 20
+  var currentPP = maxPP
 
-  override def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {}   
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextFloat < accuracy) { defender.takeDamage(20) }
+    currentPP -= 1
+  }
 }
 
-class Struggle extends Move {
+
+/* STATUS MOVES */
+abstract class StatusMove extends Move
+
+class Struggle extends PhysicalMove {
   val index = 165
   val accuracy = 0.0
   val critHitRate = 0.0
   val type1 = Normal
-  val power = 0
+  val power = 50
   val priority = 0
-  val maxPP = 35
-  var currentPP = 0
+  val maxPP = 1
+  var currentPP = 1
 
   override def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // Attack!

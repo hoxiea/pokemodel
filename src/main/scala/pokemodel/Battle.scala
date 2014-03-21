@@ -110,7 +110,6 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     // Process any status ailments that take effect at the end of the round, assuming the opponent
     // didn't faint, in which case status ailments don't kick in
     if (!team2Fainted) { team1.activePokemon.takeStatusAilmentDamage() }
-    
     if (!team1Fainted) { team2.activePokemon.takeStatusAilmentDamage() }
     
     // Another turn passes

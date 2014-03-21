@@ -102,8 +102,8 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 
 
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
-= Dragon Rage: Inflict 40 damage if it hits; "it does not ignore type immunity"?
-= Sonic Boom: Inflict 20 damage if it hits; "it does not ignore type immunity"?
+    = Dragon Rage: Inflict 40 damage if it hits; "it does not ignore type immunity"?
+    = Sonic Boom: Inflict 20 damage if it hits; "it does not ignore type immunity"?
 = Thunder: damage, 10% chance PAR
 = Thunderbolt: damage, 10% chance PAR
 = Thunder Shock: damage, 10% chance PAR
