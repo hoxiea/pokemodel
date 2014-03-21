@@ -60,6 +60,7 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   private def evasionStageToFraction = accuracyStageToFraction
 
   /* Ways for the Battle to interact with the stats */
+  // TODO: Take status ailments into account, like the fact that BRN reduces attack by half, etc.
   def getEffectiveAttack(p: Pokemon) : Int = {
     require(attackStages.contains(p), s"getEffectiveAttack error for $p")
     (attackStageToFraction(attackStages(p)) * p.attack).toInt

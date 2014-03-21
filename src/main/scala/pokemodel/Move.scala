@@ -2,6 +2,7 @@ package pokemodel
 
 import scala.collection.mutable
 import Type._
+import MoveType._
 import StatusAilment._
 import CritHitType._
 import scala.util.Random
@@ -10,7 +11,6 @@ import scala.util.Random
 // Can be scraped from pages such as
 // http://bulbapedia.bulbagarden.net/wiki/Charmander_(Pok%C3%A9mon)/Generation_I_learnset
 
-// TODO: There are really just two critHitRates: normal, and high. Make a little Enum for them
 // TODO: I think that traits are the way to go for at least some of the moves
 
 /* In the game, each Move is stored exactly once in memory, and the Pokemon Data Structure keeps
@@ -27,11 +27,12 @@ import scala.util.Random
  * to think about anyway), and then when a Pokemon is created from a Builder, it can pass itself as the Move owner.
  */
 
-abstract class Move {  
+sealed trait Move {  
   /* ABSTRACT STUFF */
   val index : Int                // in 1 .. 165
   val accuracy : Double          // in [0.0, 1.0]
   val type1 : Type.Value
+  val moveType : MoveType.Value
   val power : Int
   val priority : Int
   val maxPP : Int
@@ -40,7 +41,7 @@ abstract class Move {
 
   /* IMPEMENTED STUFF */
   val critHitRate = LOW   // True for 99% of moves, outliers can override
-  def restorePP(amount : Int) = { currentPP = maxPP min (currentPP + amount) }
+  def restorePP(amount : Int) = { currentPP = intWrapper(maxPP) min (currentPP + amount) }
   def restorePP() = { currentPP = maxPP }
     
   override def toString() = {
@@ -51,10 +52,37 @@ abstract class Move {
   }
 }
 
-/* PHYSICAL MOVES */
-abstract class PhysicalMove extends Move {
+trait PhysicalMove extends Move {
   def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveAttack(attacker)
   def getDefenseStat(defender: Pokemon, b : Battle) = b.statManager.getEffectiveDefense(defender)
+  override val moveType = PHYSICAL
+}
+
+trait SpecialMove extends Move {
+  def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(attacker)
+  def getDefenseStat(defender: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(defender)
+  override val moveType = SPECIAL
+}
+
+trait StatusMove extends Move {
+  override val moveType = STATUS
+}
+
+/* PHYSICAL MOVES */
+class Struggle extends PhysicalMove {
+  val index = 165
+  val accuracy = 0.0
+  val type1 = Normal
+  val power = 50
+  val priority = 0
+  val maxPP = 1
+  var currentPP = 1
+
+  override def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // Attack!
+    
+    // Take 1/2 damage dealt as recoil
+  }
 }
 
 class Pound extends PhysicalMove {
@@ -73,19 +101,18 @@ class Pound extends PhysicalMove {
     		  					   defender,
                                    getAttackStat(attacker, pb),
                                    getDefenseStat(attacker, pb),
-                                   this)
+                                   this,
+                                   pb)
       defender.takeDamage(damageDealt)
+      println(s"${attacker.name} dealt $damageDealt damage to ${defender.name} with $this")
+    } else {
+      println("Pound missed!")
     }
   }
 }
 
 
 /* SPECIAL MOVES */
-abstract class SpecialMove extends Move {
-  def getAttackStat(attacker: Pokemon) = attacker.special
-  def getDefenseStat(defender: Pokemon) = defender.special
-}
-
 class DragonRage extends SpecialMove {
   val index = 82
   val accuracy = 1.0          // in [0.0, 1.0]
@@ -135,20 +162,5 @@ class Thunder extends SpecialMove {
 
 
 /* STATUS MOVES */
-abstract class StatusMove extends Move
 
-class Struggle extends PhysicalMove {
-  val index = 165
-  val accuracy = 0.0
-  val type1 = Normal
-  val power = 50
-  val priority = 0
-  val maxPP = 1
-  var currentPP = 1
 
-  override def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // Attack!
-    
-    // Take 1/2 damage dealt as recoil
-  }
-}
