@@ -18,6 +18,7 @@ class PokemonTeam(val team: List[Pokemon]) {
   def hasSomeoneAlive: Boolean = team.exists(_.currentHP > 0)
   private def firstPokemonAliveIndex: Int = team.indexWhere(_.currentHP > 0)
   def firstPokemonAlive: Pokemon = team(firstPokemonAliveIndex)
+  def length = team.length
   
   override def toString() = {
     val s = new StringBuilder()

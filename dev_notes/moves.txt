@@ -155,8 +155,8 @@ STATUS MOVES (any type, don't deal damage directly):
 = Barrier: Defense +2 stages
 = Double Team: Evasion +1 stage
 = Minimize: Evasion +1 stage
-= Growth: Special +1 stage
 = Agility: Speed +2 stages
+= Growth: Special +1 stage
 = Amnesia: Special +2 stages
 = Focus Energy: multiply the user's Crit Hit ratio by 4 (except it was buggy in Gen 1 and divided by 4 instead)
 = Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC

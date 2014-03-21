@@ -2,6 +2,7 @@ package pokemodel
 
 import scala.collection.mutable
 import Type._
+import StatusAilment._
 import scala.util.Random
 
 // TODO: Add the fact that only centain Pokemon can learn certain moves
@@ -66,13 +67,8 @@ class Pound extends PhysicalMove {
   var currentPP = maxPP
 
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    println("POUND CALLED!")
-    println(s"POUND's Pokemon = attacker")
-
     val effectiveAccuracy = accuracy      // TODO: take battle accuracy/evasion stages into account
     if (Random.nextDouble < effectiveAccuracy) {
-      println("GOING AHEAD WITH POUND!")
-    
       // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
       val baseAttack = attacker.attack
       val baseDefense = defender.defense
@@ -89,7 +85,7 @@ class Pound extends PhysicalMove {
       val modifier = STAB * typeMult * critical * r
     
       val damage = ((A * B * base + 2) * modifier).toInt
-      println(s"damage = $damage")
+      println(s"Damage = $damage from $this")
       defender.takeDamage(damage)
     }      
   }
@@ -130,6 +126,29 @@ class SonicBoom extends SpecialMove {
 
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextFloat < accuracy) { defender.takeDamage(20) }
+    currentPP -= 1
+  }
+}
+
+class Thunder extends SpecialMove {
+  val index = 87
+  val accuracy = 0.7          // in [0.0, 1.0]
+  val critHitRate = 0.0       // in [0.0, 1.0]
+  val type1 = Electric
+  val power = 110
+  val priority = 0
+  val maxPP = 10
+  var currentPP = maxPP
+  
+  val parChance = 0.1
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextFloat < accuracy) {
+      val damage = 
+      defender.takeDamage(damage)
+      if (defender.statusAilment == None && Random.nextDouble < parChance)
+        defender.statusAilment = Some(PAR)
+    }
     currentPP -= 1
   }
 }

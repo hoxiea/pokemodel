@@ -21,6 +21,8 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   val team1 = trainer1.team
   val team2 = trainer2.team
   
+  val battleStats = new BattleStatManager(team1, team2)
+  
   var time : Int = 0
 
   /* Various moves cause a stat to change up/down by one level
@@ -114,6 +116,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     
     // Another turn passes
     time = time + 1
+    println(this)
   }
  
   def runBattle() : Unit = {

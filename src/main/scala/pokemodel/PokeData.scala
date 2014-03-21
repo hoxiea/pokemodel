@@ -65,6 +65,6 @@ object PokeData {
     Type.stringToType(typeStrings._2)
   }
   
-  // Read in what moves each Pokemon can learn
+  // TODO: Read in what moves each Pokemon can learn, build data structures for initialization
 
 }

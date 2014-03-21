@@ -65,6 +65,8 @@ class Pokemon(builder : PokemonBuilder) {
     }
   }
 
+  // TODO: take Disable into account!
+  // TODO: take no PP into account?
   def useMove(index : Int, enemy : Pokemon, battle : Battle) : Unit = {
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
     index match {

@@ -62,12 +62,7 @@ class BattleSuite extends FunSuite {
     val trainer1 = new UseFirstAvailableMove(team1)
     val trainer2 = new UseFirstAvailableMove(team2)
     val battle = new Battle(trainer1, trainer2)
-    println("Before Pound")
-    println(battle)
     battle.takeNextTurn()
-    println("After Pound")
-    println(battle)
-
   }
 
 }
