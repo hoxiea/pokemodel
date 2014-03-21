@@ -97,12 +97,7 @@ class Pound extends PhysicalMove {
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     val chanceHit = accuracy * (pb.statManager.getEffectiveAccuracy(attacker).toDouble / pb.statManager.getEffectiveEvasion(defender))
     if (Random.nextDouble < chanceHit) {
-      val damageDealt = pb.dc.calc(attacker,
-    		  					   defender,
-                                   getAttackStat(attacker, pb),
-                                   getDefenseStat(attacker, pb),
-                                   this,
-                                   pb)
+      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
       println(s"${attacker.name} dealt $damageDealt damage to ${defender.name} with $this")
     } else {

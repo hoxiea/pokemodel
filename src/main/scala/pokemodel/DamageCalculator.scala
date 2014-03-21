@@ -9,8 +9,6 @@ class DamageCalculator {
   // TODO: take status stuff like FocusEnergy into account when calculating criticalChance 
   def calc(attacker : Pokemon, 
            defender : Pokemon,
-           effectiveAttack : Int,
-           effectiveDefense : Int,
            move : Move,
            battle : Battle) : Int = {
     // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
@@ -44,6 +42,16 @@ class DamageCalculator {
       damage
     } else {
       // No critical hit
+      val effectiveAttack = move.moveType match {
+        case PHYSICAL => battle.statManager.getEffectiveAttack(attacker)
+        case SPECIAL  => battle.statManager.getEffectiveDefense(attacker)
+        case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+      }
+      val effectiveDefense = move.moveType match {
+        case PHYSICAL => battle.statManager.getEffectiveSpecial(attacker)
+        case SPECIAL  => battle.statManager.getEffectiveSpecial(attacker)
+        case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+      }
       val damage = calcHelper(attacker.level, effectiveAttack, effectiveDefense, move.power, modifier)
       damage
     }
