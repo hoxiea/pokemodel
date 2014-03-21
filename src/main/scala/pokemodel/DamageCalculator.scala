@@ -5,55 +5,18 @@ import CritHitType._
 import MoveType._
 
 class DamageCalculator {
+  /*
+   * The damage that a move does is always a function of the inputs to calcHelper
+   * However, depending on whether or not the move lands a critical hit, those numbers change
+   */
   
-  // TODO: take status stuff like FocusEnergy into account when calculating criticalChance 
-  def calc(attacker : Pokemon, 
-           defender : Pokemon,
-           move : Move,
-           battle : Battle) : Int = {
-    // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
-    // http://bulbapedia.bulbagarden.net/wiki/Critical_hit
-    val typeMult = calculateTypeMultiplier(move.type1, defender)
-    val STAB = stabBonus(attacker, move)
-    val criticalChance = move.critHitRate match {
-      case LOW  => PokeData.getBaseSpeed(attacker.index).toDouble / 512
-      case HIGH => PokeData.getBaseSpeed(attacker.index).toDouble / 64
-    }
-    val r = 0.85 + Random.nextDouble * (1.0 - 0.85)  // random between 0.85 and 1.00
-    val modifier = STAB * typeMult * r  // same for both critHit and not
-    
+  def calc(attacker : Pokemon, defender : Pokemon, move : Move, battle : Battle) : Int = {
+    // The key method, through which all damages are calculated
+    val criticalChance = calcCriticalChance(attacker, defender, move, battle)
     if (Random.nextDouble < criticalChance) {
-      /* Critical hit!
-       * - Attacker's level is temporarily doubled for damage calculation
-       * - Ignore halved attack from BRN
-       * - Ignore all stat mods, even beneficial ones
-       */
-      val attack = move.moveType match {
-        case PHYSICAL => attacker.attack
-        case SPECIAL  => attacker.defense
-        case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
-      }
-      val defense = move.moveType match {
-        case PHYSICAL => attacker.special
-        case SPECIAL  => attacker.special
-        case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
-      }
-      val damage = calcHelper(attacker.level * 2, attack, defense, move.power, modifier)
-      damage
+      calcCriticalHitDamage(attacker, defender, move, battle)
     } else {
-      // No critical hit
-      val effectiveAttack = move.moveType match {
-        case PHYSICAL => battle.statManager.getEffectiveAttack(attacker)
-        case SPECIAL  => battle.statManager.getEffectiveDefense(attacker)
-        case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
-      }
-      val effectiveDefense = move.moveType match {
-        case PHYSICAL => battle.statManager.getEffectiveSpecial(attacker)
-        case SPECIAL  => battle.statManager.getEffectiveSpecial(attacker)
-        case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
-      }
-      val damage = calcHelper(attacker.level, effectiveAttack, effectiveDefense, move.power, modifier)
-      damage
+      calcRegularHitDamage(attacker, defender, move, battle)
     }
   }
   
@@ -63,7 +26,65 @@ class DamageCalculator {
     ((A * B * base + 2) * mod).toInt
   }
   
-  def calculateTypeMultiplier(attackType : Type.Value, d : Pokemon) : Double = {
+  private def calcModifier(attacker: Pokemon, defender: Pokemon, move: Move) : Double = {
+    // "Modifier" value in http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
+    // Used in both calcRegularHit and calcCriticalHit
+    val typeMult = calculateTypeMultiplier(move.type1, defender)
+    val STAB = stabBonus(attacker, move)
+    val r = 0.85 + Random.nextDouble * (1.0 - 0.85)
+    STAB * typeMult * r    
+  }
+  
+  private def calcRegularHitDamage(attacker : Pokemon, defender : Pokemon, move : Move, battle : Battle) : Int = {
+    // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
+    val modifier = calcModifier(attacker, defender, move)
+    val effectiveAttack = move.moveType match {
+      case PHYSICAL => battle.statManager.getEffectiveAttack(attacker)
+      case SPECIAL  => battle.statManager.getEffectiveDefense(attacker)
+      case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+    }
+    val effectiveDefense = move.moveType match {
+      case PHYSICAL => battle.statManager.getEffectiveSpecial(attacker)
+      case SPECIAL  => battle.statManager.getEffectiveSpecial(attacker)
+      case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+    }
+    val damage = calcHelper(attacker.level, effectiveAttack, effectiveDefense, move.power, modifier)
+    damage
+  }
+  
+  private def calcCriticalHitDamage(attacker : Pokemon, defender : Pokemon, move : Move, battle : Battle) : Int = {
+    /* 
+     * http://bulbapedia.bulbagarden.net/wiki/Critical_hit
+     * - Attacker's level is temporarily doubled for damage calculation
+     * - Ignore halved attack from BRN
+     * - Ignore all stat mods, even beneficial ones
+     */
+    val modifier = calcModifier(attacker, defender, move)
+    val attack = move.moveType match {
+      case PHYSICAL => attacker.attack
+      case SPECIAL  => attacker.defense
+      case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+    }
+    val defense = move.moveType match {
+      case PHYSICAL => attacker.special
+      case SPECIAL  => attacker.special
+      case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+    }
+    val damage = calcHelper(attacker.level * 2, attack, defense, move.power, modifier)
+    damage
+  }
+
+  
+  private def calcCriticalChance(attacker : Pokemon, defender : Pokemon, move : Move, battle : Battle) : Double = {
+  // TODO: take status stuff like FocusEnergy into account when calculating criticalChance
+    val criticalChance = move.critHitRate match {
+      case LOW  => PokeData.getBaseSpeed(attacker.index).toDouble / 512
+      case HIGH => PokeData.getBaseSpeed(attacker.index).toDouble / 64
+    }
+    criticalChance
+  }
+   
+  private def calculateTypeMultiplier(attackType : Type.Value, d : Pokemon) : Double = {
     val dType1 = d.type1
     val dType2 = d.type2
     val m = Type.typeMap(attackType)
@@ -71,7 +92,7 @@ class DamageCalculator {
     else m(dType1) * m(dType2)
   }
   
-  def stabBonus(attacker : Pokemon, move : Move) : Double = {
+  private def stabBonus(attacker : Pokemon, move : Move) : Double = {
     if (attacker.type1 == move.type1 || attacker.type2 == move.type1) 1.5 
     else 1.0
   }
