@@ -1,22 +1,45 @@
 package pokemodel
 
 import scala.util.Random
+import CritHitType._
 
-object DamageCalculator {
+class DamageCalculator {
   def criticalHit(m : Move) : Boolean = false
   
-  def calc(attacker : Pokemon, moveIndex : Int, defender : Pokemon) : Int = {
-    // If attacker uses the Move at moveIndex, how much damage would it do against defender?
-    // from http://www.math.miami.edu/~jam/azure/compendium/battdam.htm
-    // TODO: take battle statistics into account!  Attack/Defense/whatever might have increased/decreased
-    // TODO: the order is Type Effectiveness, then STAB, then critical hit... but shouldn't really matter?
-    require(1 <= moveIndex && moveIndex <= 4, 
-        s"invalid moveIndex $moveIndex passed to DamageCalculator.calc")
-    return 0
+  def calc(attacker : Pokemon, 
+           defender : Pokemon,
+           effectiveAttack : Int,
+           effectiveDefense : Int,
+           move : Move) : Int = {
+    // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
+    // http://bulbapedia.bulbagarden.net/wiki/Critical_hit
+    val typeMult = calculateTypeMultiplier(move.type1, defender)
+    val STAB = stabBonus(attacker, move)
+    val criticalChance = move.critHitRate match {
+      case LOW  => PokeData.getBaseSpeed(attacker.index).toDouble / 512
+      case HIGH => PokeData.getBaseSpeed(attacker.index).toDouble / 512
+    }
+    
+    if (Random.nextDouble < criticalChance) {
+      /* Critical hit!
+       * - Attacker's level is temporarily doubled for damage calculation
+       * - Ignore halved attack from BRN
+       * - Ignore all stat mods, even beneficial ones
+       * 
+       */
+    }
+    val r = 0.85 + Random.nextDouble * (1.0 - 0.85)  // random between 0.85 and 1.00
+    
+    val A = (2 * attacker.level.toDouble + 10) / 250
+    val B = effectiveAttack.toDouble / effectiveDefense
+    val modifier = STAB * typeMult * r
+    
+    val damage = ((A * B * move.power + 2) * modifier).toInt
+    println(s"Damage = $damage from $this")
+    damage
   }
   
-  def calculateTypeMultiplier(attack : Move, d : Pokemon) : Double = {
-    val attackType = attack.type1
+  def calculateTypeMultiplier(attackType : Type.Value, d : Pokemon) : Double = {
     val dType1 = d.type1
     val dType2 = d.type2
     val m = Type.typeMap(attackType)

@@ -3,6 +3,7 @@ package pokemodel
 import scala.collection.mutable
 import Type._
 import StatusAilment._
+import CritHitType._
 import scala.util.Random
 
 // TODO: Add the fact that only centain Pokemon can learn certain moves
@@ -30,7 +31,6 @@ abstract class Move {
   /* ABSTRACT STUFF */
   val index : Int                // in 1 .. 165
   val accuracy : Double          // in [0.0, 1.0]
-  val critHitRate : Double       // in [0.0, 1.0]
   val type1 : Type.Value
   val power : Int
   val priority : Int
@@ -39,6 +39,7 @@ abstract class Move {
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle)
 
   /* IMPEMENTED STUFF */
+  val critHitRate = LOW   // True for 99% of moves, outliers can override
   def restorePP(amount : Int) = { currentPP = maxPP min (currentPP + amount) }
   def restorePP() = { currentPP = maxPP }
     
@@ -52,14 +53,13 @@ abstract class Move {
 
 /* PHYSICAL MOVES */
 abstract class PhysicalMove extends Move {
-  def getAttackStat(attacker: Pokemon) = attacker.attack
-  def getDefenseStat(defender: Pokemon) = defender.defense
+  def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveAttack(attacker)
+  def getDefenseStat(defender: Pokemon, b : Battle) = b.statManager.getEffectiveDefense(defender)
 }
 
 class Pound extends PhysicalMove {
   val index = 1
   val accuracy = 1.0          // in [0.0, 1.0]
-  val critHitRate = 0.1       // in [0.0, 1.0]
   val type1 = Normal
   val power = 40
   val priority = 0
@@ -67,27 +67,15 @@ class Pound extends PhysicalMove {
   var currentPP = maxPP
 
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    val effectiveAccuracy = accuracy      // TODO: take battle accuracy/evasion stages into account
-    if (Random.nextDouble < effectiveAccuracy) {
-      // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
-      val baseAttack = attacker.attack
-      val baseDefense = defender.defense
-      val effectiveAttack = baseAttack    // TODO: take battle stages into account, and BRN, and Reflect + Light Screen, and others
-      val effectiveDefense = baseDefense  // TODO: take battle stages into account
-      val base = power
-      val typeMult = DamageCalculator.calculateTypeMultiplier(this, defender)
-      val STAB = if (type1 == attacker.type1 || type1 == attacker.type2) 1.5 else 1.0
-      val critical = if (Random.nextFloat() < critHitRate) 2 else 1   // TODO: actually implement critHit logic
-      val r = 0.85 + Random.nextDouble * (1.0 - 0.85)  // random between 0.85 and 1.00
-    
-      val A = (2 * attacker.level.toDouble + 10) / 250
-      val B = effectiveAttack.toDouble / effectiveDefense
-      val modifier = STAB * typeMult * critical * r
-    
-      val damage = ((A * B * base + 2) * modifier).toInt
-      println(s"Damage = $damage from $this")
-      defender.takeDamage(damage)
-    }      
+    val chanceHit = accuracy * (pb.statManager.getEffectiveAccuracy(attacker).toDouble / pb.statManager.getEffectiveEvasion(defender))
+    if (Random.nextDouble < chanceHit) {
+      val damageDealt = pb.dc.calc(attacker,
+    		  					   defender,
+                                   getAttackStat(attacker, pb),
+                                   getDefenseStat(attacker, pb),
+                                   this)
+      defender.takeDamage(damageDealt)
+    }
   }
 }
 
@@ -101,7 +89,6 @@ abstract class SpecialMove extends Move {
 class DragonRage extends SpecialMove {
   val index = 82
   val accuracy = 1.0          // in [0.0, 1.0]
-  val critHitRate = 0.0       // in [0.0, 1.0]
   val type1 = Dragon
   val power = 0
   val priority = 0
@@ -117,7 +104,6 @@ class DragonRage extends SpecialMove {
 class SonicBoom extends SpecialMove {
   val index = 49
   val accuracy = 0.9          // in [0.0, 1.0]
-  val critHitRate = 0.0       // in [0.0, 1.0]
   val type1 = Normal
   val power = 0
   val priority = 0
@@ -133,7 +119,6 @@ class SonicBoom extends SpecialMove {
 class Thunder extends SpecialMove {
   val index = 87
   val accuracy = 0.7          // in [0.0, 1.0]
-  val critHitRate = 0.0       // in [0.0, 1.0]
   val type1 = Electric
   val power = 110
   val priority = 0
@@ -143,12 +128,7 @@ class Thunder extends SpecialMove {
   val parChance = 0.1
 
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextFloat < accuracy) {
-      val damage = 
-      defender.takeDamage(damage)
-      if (defender.statusAilment == None && Random.nextDouble < parChance)
-        defender.statusAilment = Some(PAR)
-    }
+    // TODO: use Pound as a reference point
     currentPP -= 1
   }
 }
@@ -160,7 +140,6 @@ abstract class StatusMove extends Move
 class Struggle extends PhysicalMove {
   val index = 165
   val accuracy = 0.0
-  val critHitRate = 0.0
   val type1 = Normal
   val power = 50
   val priority = 0
