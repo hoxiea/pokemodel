@@ -41,6 +41,13 @@ sealed trait Move {
   val accuracy = 1.0      // in [0.0, 1.0], true for ~60% of moves, others can override
   def restorePP(amount : Int) = { currentPP = intWrapper(maxPP) min (currentPP + amount) }
   def restorePP() = { currentPP = maxPP }
+  
+  // TODO: every Move should call finishUsingMove at the end of use
+  def finishUsingMove(attacker: Pokemon, pb: Battle) : Unit = {
+    currentPP -= 1
+    pb.moveManager.updateLastMoveIndex(attacker, index)
+    
+  }
 
   // Even moves with 100% accuracy might miss because of accuracy/evasion adjustments in battle
   def chanceHit(attacker : Pokemon, defender : Pokemon, pb : Battle): Double = {
@@ -542,6 +549,7 @@ class MirrorMove extends StatusMove {
       case None    => {}
     }
     currentPP -= 1
+    pb.moveManager.updateLastMoveIndex(attacker, index)
   }
 }
 

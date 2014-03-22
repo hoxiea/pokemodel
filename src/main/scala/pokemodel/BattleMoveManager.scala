@@ -6,7 +6,6 @@ import scala.collection.mutable
  * A BattleMoveManager is responsible for storing the last Move that each
  * active Pokemon has used.  Actually, the move's index is stored (in 1..165).
  * 
- * TODO: switch should remove that Pokemon's entry in lastMoveIndex when the Pokemon is switched out
  * TODO: using a move m should update lastMoveIndex with m.index for that Pokemon 
  *  getLastMove 
  * 
@@ -20,6 +19,11 @@ class BattleMoveManager (team1: PokemonTeam, team2: PokemonTeam) {
   def getLastMove(p: Pokemon) : Option[Move] = {
     if (lastMoveIndex.contains(p)) None // TODO: take lastMoveIndex(p), look up that move, and return a Some(new thatMove)
     else None
+  }
+  
+  def updateLastMoveIndex(p: Pokemon, index : Int) : Unit = {
+    require(1 <= index && index <= 165)
+    lastMoveIndex(p) = index
   }
   
   def clearLastMove(p: Pokemon) : Unit = {
