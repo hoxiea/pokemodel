@@ -92,15 +92,15 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     // Switches get the highest priority, so process those first in all cases where they appear
     (team1Action, team2Action) match {
       case (SwitchPokemon(i), SwitchPokemon(j)) => {
-        team1.switch(i)
-        team1.switch(j)
+        team1.switch(i, this)
+        team1.switch(j, this)
       }
       case (SwitchPokemon(i), UseMove(j)) => {
-        team1.switch(i)
+        team1.switch(i, this)
         team2.activePokemon.useMove(j, team1.activePokemon, this)
       }
       case (UseMove(i), SwitchPokemon(j)) => {
-        team2.switch(j)
+        team2.switch(j, this)
         team1.activePokemon.useMove(i, team2.activePokemon, this)
       }
       case (UseMove(i), UseMove(j)) => {

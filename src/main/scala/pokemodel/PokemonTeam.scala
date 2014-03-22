@@ -8,11 +8,13 @@ class PokemonTeam(val team: List[Pokemon]) {
   def this(singlePokemon: Pokemon) = this(List(singlePokemon))
   def healAll() = { team.map(_.heal()) }
   
-  def switch(newIndex : Int) = {
+  def switch(newIndex : Int, pb : Battle) = {
     require(0 <= newIndex && newIndex <= 5, s"newIndex $newIndex out of range for switch")
     require(newIndex != activeIndex, s"tried to switch the active Pokemon in")
+    pb.moveManager.clearLastMove(activePokemon)  // clear the last move of the Pokemon leaving battle
     activeIndex = newIndex
     activePokemon.takeStatusAilmentDamage()
+    
   }
   
   def hasSomeoneAlive: Boolean = team.exists(_.currentHP > 0)
