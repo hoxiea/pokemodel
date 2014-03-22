@@ -4,7 +4,7 @@ import StatusAilment._
 import Type._
 
 object Battle {
-  // Battle customizations
+  // Battle customizations and bug fixes
   
   /*
    * In Gen1, teams weren't actually healed before link battles started, and some
@@ -14,7 +14,13 @@ object Battle {
    * point in time, and newer ones don't displace older ones. This was fixed in later
    * Generations.
    */
-  val healBefore : Boolean = false
+  val healBefore: Boolean = false
+  
+  /*
+   * The move Focus Energy is supposed to quadruple the user's critical hit rate.
+   * In Gen 1, however, it divides it by 4 instead.
+   */
+  val focusEnergyHelps: Boolean = false
 }
 
 class Battle(val trainer1 : Trainer, val trainer2: Trainer) {

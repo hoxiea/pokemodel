@@ -6,8 +6,10 @@ import MoveType._
 
 class DamageCalculator {
   /*
-   * The damage that a move does is always a function of the inputs to calcHelper
-   * However, depending on whether or not the move lands a critical hit, those numbers change
+   * The damage that a move does is always captured by the logic in damageFormula
+   * However, depending on whether or not the move lands a critical hit,
+   * inputs to damageFormula change. The key method here, calc, dispatches to get
+   * the appropriate inputs depending on whether or not a critical happened
    */
   
   def calc(attacker : Pokemon, defender : Pokemon, move : Move, battle : Battle) : Int = {
@@ -20,7 +22,7 @@ class DamageCalculator {
     }
   }
   
-  private def calcHelper(level: Int, attack: Int, defense: Int, base: Int, mod: Double) : Int = {
+  private def damageFormula(level: Int, attack: Int, defense: Int, base: Int, mod: Double) : Int = {
     val A = (2 * level.toDouble + 10) / 250
     val B = attack.toDouble / defense
     ((A * B * base + 2) * mod).toInt
@@ -41,14 +43,14 @@ class DamageCalculator {
     val effectiveAttack = move.moveType match {
       case PHYSICAL => battle.statManager.getEffectiveAttack(attacker)
       case SPECIAL  => battle.statManager.getEffectiveDefense(attacker)
-      case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+      case STATUS => throw new Exception("A Status move called calcRegularHitDamage!")
     }
     val effectiveDefense = move.moveType match {
       case PHYSICAL => battle.statManager.getEffectiveSpecial(attacker)
       case SPECIAL  => battle.statManager.getEffectiveSpecial(attacker)
-      case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+      case STATUS => throw new Exception("A Status move called calcRegularHitDamage!")
     }
-    val damage = calcHelper(attacker.level, effectiveAttack, effectiveDefense, move.power, modifier)
+    val damage = damageFormula(attacker.level, effectiveAttack, effectiveDefense, move.power, modifier)
     damage
   }
   
@@ -63,20 +65,20 @@ class DamageCalculator {
     val attack = move.moveType match {
       case PHYSICAL => attacker.attack
       case SPECIAL  => attacker.defense
-      case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+      case STATUS => throw new Exception("A Status move called calcCriticalHitDamage!")
     }
     val defense = move.moveType match {
       case PHYSICAL => attacker.special
       case SPECIAL  => attacker.special
-      case STATUS => throw new Exception("A Status move called DamageCalculator.calc!")
+      case STATUS => throw new Exception("A Status move called calcCriticalHitDamage!")
     }
-    val damage = calcHelper(attacker.level * 2, attack, defense, move.power, modifier)
+    val damage = damageFormula(attacker.level * 2, attack, defense, move.power, modifier)
     damage
   }
 
   
   private def calcCriticalChance(attacker : Pokemon, defender : Pokemon, move : Move, battle : Battle) : Double = {
-  // TODO: take status stuff like FocusEnergy into account when calculating criticalChance
+  // TODO: take FocusEnergy status (and Battle.focusEnergyHelps) into account when calculating criticalChance
     val criticalChance = move.critHitRate match {
       case LOW  => PokeData.getBaseSpeed(attacker.index).toDouble / 512
       case HIGH => PokeData.getBaseSpeed(attacker.index).toDouble / 64
