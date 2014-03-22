@@ -28,7 +28,6 @@ import scala.util.Random
 sealed trait Move {
   /* ABSTRACT STUFF */
   val index : Int                // in 1 .. 165
-  val accuracy : Double          // in [0.0, 1.0]
   val type1 : Type.Value
   val moveType : MoveType.Value
   val power : Int
@@ -39,8 +38,14 @@ sealed trait Move {
   /* IMPEMENTED STUFF */
   val critHitRate = LOW   // True for 99% of moves, outliers can override
   val priority = 0        // True for 99% of moves, outliers can override
+  val accuracy = 1.0      // in [0.0, 1.0], true for ~60% of moves, others can override
   def restorePP(amount : Int) = { currentPP = intWrapper(maxPP) min (currentPP + amount) }
   def restorePP() = { currentPP = maxPP }
+
+  // Even moves with 100% accuracy might miss because of accuracy/evasion adjustments in battle
+  def chanceHit(attacker : Pokemon, defender : Pokemon, pb : Battle): Double = {
+    accuracy * (pb.statManager.getEffectiveAccuracy(attacker).toDouble / pb.statManager.getEffectiveEvasion(defender))
+  }
 
   override def toString() = {
     val moveName = this.getClass().getName()
@@ -72,7 +77,6 @@ class Struggle extends PhysicalMove {
   val index = 165
   val type1 = Normal
   val power = 50
-  val accuracy = 1.0
   val maxPP = 1
   var currentPP = 1
 
@@ -87,7 +91,6 @@ class Struggle extends PhysicalMove {
 
 class Pound extends PhysicalMove {
   val index = 1
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Normal
   val power = 40
   val maxPP = 35
@@ -95,8 +98,7 @@ class Pound extends PhysicalMove {
 
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     assert(currentPP > 0, s"tried to use $this with 0 pp")
-    val chanceHit = accuracy * (pb.statManager.getEffectiveAccuracy(attacker).toDouble / pb.statManager.getEffectiveEvasion(defender))
-    if (Random.nextDouble < chanceHit) {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
       println(s"${attacker.name} dealt $damageDealt damage to ${defender.name} with $this")
@@ -111,30 +113,29 @@ class Pound extends PhysicalMove {
 /* SPECIAL MOVES */
 class DragonRage extends SpecialMove {
   val index = 82
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Dragon
   val power = 0
   val maxPP = 10
   var currentPP = maxPP
 
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-
-    defender.takeDamage(40)
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      defender.takeDamage(40)
+    }
     currentPP -= 1
   }
 }
 
 class SonicBoom extends SpecialMove {
   val index = 49
-  val accuracy = 0.9          // in [0.0, 1.0]
+  override val accuracy = 0.9          // in [0.0, 1.0]
   val type1 = Normal
   val power = 0
   val maxPP = 20
   var currentPP = maxPP
 
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    val chanceHit = accuracy * (pb.statManager.getEffectiveAccuracy(attacker).toDouble / pb.statManager.getEffectiveEvasion(defender))
-    if (Random.nextDouble < chanceHit) {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       defender.takeDamage(20)
     }
     currentPP -= 1
@@ -143,7 +144,7 @@ class SonicBoom extends SpecialMove {
 
 class Thunder extends SpecialMove {
   val index = 87
-  val accuracy = 0.7          // in [0.0, 1.0]
+  override val accuracy = 0.7          // in [0.0, 1.0]
   val type1 = Electric
   val power = 110
   val maxPP = 10
@@ -152,7 +153,7 @@ class Thunder extends SpecialMove {
   val parChance = 0.1
 
   def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // TODO: use Pound as a reference point
+    // TODO: model after Pound!
     currentPP -= 1
   }
 }
@@ -161,7 +162,6 @@ class Thunder extends SpecialMove {
 /* STATUS MOVES */
 class Sharpen extends StatusMove {
   val index = 159
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Normal
   val maxPP = 30
   var currentPP = maxPP
@@ -174,7 +174,6 @@ class Sharpen extends StatusMove {
 
 class Meditate extends StatusMove {
   val index = 96
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Psychic
   val maxPP = 40
   var currentPP = maxPP
@@ -187,7 +186,6 @@ class Meditate extends StatusMove {
 
 class SwordsDance extends StatusMove {
   val index = 14
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Normal
   val maxPP = 30
   var currentPP = maxPP
@@ -201,7 +199,6 @@ class SwordsDance extends StatusMove {
 
 class DefenseCurl extends StatusMove {
   val index = 111
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Normal
   val maxPP = 40
   var currentPP = maxPP
@@ -214,7 +211,6 @@ class DefenseCurl extends StatusMove {
 
 class Withdraw extends StatusMove {
   val index = 110
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Water
   val maxPP = 40
   var currentPP = maxPP
@@ -227,7 +223,6 @@ class Withdraw extends StatusMove {
 
 class Harden extends StatusMove {
   val index = 106
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Normal
   val maxPP = 30
   var currentPP = maxPP
@@ -241,7 +236,6 @@ class Harden extends StatusMove {
 
 class AcidArmor extends StatusMove {
   val index = 151
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Poison
   val maxPP = 40
   var currentPP = maxPP
@@ -255,7 +249,6 @@ class AcidArmor extends StatusMove {
 
 class Barrier extends StatusMove {
   val index = 112
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Psychic
   val maxPP = 30
   var currentPP = maxPP
@@ -269,7 +262,6 @@ class Barrier extends StatusMove {
 
 class DoubleTeam extends StatusMove {
   val index = 104
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Normal
   val maxPP = 15
   var currentPP = maxPP
@@ -282,7 +274,6 @@ class DoubleTeam extends StatusMove {
 
 class Minimize extends StatusMove {
   val index = 107
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Normal
   val maxPP = 20
   var currentPP = maxPP
@@ -295,7 +286,6 @@ class Minimize extends StatusMove {
 
 class Agility extends StatusMove {
   val index = 97
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Psychic
   val maxPP = 30
   var currentPP = maxPP
@@ -308,7 +298,6 @@ class Agility extends StatusMove {
 
 class Growth extends StatusMove {
   val index = 74
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Normal
   val maxPP = 40
   var currentPP = maxPP
@@ -321,7 +310,6 @@ class Growth extends StatusMove {
 
 class Amnesia extends StatusMove {
   val index = 133
-  val accuracy = 1.0          // in [0.0, 1.0]
   val type1 = Psychic
   val maxPP = 20
   var currentPP = maxPP
@@ -332,5 +320,33 @@ class Amnesia extends StatusMove {
   }
 }
 
+// STATUSMOVES that change the opponent's stats
+class StringShot extends StatusMove {
+  val index = 81
+  override val accuracy = .95          // in [0.0, 1.0]
+  val type1 = Bug
+  val maxPP = 40
+  var currentPP = maxPP
 
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      pb.statManager.changeSpeedStage(defender, -1)
+    }
+    currentPP -= 1
+  }
+}
+
+class SandAttack extends StatusMove {
+  val index = 28
+  val type1 = Normal  // changed in later Gens
+  val maxPP = 15
+  var currentPP = maxPP
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      pb.statManager.changeAccuracyStage(defender, -1)
+    }
+    currentPP -= 1
+  }
+}
 

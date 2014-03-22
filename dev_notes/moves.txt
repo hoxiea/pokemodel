@@ -161,7 +161,7 @@ STATUS MOVES (any type, don't deal damage directly):
     = Amnesia: Special +2 stages
 
 - Change opponent's stats
-= String Shot: Speed stat -1 stage
+    = String Shot: Speed stat -1 stage
 = Sand Attack: Accuracy stat -1 stage
 = Flash: Accuracy stat -1 stage
 = Smoke Screen: Accuracy stat -1 stage
