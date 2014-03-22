@@ -350,3 +350,199 @@ class SandAttack extends StatusMove {
   }
 }
 
+abstract class Flash extends StatusMove
+abstract class SmokeScreen extends StatusMove
+abstract class Kinesis extends StatusMove
+abstract class Growl extends StatusMove
+abstract class Leer extends StatusMove
+abstract class TailWhip extends StatusMove
+abstract class Screech extends StatusMove
+
+// STATUSMOVES that change the opponent's statusAilment
+class ThunderWave extends StatusMove {
+  val index = 86
+  val type1 = Electric
+  val maxPP = 20
+  var currentPP = maxPP
+  val chancePAR = 1.0
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      if (Random.nextDouble < chancePAR) {
+        defender.tryToChangeStatusAilment(PAR)
+      }
+    }
+    currentPP -= 1
+  }
+}
+
+class StunSpore extends StatusMove {
+  val index = 78
+  val type1 = Grass
+  val maxPP = 30
+  var currentPP = maxPP
+  val chancePAR = 1.0
+  override val accuracy = 0.75
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      if (Random.nextDouble < chancePAR) {
+        defender.tryToChangeStatusAilment(PAR)
+      }
+    }
+    currentPP -= 1
+  }
+}
+
+class Glare extends StatusMove {
+  val index = 137
+  val type1 = Normal
+  val maxPP = 30
+  var currentPP = maxPP
+  val chancePAR = 1.0
+  override val accuracy = 0.75  // increased in later generations
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      if (Random.nextDouble < chancePAR) {
+        defender.tryToChangeStatusAilment(PAR)
+      }
+    }
+    currentPP -= 1
+  }
+}
+
+class ConfuseRay extends StatusMove {
+  val index = 109
+  val type1 = Ghost
+  val maxPP = 10
+  var currentPP = maxPP
+  val chanceCON = 1.0
+
+  // TODO: ConfuseRay will fail if the target has a substitute
+  // TODO: Confusion is volative and requires a data structure! Probably a map from Pokemon to number of turns left with confusion
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      if (Random.nextDouble < chanceCON) {
+        // defender.tryToChangeStatusAilment(CON)
+      }
+    }
+    currentPP -= 1
+  }
+}
+
+//class Supersonic extends StatusMove {
+//  val index = 48
+//  val type1 = Normal
+//  val maxPP = 20
+//  var currentPP = maxPP
+//  val chanceCON = 1.0
+//  override val accuracy = 0.55
+//
+//  // TODO: Supersonic will fail if the target has a substitute
+//  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+//    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+//      if (Random.nextDouble < chanceCON) {
+//        defender.tryToChangeStatusAilment(CON)
+//      }
+//    }
+//    currentPP -= 1
+//  }
+//}
+
+class SleepPowder extends StatusMove {
+  val index = 79
+  val type1 = Grass
+  val maxPP = 15
+  var currentPP = maxPP
+  val chanceSLP = 1.0
+  override val accuracy = 0.75
+
+  // TODO: Supersonic will fail if the target has a substitute
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      if (Random.nextDouble < chanceSLP) {
+        defender.tryToChangeStatusAilment(SLP)
+      }
+    }
+    currentPP -= 1
+  }
+}
+
+class Hypnosis extends StatusMove {
+  val index = 95
+  val type1 = Psychic
+  val maxPP = 15
+  var currentPP = maxPP
+  val chanceSLP = 1.0
+  override val accuracy = 0.60
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      if (Random.nextDouble < chanceSLP) {
+        defender.tryToChangeStatusAilment(SLP)
+      }
+    }
+    currentPP -= 1
+  }
+}
+
+class PoisonGas extends StatusMove {
+  val index = 139
+  val type1 = Poison
+  val maxPP = 40
+  var currentPP = maxPP
+  val chancePSN = 1.0
+  override val accuracy = 0.55
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      if (Random.nextDouble < chancePSN) {
+        defender.tryToChangeStatusAilment(PSN)
+      }
+    }
+    currentPP -= 1
+  }
+}
+
+class Toxic extends StatusMove {
+  val index = 92
+  val type1 = Poison
+  val maxPP = 10
+  var currentPP = maxPP
+  val chancePSN = 1.0
+  override val accuracy = 0.85
+
+  // TODO: Toxic is a mess and requires a battle data structure
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      if (Random.nextDouble < chancePSN) {
+        defender.tryToChangeStatusAilment(BPSN)
+      }
+    }
+    currentPP -= 1
+  }
+}
+
+// SUPER WEIRD STATUS MOVES
+class MirrorMove extends StatusMove {
+  val index = 119
+  val type1 = Flying
+  val maxPP = 20
+  var currentPP = maxPP
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // Get the last move that $defender used during his current stay in battle;
+    // TODO: it resets if the Pokemon switches out! So switch needs access to the battle
+    val lastMove : Option[Move] = pb.moveManager.getLastMove(defender)
+
+    // $attacker should use lastMove against $defender
+    lastMove match {
+      case Some(m) => m.use(attacker, defender, pb)
+      case None    => {}
+    }
+    currentPP -= 1
+  }
+}
+
+

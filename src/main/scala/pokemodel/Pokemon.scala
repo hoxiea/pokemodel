@@ -53,6 +53,11 @@ class Pokemon(builder : PokemonBuilder) {
   def takeDamage(damage : Int) {
     currentHP = if (damage >= currentHP) 0 else currentHP - damage
   }
+  
+  def tryToChangeStatusAilment(newStatus : StatusAilment.Value) : Unit = statusAilment match {
+    case None => { statusAilment = Some(newStatus) }
+    case Some(s) => {}  // new status ailments don't overwrite old ones
+  }
 
   def heal() {
     currentHP = maxHP

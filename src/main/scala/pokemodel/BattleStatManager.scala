@@ -2,6 +2,16 @@ package pokemodel
 
 import scala.collection.mutable
 
+/*
+ * BattleStatManagers keep track of the stages of attack, defense, speed,
+ * special, accuracy, and evasion for each Pokemon in a battle. Each battle
+ * has its own BattleStatManager instance.
+ * 
+ * BattleStatManagers also know how to take the stats they contain and use them
+ * plus a Pokemon's base stats to calculate an effective attack, defense, speed, 
+ * special, accuracy, and evasion 
+ */
+
 class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   // http://bulbapedia.bulbagarden.net/wiki/Stats#Stages
   private val init = List.fill(team1.length + team2.length)(0)

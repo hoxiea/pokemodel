@@ -162,7 +162,7 @@ STATUS MOVES (any type, don't deal damage directly):
 
 - Change opponent's stats
     = String Shot: Speed stat -1 stage
-= Sand Attack: Accuracy stat -1 stage
+    = Sand Attack: Accuracy stat -1 stage
 = Flash: Accuracy stat -1 stage
 = Smoke Screen: Accuracy stat -1 stage
 = Kinesis: Accuracy stat -1 stage
@@ -177,17 +177,17 @@ STATUS MOVES (any type, don't deal damage directly):
 = Light Screen: double the user's Special when the opponent damages the user with a special move, WSSC
 
 - Change opponent's status
-= Thunder Wave: paralyze
-= Stun Spore: paralyze
-= Glare: paralyze
-= Confuse Ray: confusion, WSSC
-= Supersonic: confusion, WSSC
-= Sleep Powder: sleep
+    = Thunder Wave: paralyze
+    = Stun Spore: paralyze
+    = Glare: paralyze
+    = Confuse Ray: confusion, WSSC
+    = Supersonic: confusion, WSSC
+    = Sleep Powder: sleep
 = Spore: sleep
 = Lovely Kiss: sleep
 = Sing: sleep
-= Hypnosis: sleep, WSSC
-= Poison Gas: poison
+    = Hypnosis: sleep, WSSC
+    = Poison Gas: poison
 = PoisonPowder: poison
 = Toxic: badly poison, WSSC
 

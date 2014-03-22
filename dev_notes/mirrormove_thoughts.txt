@@ -1,0 +1,18 @@
+PROBLEM: MirrorMove can't be implemented using the given infrastructure.
+NECESSARY PART OF SOLUTION: Make a BattleMoveManager class that's very similar to BattleStatManager
+Map Pokemon -> what?
+Options:
+1. The index of the move that it used last, relative to the Pokemon (in 1..5)
+- Problem: If the Pokemon uses Metronome, it'll then use a random attack, and it's that random attack
+  that counts as the last move used according to the Metronome move description
+
+2. The move itself, presumably a reference to the move in the Pokemon
+- Problem: Again, fails on Metronome.
+
+3. The index of the move that it used last, relative to the move (in 1..165)
+Problem: Once I have that information, there's no great way for me to make an instance of that move
+and then use it. But it certainly solves the problem with Option 1.
+
+Assume I do have some way to create an instance of that move. Can I use it?
+val lastMoveUsed : Move = pb.moveManager.getLastMove(attacker)
+
