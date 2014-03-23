@@ -14,5 +14,6 @@ Problem: Once I have that information, there's no great way for me to make an in
 and then use it. But it certainly solves the problem with Option 1.
 
 Assume I do have some way to create an instance of that move. Can I use it?
-val lastMoveUsed : Move = pb.moveManager.getLastMove(attacker)
+val lastMoveUsed : Move = pb.moveManager.getLastMove(defender)
+lastMoveUsed.use(this, defender, pb
 

@@ -6,10 +6,10 @@ import scala.collection.mutable
  * BattleStatManagers keep track of the stages of attack, defense, speed,
  * special, accuracy, and evasion for each Pokemon in a battle. Each battle
  * has its own BattleStatManager instance.
- * 
+ *
  * BattleStatManagers also know how to take the stats they contain and use them
- * plus a Pokemon's base stats to calculate an effective attack, defense, speed, 
- * special, accuracy, and evasion 
+ * plus a Pokemon's base stats to calculate an effective attack, defense, speed,
+ * special, accuracy, and evasion
  */
 
 class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
@@ -17,12 +17,12 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   private val init = List.fill(team1.length + team2.length)(0)
   private val allPokemon = team1.team ++ team2.team
 
-  private val attackStages:   mutable.Map[Pokemon, Int] = mutable.Map()
-  private val defenseStages:  mutable.Map[Pokemon, Int] = mutable.Map()
-  private val speedStages:    mutable.Map[Pokemon, Int] = mutable.Map()
-  private val specialStages:  mutable.Map[Pokemon, Int] = mutable.Map()
-  private val evasionStages:  mutable.Map[Pokemon, Int] = mutable.Map()
-  private val accuracyStages: mutable.Map[Pokemon, Int] = mutable.Map()
+  val attackStages:   mutable.Map[Pokemon, Int] = mutable.Map()
+  val defenseStages:  mutable.Map[Pokemon, Int] = mutable.Map()
+  val speedStages:    mutable.Map[Pokemon, Int] = mutable.Map()
+  val specialStages:  mutable.Map[Pokemon, Int] = mutable.Map()
+  val evasionStages:  mutable.Map[Pokemon, Int] = mutable.Map()
+  val accuracyStages: mutable.Map[Pokemon, Int] = mutable.Map()
 
   for ((p, zero) <- allPokemon.zip(init)) {
     attackStages(p)   = zero
@@ -148,20 +148,23 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
     val newTotal = evasionStages(p) + change
     evasionStages(p) = curbNewTotal(newTotal)
   }
-  
+
+  // Ways to set the stats to an absolute value
+  // Useful in a few rare settings
+  def setAttackStage(p: Pokemon, newValue: Int) : Unit   = { attackStages(p)   = newValue }
+  def setDefenseStage(p: Pokemon, newValue: Int) : Unit  = { defenseStages(p)  = newValue }
+  def setSpecialStage(p: Pokemon, newValue: Int) : Unit  = { specialStages(p)  = newValue }
+  def setSpeedStage(p: Pokemon, newValue: Int) : Unit    = { speedStages(p)    = newValue }
+  def setAccuracyStage(p: Pokemon, newValue: Int) : Unit = { accuracyStages(p) = newValue }
+  def setEvasionStage(p: Pokemon, newValue: Int) : Unit  = { evasionStages(p)  = newValue }
+
   def resetAll(p: Pokemon) : Unit = {
     // Useful for Haze
-    attackStages(p) -= attackStages(p)
-    defenseStages(p) -= defenseStages(p)
-    specialStages(p) -= specialStages(p)
-    speedStages(p) -= speedStages(p)
-    accuracyStages(p) -= accuracyStages(p)
-    evasionStages(p) -= evasionStages(p)
-    assert (attackStages(p)   == 0)
-    assert (defenseStages(p)  == 0)
-    assert (specialStages(p)  == 0)
-    assert (speedStages(p)    == 0)
-    assert (accuracyStages(p) == 0)
-    assert (evasionStages(p)  == 0)
+    setAttackStage(p, 0)
+    setDefenseStage(p, 0)
+    setSpecialStage(p, 0)
+    setSpeedStage(p, 0)
+    setAccuracyStage(p, 0)
+    setEvasionStage(p, 0)
   }
 }

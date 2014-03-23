@@ -17,17 +17,18 @@ object Type extends Enumeration {
   val Psychic = Value("Psychic")
   val Ice = Value("Ice")
   val Dragon = Value("Dragon")
-  
+
   val allTypes = List(
-    Normal, Fighting, Flying, Poison, Ground, 
-    Rock, Bug, Ghost, Fire, Water, 
+    Normal, Fighting, Flying, Poison, Ground,
+    Rock, Bug, Ghost, Fire, Water,
     Grass, Electric, Psychic, Ice, Dragon
   )
-  
-  val superEffective = 2.0
-  val notVeryEffective = 0.5
-  val notEffective = 0.0
-  
+
+  val double = 2.0
+  val normal = 1.0
+  val half = 0.5
+  val not = 0.0
+
   val stringToType: Map[String, Type.Value] = Map(
     "Normal" -> Normal,
     "Fighting" -> Fighting,
@@ -45,22 +46,89 @@ object Type extends Enumeration {
     "Ice" -> Ice,
     "Dragon" -> Dragon
   )
-  
+
   val typeMap : Map[Type.Value, Map[Type.Value, Double]] = Map(
-    Normal   -> Map(Rock -> notVeryEffective, 
-                    Ghost -> notEffective).withDefaultValue(1.0),
-    Fighting -> Map(Normal -> superEffective, 
-                    Flying -> notVeryEffective,
-                      Poison -> notVeryEffective,
-                      Rock -> superEffective,
-                      Bug -> notVeryEffective,
-                      Ghost -> notEffective,
-                      Psychic -> notVeryEffective,
-                      Ice -> superEffective).withDefaultValue(1.0),
-    Flying -> Map(Fighting -> superEffective,
-                  Rock -> notVeryEffective,
-                  Bug -> superEffective,
-                  Grass -> superEffective,
-                  Electric -> notVeryEffective).withDefaultValue(1.0)
-      ).withDefaultValue(Map().withDefaultValue(1.0))  // TODO: remove this, fill in the rest!
+    Normal   -> Map(Rock -> half,
+                    Ghost -> not).withDefaultValue(normal),
+    Fighting -> Map(Normal -> double,
+                    Flying -> half,
+                    Poison -> half,
+                    Rock -> double,
+                    Bug -> half,
+                    Ghost -> not,
+                    Psychic -> half,
+                    Ice -> double).withDefaultValue(normal),
+    Flying -> Map(Fighting -> double,
+                  Rock -> half,
+                  Bug -> double,
+                  Grass -> double,
+                  Electric -> half).withDefaultValue(normal),
+    Poison -> Map(Poison -> half,
+                  Ground -> half,
+                  Rock -> half,
+                  Bug -> double,
+                  Ghost -> half,
+                  Grass -> double).withDefaultValue(normal),
+    Ground -> Map(Flying -> not,
+                  Poison -> double,
+                  Rock -> double,
+                  Bug -> half,
+                  Fire -> double,
+                  Grass -> half,
+                  Electric -> double).withDefaultValue(normal),
+    Rock -> Map(Fighting -> half,
+                Flying -> double,
+                Ground -> half,
+                Bug -> double,
+                Fire -> double,
+                Ice -> double).withDefaultValue(normal),
+    Bug -> Map(Fighting -> half,
+               Flying -> half,
+               Poison -> double,
+               Ghost -> half,
+               Fire -> half,
+               Grass -> double,
+               Psychic -> double).withDefaultValue(normal),
+    Ghost -> Map(Normal -> not,
+                 Ghost -> double,
+                 Psychic -> not).withDefaultValue(normal),
+    Fire -> Map(Rock -> half,
+                Bug -> double,
+                Fire -> half,
+                Water -> half,
+                Grass -> double,
+                Ice -> double,
+                Dragon -> half).withDefaultValue(normal),
+    Water -> Map(Ground -> double,
+                 Rock -> double,
+                 Fire -> double,
+                 Water -> half,
+                 Grass -> half,
+                 Dragon -> half).withDefaultValue(normal),
+    Grass -> Map(Flying -> half,
+                 Poison -> half,
+                 Ground -> double,
+                 Rock -> double,
+                 Bug -> half,
+                 Fire -> half,
+                 Water -> double,
+                 Grass -> half,
+                 Dragon -> half).withDefaultValue(normal),
+    Electric -> Map(Flying -> double,
+                    Ground -> not,
+                    Water -> double,
+                    Grass -> half,
+                    Electric -> half,
+                    Dragon -> half).withDefaultValue(normal),
+    Psychic -> Map(Fighting -> double,
+                   Poison -> double,
+                   Psychic -> half).withDefaultValue(normal),
+    Ice -> Map(Flying -> double,
+               Ground -> double,
+               Water -> half,
+               Grass -> double,
+               Ice -> half,
+               Dragon -> double).withDefaultValue(normal),
+    Dragon -> Map(Dragon -> double).withDefaultValue(normal)
+  )
 }

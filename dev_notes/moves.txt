@@ -5,6 +5,7 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Leech Life (Bug)
 
 - Single-strike
+    = Pound: damage
 = Drill Peck: damage
 = Peck: damage
 = Wing Attack: damage
@@ -17,7 +18,6 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Mega Kick: damage
 = Mega Punch: damage
 = Pay Day: damage
-= Pound: damage
 = Scratch: damage
 = Slam: damage
 = Strength: damage
@@ -27,16 +27,16 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Rock Throw: damage
 
 - Single-strike, special
-= Quick Attack: damage, higher priority
-= Karate Chop: damage, high crit hit rate
+    = Quick Attack: damage, higher priority
+    = Karate Chop: damage, high crit hit rate
 = Slash: damage, high crit hit rate
 = Crabhammer: damage, high crit hit rate
 
 - Single-strike + recoil
+    = Struggle: do damage, 50% recoil damage. Can get crithits. Normal element rules apply
 = Submission: do damage, receive 25% of damage done to target yourself
 = Double Edge: do damage, receive 25% of damage done to target yourself
 = Take Down: do damage, receive 25% of damage done to target yourself
-= Struggle: do damage, user receives recoil damage equal to 50% of damage dealt. Can get crit hits. Normal element, so Rock gets half damage and Ghost are unaffected, etc.
 
 - Single-strike + potential status change
 = Bite: damage and 10% chance of causing a flinch
@@ -200,11 +200,11 @@ STATUS MOVES (any type, don't deal damage directly):
     = Metronome: randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
 = Mimic: copy a randomly selected move of the opponent's
     = Recover: restore up to 50% of user's maxHP, WSSC
-= Rest: restore max HP, fall asleep and awaken two turns after it's used, WSSC
 = Soft-boiled: restore up to 50% of user's maxHP, WSSC
-= Roar: no effect whatsoever in link battles (causes battle to end in wild encounters)
-= Whirlwind: no effect whatsoever in link battles (causes battle to end in wild encounters)
-= Teleport: no effect whatsoever in link battles (causes escape in wild encounters)
-= Splash: no effect whatsoever anywhere
+    = Rest: restore max HP, fall asleep and awaken two turns after it's used, WSSC
+    = Roar: no effect whatsoever in link battles (causes battle to end in wild encounters)
+    = Whirlwind: no effect whatsoever in link battles (causes battle to end in wild encounters)
+    = Teleport: no effect whatsoever in link battles (causes escape in wild encounters)
+    = Splash: no effect whatsoever anywhere
 = Substitute: use 25% of maxHP to create a substitute with 1 HP more than the amount of HP lost by the user.  Duplicate the user's current stat modifiers, allow self-modification of stats, but disallow any stat-modifying attacks and side effects of opponent's moves.  Other weird stuff too
 = Transform: change the user's type, stats, stat mods, current moves, species, and cry to that of the target, WSSC

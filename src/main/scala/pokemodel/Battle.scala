@@ -5,38 +5,43 @@ import Type._
 
 object Battle {
   // Battle customizations and bug fixes
-  
+
   /*
    * In Gen1, teams weren't actually healed before link battles started, and some
    * players took advantage of this fact by poisoning some or all of their Pokemon.
    * Though counter-intuitive, it actually protects them from all the other non-volatile
-   * status effects, since Pokemon can only have one non-volatile status effect at any 
+   * status effects, since Pokemon can only have one non-volatile status effect at any
    * point in time, and newer ones don't displace older ones. This was fixed in later
    * Generations.
    */
   val healBefore: Boolean = false
-  
+
   /*
    * The move Focus Energy is supposed to quadruple the user's critical hit rate.
    * In Gen 1, however, it divides it by 4 instead.
    */
   val focusEnergyHelps: Boolean = false
-  
+
   /*
    * In Gen 1, Recover fails if (user's maximum HP - user's current HP) is one less than a multiple of 256.
    * Which is stupid. This was fixed in later generations. You can fix it here if you'd like.
    */
   val recoverBugEnabled: Boolean = true
+
+  /* Soft-Boiled has the same bug as Recover does. */
+  val softboiledBugEnabled: Boolean = true
+
+  val verbose = true
 }
 
 class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   val team1 = trainer1.team
   val team2 = trainer2.team
-  
+
   val statManager = new BattleStatManager(team1, team2)
   val moveManager = new BattleMoveManager(team1, team2)
   val dc = new DamageCalculator()
-  
+
   var time : Int = 0
 
   /* Various moves cause a stat to change up/down by one level
@@ -45,15 +50,15 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
    * http://www.serebii.net/games/stats.shtml
    */
   val statMods = Map()
-  
+
   /* NON-VOLATIVE STATUS EFFECTS
    * Burn, Freeze, Paralysis, Poison, Badly Poison, and Sleep
    * These remain until the Pokemon is healed at a Pokecenter (which can't happen in this simulation),
    * or after a certain number of turns in battle (Sleep)
    * The Pokemon data structure stores this type of status effect in "statusAilment"
    * Only one at a time can affect a Pokemon
-   */ 
-  
+   */
+
   /* VOLATIVE STATUS EFFECTS
    * These wear off when a Pokemon is switched out, or after a certain number of turns
    * Multiple of these can affect a Pokemon simultaneously
@@ -64,28 +69,28 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
    * Mist (user is protected from all of opponent's stat mod changes; wears off when Pokemon switched out)
    */
   val volativeStatuses = Map()
-  
+
   /* THIRD KIND
    * Sky Attack -> glowing
    * Hyper Beam -> recharging
-   * Solar Beam -> taking in sunlight 
+   * Solar Beam -> taking in sunlight
    * Substitute -> substituted
    * Skull Bash -> withdrawing
-   * Razor Wind -> whipping up a whirlwind 
+   * Razor Wind -> whipping up a whirlwind
    */
   val weirdStatuses = Map()
-  
+
   if (Battle.healBefore) {
     trainer1.healAll()
     trainer2.healAll()
   }
-  
+
   def takeNextTurn() : Unit = {
     var team1Fainted = false
     var team2Fainted = false
-    
+
     // Process any status ailments that take effect at the beginning of the round: SLP, PAR
-       
+
     // Check volativeStatuses and weirdStatuses to see if player1 gets to select a BattleAction
     // Process the status if not
 
@@ -120,28 +125,28 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
           if (team2.activePokemon.isAlive) {
             team2.activePokemon.useMove(j, team1.activePokemon, this)
           }
-        
+
       }
     }
-    
+
     // Process any status ailments that take effect at the end of the round, assuming the opponent
     // didn't faint, in which case status ailments don't kick in
     if (!team2Fainted) { team1.activePokemon.takeStatusAilmentDamage() }
     if (!team1Fainted) { team2.activePokemon.takeStatusAilmentDamage() }
-    
+
     // Another turn passes
     time = time + 1
     println(this)
   }
- 
+
   def runBattle() : Unit = {
     while (!battleIsOver) {
       takeNextTurn()
     }
   }
-  
+
   def battleIsOver: Boolean = { !(team1.hasSomeoneAlive && team2.hasSomeoneAlive) }
-  
+
   override def toString() : String = {
     val s = new StringBuilder()
     s.append("----------------------\n")
