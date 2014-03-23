@@ -22,10 +22,9 @@ class Pokemon(builder : PokemonBuilder) {
   val name  = builder.name
   val level = builder.level
 
-  // These can technically change with some really strange moves (Porygon, Ditto, etc.),
-  // but I'll implement that in the battle
-  val type1 = builder.type1
-  val type2 = builder.type2
+  // These can technically change with some really strange moves (Conversion)
+  var type1 = builder.type1
+  var type2 = builder.type2
 
   // Moves can change in battle too, believe it or not
   var move1 : Option[Move] = builder.move1
@@ -69,8 +68,12 @@ class Pokemon(builder : PokemonBuilder) {
       }
     }
   }
+  
+  def gainHP(amount : Int) {
+    currentHP = intWrapper(maxHP).min(currentHP + amount)
+  }
 
-  // TODO: take Disable into account!
+  // TODO: take Disable into account?
   // TODO: take no PP into account?
   def useMove(index : Int, enemy : Pokemon, battle : Battle) : Unit = {
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
@@ -107,6 +110,7 @@ class Pokemon(builder : PokemonBuilder) {
     repr.append(s"$name, level $level\n")
     repr.append(s"Type1 = $type1, Type2 = $type2\n")
     repr.append(s"HP = $currentHP / $maxHP, Status = $statusAilment\n")
+    repr.append(s"A|D|Spd|Spcl = $attack $defense $speed $special\n")
     repr.append(s"IV (A|D|Spd|Spcl|HP) = $attackIV $defenseIV $speedIV $specialIV $hpIV\n")
     repr.append(s"EV (A|D|Spd|Spcl|HP) = $attackEV $defenseEV $speedEV $specialEV $hpEV\n")
     repr.append(s"Moves: $move1, $move2, $move3, $move4")

@@ -11,10 +11,16 @@ class PokemonTeam(val team: List[Pokemon]) {
   def switch(newIndex : Int, pb : Battle) = {
     require(0 <= newIndex && newIndex <= 5, s"newIndex $newIndex out of range for switch")
     require(newIndex != activeIndex, s"tried to switch the active Pokemon in")
-    pb.moveManager.clearLastMove(activePokemon)  // clear the last move of the Pokemon leaving battle
-    activeIndex = newIndex
-    activePokemon.takeStatusAilmentDamage()
     
+    // Take care of things that happen to the previously-active opponent when they switch out
+    pb.moveManager.clearLastMove(activePokemon)  // clear the last move of the Pokemon leaving battle
+    // TODO: clear the effects of Mist
+    
+    // Update the index
+    activeIndex = newIndex
+    
+    // Take care of things that happen to the newly-active opponent when they switch it
+    activePokemon.takeStatusAilmentDamage()
   }
   
   def hasSomeoneAlive: Boolean = team.exists(_.currentHP > 0)

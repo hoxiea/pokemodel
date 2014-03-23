@@ -25,6 +25,8 @@ import scala.util.Random
  * to think about anyway), and then when a Pokemon is created from a Builder, it can pass itself as the Move owner.
  */
 
+// TODO: Any move that can cause a stat change to opponent needs to make sure opponent doesn't have Mist cast
+
 sealed trait Move {
   /* ABSTRACT STUFF */
   val index : Int                // in 1 .. 165
@@ -33,21 +35,30 @@ sealed trait Move {
   val power : Int
   val maxPP : Int
   var currentPP : Int
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle)
+  def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle)
 
   /* IMPEMENTED STUFF */
   val critHitRate = LOW   // True for 99% of moves, outliers can override
-  val priority = 0        // True for 99% of moves, outliers can override
+  var priority = 0        // True for 99% of moves, outliers can override; var because Metronome needs to change priority to 0
   val accuracy = 1.0      // in [0.0, 1.0], true for ~60% of moves, others can override
   def restorePP(amount : Int) = { currentPP = intWrapper(maxPP) min (currentPP + amount) }
   def restorePP() = { currentPP = maxPP }
-  
-  // TODO: every Move should call finishUsingMove at the end of use
-  def finishUsingMove(attacker: Pokemon, pb: Battle) : Unit = {
+
+  def startUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) : Unit = {
+    assert(currentPP > 0, s"tried to use $this with 0 PP")
+  }
+
+  def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) : Unit = {
     currentPP -= 1
     pb.moveManager.updateLastMoveIndex(attacker, index)
-    
   }
+
+  def use(attacker: Pokemon, defender: Pokemon, pb: Battle): Unit = {
+    startUsingMove(attacker, defender, pb)
+    moveSpecificStuff(attacker, defender, pb)
+    finishUsingMove(attacker, defender, pb)
+  }
+
 
   // Even moves with 100% accuracy might miss because of accuracy/evasion adjustments in battle
   def chanceHit(attacker : Pokemon, defender : Pokemon, pb : Battle): Double = {
@@ -87,7 +98,7 @@ class Struggle extends PhysicalMove {
   val maxPP = 1
   var currentPP = 1
 
-  override def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // Attack!
 
     // Take 1/2 damage dealt as recoil
@@ -103,8 +114,7 @@ class Pound extends PhysicalMove {
   val maxPP = 35
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    assert(currentPP > 0, s"tried to use $this with 0 pp")
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
@@ -112,7 +122,6 @@ class Pound extends PhysicalMove {
     } else {
       println("Pound missed!")
     }
-    currentPP -= 1
   }
 }
 
@@ -125,11 +134,10 @@ class DragonRage extends SpecialMove {
   val maxPP = 10
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       defender.takeDamage(40)
     }
-    currentPP -= 1
   }
 }
 
@@ -141,11 +149,10 @@ class SonicBoom extends SpecialMove {
   val maxPP = 20
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       defender.takeDamage(20)
     }
-    currentPP -= 1
   }
 }
 
@@ -159,9 +166,8 @@ class Thunder extends SpecialMove {
 
   val parChance = 0.1
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // TODO: model after Pound!
-    currentPP -= 1
   }
 }
 
@@ -173,9 +179,8 @@ class Sharpen extends StatusMove {
   val maxPP = 30
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeAttackStage(attacker, 1)
-    currentPP -= 1
   }
 }
 
@@ -185,9 +190,8 @@ class Meditate extends StatusMove {
   val maxPP = 40
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeAttackStage(attacker, 1)
-    currentPP -= 1
   }
 }
 
@@ -197,9 +201,8 @@ class SwordsDance extends StatusMove {
   val maxPP = 30
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeAttackStage(attacker, 2)
-    currentPP -= 1
   }
 }
 
@@ -210,9 +213,8 @@ class DefenseCurl extends StatusMove {
   val maxPP = 40
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeDefenseStage(attacker, 1)
-    currentPP -= 1
   }
 }
 
@@ -222,9 +224,8 @@ class Withdraw extends StatusMove {
   val maxPP = 40
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeDefenseStage(attacker, 1)
-    currentPP -= 1
   }
 }
 
@@ -234,9 +235,8 @@ class Harden extends StatusMove {
   val maxPP = 30
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeDefenseStage(attacker, 1)
-    currentPP -= 1
   }
 }
 
@@ -247,9 +247,8 @@ class AcidArmor extends StatusMove {
   val maxPP = 40
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeDefenseStage(attacker, 2)
-    currentPP -= 1
   }
 }
 
@@ -260,9 +259,8 @@ class Barrier extends StatusMove {
   val maxPP = 30
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeDefenseStage(attacker, 2)
-    currentPP -= 1
   }
 }
 
@@ -273,9 +271,8 @@ class DoubleTeam extends StatusMove {
   val maxPP = 15
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeEvasionStage(attacker, 1)
-    currentPP -= 1
   }
 }
 
@@ -285,9 +282,8 @@ class Minimize extends StatusMove {
   val maxPP = 20
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeEvasionStage(attacker, 1)
-    currentPP -= 1
   }
 }
 
@@ -297,9 +293,8 @@ class Agility extends StatusMove {
   val maxPP = 30
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeSpeedStage(attacker, 2)
-    currentPP -= 1
   }
 }
 
@@ -309,9 +304,8 @@ class Growth extends StatusMove {
   val maxPP = 40
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeSpecialStage(attacker, 1)
-    currentPP -= 1
   }
 }
 
@@ -321,9 +315,8 @@ class Amnesia extends StatusMove {
   val maxPP = 20
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     pb.statManager.changeSpecialStage(attacker, 2)
-    currentPP -= 1
   }
 }
 
@@ -335,11 +328,10 @@ class StringShot extends StatusMove {
   val maxPP = 40
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       pb.statManager.changeSpeedStage(defender, -1)
     }
-    currentPP -= 1
   }
 }
 
@@ -349,11 +341,10 @@ class SandAttack extends StatusMove {
   val maxPP = 15
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       pb.statManager.changeAccuracyStage(defender, -1)
     }
-    currentPP -= 1
   }
 }
 
@@ -373,13 +364,12 @@ class ThunderWave extends StatusMove {
   var currentPP = maxPP
   val chancePAR = 1.0
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chancePAR) {
         defender.tryToChangeStatusAilment(PAR)
       }
     }
-    currentPP -= 1
   }
 }
 
@@ -391,13 +381,12 @@ class StunSpore extends StatusMove {
   val chancePAR = 1.0
   override val accuracy = 0.75
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chancePAR) {
         defender.tryToChangeStatusAilment(PAR)
       }
     }
-    currentPP -= 1
   }
 }
 
@@ -409,13 +398,12 @@ class Glare extends StatusMove {
   val chancePAR = 1.0
   override val accuracy = 0.75  // increased in later generations
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chancePAR) {
         defender.tryToChangeStatusAilment(PAR)
       }
     }
-    currentPP -= 1
   }
 }
 
@@ -428,13 +416,12 @@ class ConfuseRay extends StatusMove {
 
   // TODO: ConfuseRay will fail if the target has a substitute
   // TODO: Confusion is volative and requires a data structure! Probably a map from Pokemon to number of turns left with confusion
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chanceCON) {
         // defender.tryToChangeStatusAilment(CON)
       }
     }
-    currentPP -= 1
   }
 }
 
@@ -447,13 +434,12 @@ class ConfuseRay extends StatusMove {
 //  override val accuracy = 0.55
 //
 //  // TODO: Supersonic will fail if the target has a substitute
-//  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+//  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
 //    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
 //      if (Random.nextDouble < chanceCON) {
 //        defender.tryToChangeStatusAilment(CON)
 //      }
 //    }
-//    currentPP -= 1
 //  }
 //}
 
@@ -465,14 +451,13 @@ class SleepPowder extends StatusMove {
   val chanceSLP = 1.0
   override val accuracy = 0.75
 
-  // TODO: Supersonic will fail if the target has a substitute
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  // TODO: SleepPowder will fail if the target has a substitute
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chanceSLP) {
         defender.tryToChangeStatusAilment(SLP)
       }
     }
-    currentPP -= 1
   }
 }
 
@@ -484,13 +469,12 @@ class Hypnosis extends StatusMove {
   val chanceSLP = 1.0
   override val accuracy = 0.60
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chanceSLP) {
         defender.tryToChangeStatusAilment(SLP)
       }
     }
-    currentPP -= 1
   }
 }
 
@@ -502,13 +486,12 @@ class PoisonGas extends StatusMove {
   val chancePSN = 1.0
   override val accuracy = 0.55
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chancePSN) {
         defender.tryToChangeStatusAilment(PSN)
       }
     }
-    currentPP -= 1
   }
 }
 
@@ -521,13 +504,12 @@ class Toxic extends StatusMove {
   override val accuracy = 0.85
 
   // TODO: Toxic is a mess and requires a battle data structure
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chancePSN) {
         defender.tryToChangeStatusAilment(BPSN)
       }
     }
-    currentPP -= 1
   }
 }
 
@@ -538,9 +520,8 @@ class MirrorMove extends StatusMove {
   val maxPP = 20
   var currentPP = maxPP
 
-  def use(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // Get the last move that $defender used during his current stay in battle;
-    // TODO: it resets if the Pokemon switches out! So switch needs access to the battle
     val lastMove : Option[Move] = pb.moveManager.getLastMove(defender)
 
     // $attacker should use lastMove against $defender
@@ -548,9 +529,142 @@ class MirrorMove extends StatusMove {
       case Some(m) => m.use(attacker, defender, pb)
       case None    => {}
     }
+  }
+
+  /* MirrorMove would get the updateLastMoveIndex wrong, since the order would be:
+   * MirrorMove.startUsingMove()
+   * MirrorMove.moveSpecificStuff()   => uses Move m
+   *   m.startUsingMove()
+   *   m.moveSpecificStuff()
+   *   m.finishUsingMove()            => sets lastMoveUsed to the correct value
+   * Move.finishUsingMove()     => sets it back to incorrect value
+   * So just don't update lastMoveUsed after calling MirrorMove!
+   */
+  override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     currentPP -= 1
-    pb.moveManager.updateLastMoveIndex(attacker, index)
   }
 }
 
+class Haze extends StatusMove {
+  val index = 114
+  val type1 = Ice
+  val maxPP = 30
+  var currentPP = maxPP
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) {
+    // http://bulbapedia.bulbagarden.net/wiki/Haze_(move)
+    // reset the stat levels of both active Pokemon to 0
+    pb.statManager.resetAll(attacker)
+    pb.statManager.resetAll(defender)
+
+    // TODO: fill in all the crazy stuff that Haze does
+    // remove the stat reductions due to BRN/PAR
+
+    // negate Focus Energy for both active Pokemon
+
+    // negate Leech Seed for both active Pokemon
+
+    // negate Light Screen for both active Pokemon
+
+    // negate Mist for both active Pokemon
+
+    // negate Reflect for both active Pokemon
+
+    // negate confusion for both active Pokemon
+
+    // negate Leech Seed for both active Pokemon
+
+    // negate any major status ailments for THE ENEMY
+
+    // Superweird thing that happens if an opponent is trying to use Hyper Beam, then gets frozen, and then Haze unfreezes him
+  }
+}
+
+class Mist extends StatusMove {
+  val index = 54
+  val type1 = Ice
+  val maxPP = 30
+  var currentPP = maxPP
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // http://bulbapedia.bulbagarden.net/wiki/Mist_(move)
+    // Mist protects the user from stat mods inflicted by the opponent until it switches out
+    // TODO: flip the Mist switch for attacker in the Battle's Mist data structure
+  }
+}
+
+class Conversion extends StatusMove {
+  val index = 160
+  val type1 = Normal
+  val maxPP = 30
+  var currentPP = maxPP
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // Conversion changes the types of the attacker to be those of the defender
+    // Porygon is the only Pokemon in the game that can learn this move
+    assert(attacker.index == 137, "someone other than Porygon tried to use Conversion!")
+    attacker.type1 = defender.type1
+    attacker.type2 = defender.type2
+  }
+}
+
+class Metronome extends StatusMove {
+  val index = 119
+  val type1 = Flying
+  val maxPP = 20
+  var currentPP = maxPP
+
+  private def getValidIndex() : Int = {
+      val potentialIndex = Utils.intBetween(1, 165 + 1)
+      if (potentialIndex != index && potentialIndex != 165) potentialIndex
+      else getValidIndex()
+  }
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
+    val randomIndex = getValidIndex()
+    val moveToUse = MoveMaker.makeMove(randomIndex)
+    moveToUse.priority = 0
+    moveToUse.use(attacker, defender, pb)
+  }
+
+  override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // The random move used is logged as the most recent move used, so don't log a la MirrorMove
+    currentPP -= 1
+  }
+}
+
+class Mimic extends StatusMove {
+  val index = 102
+  val type1 = Normal
+  val maxPP = 20
+  var currentPP = maxPP
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // TODO: figure out what Mimic actually does in Gen 1, then make it happen
+  }
+
+}
+
+class Recovery extends StatusMove {
+  val index = 105
+  val type1 = Normal
+  val maxPP = 10
+  var currentPP = maxPP
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    val currentHP = attacker.currentHP
+    val maxHP = attacker.maxHP
+    if (currentHP > maxHP) {
+      attacker.currentHP = maxHP
+    } else if (currentHP == maxHP) {
+      // no recovering necessary
+    } else if (Battle.recoverBugEnabled && ((maxHP - currentHP) + 1) % 256 == 0) {
+      // bug - do nothing!
+    } else {
+      val hpToHeal = maxHP / 2
+      attacker.gainHP(hpToHeal)
+    }
+  }
+}
 

@@ -21,6 +21,12 @@ object Battle {
    * In Gen 1, however, it divides it by 4 instead.
    */
   val focusEnergyHelps: Boolean = false
+  
+  /*
+   * In Gen 1, Recover fails if (user's maximum HP - user's current HP) is one less than a multiple of 256.
+   * Which is stupid. This was fixed in later generations. You can fix it here if you'd like.
+   */
+  val recoverBugEnabled: Boolean = true
 }
 
 class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
@@ -55,6 +61,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
    * Flinch (one-turn, can only flinch if opponent attacks first)
    * Partially trapped (caused by Wrap, Clamp, and Fire Spin, lasts 2-5 turns)
    * Seeded (leech seed, damage transfered from target to opponent's active Pokemon)
+   * Mist (user is protected from all of opponent's stat mod changes; wears off when Pokemon switched out)
    */
   val volativeStatuses = Map()
   

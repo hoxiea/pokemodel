@@ -148,4 +148,20 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
     val newTotal = evasionStages(p) + change
     evasionStages(p) = curbNewTotal(newTotal)
   }
+  
+  def resetAll(p: Pokemon) : Unit = {
+    // Useful for Haze
+    attackStages(p) -= attackStages(p)
+    defenseStages(p) -= defenseStages(p)
+    specialStages(p) -= specialStages(p)
+    speedStages(p) -= speedStages(p)
+    accuracyStages(p) -= accuracyStages(p)
+    evasionStages(p) -= evasionStages(p)
+    assert (attackStages(p)   == 0)
+    assert (defenseStages(p)  == 0)
+    assert (specialStages(p)  == 0)
+    assert (speedStages(p)    == 0)
+    assert (accuracyStages(p) == 0)
+    assert (evasionStages(p)  == 0)
+  }
 }
