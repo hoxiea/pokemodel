@@ -30,6 +30,7 @@ object PokeData {
   assert(nameToID.size == PokemonBuilder.numPokemon)
   assert(types.size == PokemonBuilder.numPokemon)
 
+  // Methods so that other parts of the program can query this stuff
   def getBaseHP(index : Int) : Int = {
     require(1 <= index && index <= 151, s"invalid call $index to getBaseHP")
     baseStats(index)._2
@@ -64,7 +65,4 @@ object PokeData {
     val typeStrings = types(index)
     Type.stringToType(typeStrings._2)
   }
-  
-  // TODO: Read in what moves each Pokemon can learn, build data structures for initialization
-
 }

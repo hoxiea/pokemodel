@@ -37,7 +37,6 @@ class PokemonBuilder (val index: Int, val level: Int) {
   var speedEV   = PokemonBuilder.generateRandomScaledEV(level)
   var specialEV = PokemonBuilder.generateRandomScaledEV(level)
 
-  // TODO: Could pick a random move the Pokemon can learn for easier test creation
   var move1: Option[Move] = None
   var move2: Option[Move] = None
   var move3: Option[Move] = None
@@ -138,14 +137,20 @@ class PokemonBuilder (val index: Int, val level: Int) {
   }
 
   def move1(m : Move) : PokemonBuilder = {
-    // TODO: make sure that this Pokemon can learn m; ignore call if it can't learn m
-    move1 = Some(m)
+    if (!(LearnsetData.learnsets(index) contains m.index)) {
+      println(s"$name can't learn $m")  
+    } else { 
+      move1 = Some(m) 
+    }
     this
   }
 
   def move2(m : Move) : PokemonBuilder = {
-    // TODO: make sure that this Pokemon can learn m; ignore call if it can't learn m
-    move2 = Some(m)
+    if (!(LearnsetData.learnsets(index) contains m.index)) {
+      println(s"$name can't learn $m")  
+    } else { 
+      move1 = Some(m) 
+    }
     this
   }
 

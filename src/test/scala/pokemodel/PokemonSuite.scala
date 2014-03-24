@@ -19,7 +19,7 @@ class PokemonSuite extends FunSuite {
     assert(p.name == "Pikachu")
   }
   
-  test("base stats") {
+  test("test base stats of Pikachu") {
     // base stats from http://bulbapedia.bulbagarden.net/wiki/Stats#Example
     val pikachuIndex = 25
     assert(PokeData.getBaseHP(pikachuIndex) == 35)
@@ -51,7 +51,7 @@ class PokemonSuite extends FunSuite {
     assert(pb.speedEV == 24795)
   }
 
-  test("specific Pokemon creation: level 81 Pikachu") {
+  test("test scaling formulas for HP and stats with level 81 Pikachu") {
     // http://bulbapedia.bulbagarden.net/wiki/Stats#Example
     val pb = new PokemonBuilder("Pikachu", 81)
                  .attackIV(8)
@@ -69,4 +69,11 @@ class PokemonSuite extends FunSuite {
     assert(pb.special == 128, "(Special)")
     assert(pb.speed == 190, "(Speed)")
   }
+  
+  test("teach a Pokemon a move that it can definitely learn") {
+    val pokemonIndex = 1
+    val m = new SwordsDance
+    val pb = new PokemonBuilder(pokemonIndex, 50).move1(m)
+  }
+
 }

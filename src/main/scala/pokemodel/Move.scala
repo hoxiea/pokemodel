@@ -8,7 +8,7 @@ import CritHitType._
 import scala.util.Random
 import Battle.{verbose=>VERBOSE}
 
-// TODO: Add the fact that only centain Pokemon can learn certain moves
+// TODO: Add the fact that only certain Pokemon can learn certain moves
 // Can be scraped from pages such as
 // http://bulbapedia.bulbagarden.net/wiki/Charmander_(Pok%C3%A9mon)/Generation_I_learnset
 
@@ -30,10 +30,10 @@ abstract class Move {
   val type1 : Type.Value
   val moveType : MoveType.Value
   val power : Int
-  
+
   var maxPP : Int
   var currentPP : Int
-  
+
   def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle)
 
   /* IMPEMENTED STUFF */
@@ -137,7 +137,7 @@ class QuickAttack extends PhysicalMove {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
-    } 
+    }
   }
 }
 
@@ -153,7 +153,7 @@ class Slash extends PhysicalMove {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
-    } 
+    }
   }
 }
 
