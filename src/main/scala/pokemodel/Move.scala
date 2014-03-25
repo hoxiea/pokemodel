@@ -8,15 +8,12 @@ import CritHitType._
 import scala.util.Random
 import Battle.{verbose=>VERBOSE}
 
-// TODO: Add the fact that only certain Pokemon can learn certain moves
-// Can be scraped from pages such as
-// http://bulbapedia.bulbagarden.net/wiki/Charmander_(Pok%C3%A9mon)/Generation_I_learnset
-
 /* In the game, each Move is stored exactly once in memory, and the Pokemon Data Structure keeps
  * track of which Moves the Pokemon knows and how many PP are left for each Move the Pokemon has.
  *
- * I modeled Moves as objects that maintain their own statistics and state, and know how to do things
- * like use themselves against another Pokemon.
+ * I took a more object-oriented approach and modeled Moves as objects that
+ * maintain their own statistics and state, and know how to do things like use
+ * themselves against another Pokemon.
  */
 
 // TODO: Any move that can cause a stat change to opponent needs to make sure opponent doesn't have Mist cast
@@ -38,7 +35,7 @@ abstract class Move {
 
   /* IMPEMENTED STUFF */
   val critHitRate = LOW   // True for 99% of moves, outliers can override
-  val priority = 0        // True for 99% of moves, outliers can override; var because Metronome needs to change priority to 0
+  val priority = 0        // True for 99% of moves, outliers can override
   val accuracy = 1.0      // in [0.0, 1.0], true for ~60% of moves, others can override
   def restorePP(amount : Int) = { currentPP = intWrapper(maxPP) min (currentPP + amount) }
   def restorePP() = { currentPP = maxPP }
@@ -73,18 +70,21 @@ abstract class Move {
 }
 
 trait PhysicalMove extends Move {
+  // Physical Moves use Attack and Defense as the relevant stats
   def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveAttack(attacker)
   def getDefenseStat(defender: Pokemon, b : Battle) = b.statManager.getEffectiveDefense(defender)
   override val moveType = PHYSICAL
 }
 
 trait SpecialMove extends Move {
+  // Special Moves use Special as the relevant stat for both offense and defense in Gen 1
   def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(attacker)
   def getDefenseStat(defender: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(defender)
   override val moveType = SPECIAL
 }
 
 trait StatusMove extends Move {
+  // Stats don't really enter the picture with Status Moves
   override val moveType = STATUS
   override val power = 0
 }
