@@ -329,15 +329,16 @@ class Crabhammer extends PhysicalSingleStrike {
 
 
 // PHYSICAL, WITH RECOIL
-trait PhysicalSingleStrikeRecoil extends PhysicalMove {
+abstract class PhysicalSingleStrikeRecoil extends PhysicalMove {
   // TODO: If the user of MOVE attacks first and makes itself faint due to recoil damage, the target will not attack or be subjected to recurrent damage during that round.
   // TODO: Self-inflicted recoil damage from MOVE from the previous turn can be countered if the target does not make a move on the following turn.
   // TODO: If MOVE breaks a substitute, the user will take no recoil damage.
+  val recoilProportion : Double
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
       if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
-      val recoilDamage = damageDealt / 4
+      val recoilDamage = (damageDealt * recoilProportion).toInt
       attacker.takeDamage(recoilDamage)
       if (VERBOSE) println(s"${attacker.name} took $recoilDamage recoil damage")
     }
@@ -351,6 +352,7 @@ class Submission extends PhysicalSingleStrikeRecoil {
   var maxPP = 25
   var currentPP = maxPP
   override val accuracy = 0.80
+  override val recoilProportion = 0.25
 }
 
 class DoubleEdge extends PhysicalSingleStrikeRecoil {
@@ -359,6 +361,7 @@ class DoubleEdge extends PhysicalSingleStrikeRecoil {
   val power = 100  // higher in later generations
   var maxPP = 15
   var currentPP = maxPP
+  override val recoilProportion = 0.25
 }
 
 class TakeDown extends PhysicalSingleStrikeRecoil {
@@ -368,25 +371,16 @@ class TakeDown extends PhysicalSingleStrikeRecoil {
   var maxPP = 20
   var currentPP = maxPP
   override val accuracy = 0.85
+  override val recoilProportion = 0.25
 }
 
-class Struggle extends PhysicalMove {
+class Struggle extends PhysicalSingleStrikeRecoil {
   val index = 165
   val type1 = Normal
   val power = 50
   var maxPP = 1
   var currentPP = 1
-
-  // Take half damage inflicted instead of 25%, so just handle separately here
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
-      defender.takeDamage(damageDealt)
-      val recoilDamage = damageDealt / 2
-      attacker.takeDamage(recoilDamage)     // Take 50% damage dealt as recoil
-      if (VERBOSE) println(s"${attacker.name} took $recoilDamage recoil damage")
-    }
-  }
+  override val recoilProportion = 0.5   // different from others!
 
   override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // Don't deduct a PP! Just log it
