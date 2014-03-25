@@ -17,7 +17,6 @@ object LearnsetData {
   val learnsetsPath = "/Users/hha/Dropbox/pokemodel/game_data/learnsets.csv"
   val learnsetsFile = new File(learnsetsPath)
 
-  println("Starting the loop")
   for (line <- Source.fromFile(learnsetsFile).getLines) {
     val Array(pokemonIndex : String, moveList : String) = line.split(": ")
     val moveIndices = scala.collection.mutable.Set[Int]()
@@ -27,7 +26,6 @@ object LearnsetData {
       moveIndices += moveIndex.toInt
     }
     learnsets += (pokemonIndex.toInt -> moveIndices)
-    println(s"Done loading moves for Pokemon $pokemonIndex")
   }
 
   def getLearnset(index : Int) : mutable.Set[Int] = {
@@ -38,6 +36,8 @@ object LearnsetData {
   def getFourRandomMoveIndices(index : Int) : List[Int] = {
     require(1 <= index && index <= 151)
     val potentials = getLearnset(index).toList
-    Random.shuffle(potentials).take(4)  // TODO: could be more efficient, this is O(#moves for Pokemon $index)
+    Random.shuffle(potentials).take(4)
+    // TODO: could be more efficient, this is O(#moves for Pokemon $index)
+    // FACT: take returns the whole list if fewer than 4 elements, so no worries there
   }
 }

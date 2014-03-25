@@ -12,7 +12,7 @@ class PokemonBuilder (val index: Int, val level: Int) {
   // TODO: This will crash if a name is misspelled; make more resilient?
   def this(name : String, level : Int) = this(PokeData.nameToID(name), level)
 
-  /* Optional parameters - default to random values */
+  /* Parameters that can be set - default to random values */
   // Pokemon have 5 individual values (IVs) that are generated when their created
   // These are one reason why two Pokemon of the same level + species can have
   // different statistics
@@ -22,7 +22,7 @@ class PokemonBuilder (val index: Int, val level: Int) {
   var specialIV = Random.nextInt(15)
 
   // hpIV is a function of the other four IVs
-  // Implement as a function so that it will be correct despite changes to other IVs
+  // Implemented as a function so that it will be correct despite changes to other IVs
   def hpIV = List(8, 4, 2, 1).zip(
     List(attackIV, defenseIV, speedIV, specialIV)).filter(
       pair => pair._2 % 2 == 1).foldLeft(0)((x, y) => x + y._1)
@@ -136,33 +136,15 @@ class PokemonBuilder (val index: Int, val level: Int) {
     this
   }
 
-  def move1(m : Move) : PokemonBuilder = {
-    if (!(LearnsetData.learnsets(index) contains m.index)) {
-      println(s"$name can't learn $m")  
-    } else { 
-      move1 = Some(m) 
+  def move(moveIndex : Int, m : Move) : PokemonBuilder = {
+    require(1 <= moveIndex && moveIndex <= 4)
+    require(LearnsetData.learnsets(index) contains m.index)
+    moveIndex match {
+      case 1 => move1 = Some(m)
+      case 2 => move2 = Some(m)
+      case 3 => move3 = Some(m)
+      case 4 => move4 = Some(m)
     }
-    this
-  }
-
-  def move2(m : Move) : PokemonBuilder = {
-    if (!(LearnsetData.learnsets(index) contains m.index)) {
-      println(s"$name can't learn $m")  
-    } else { 
-      move1 = Some(m) 
-    }
-    this
-  }
-
-  def move3(m : Move) : PokemonBuilder = {
-    // TODO: make sure that this Pokemon can learn m; ignore call if it can't learn m
-    move3 = Some(m)
-    this
-  }
-
-  def move4(m : Move) : PokemonBuilder = {
-    // TODO: make sure that this Pokemon can learn m; ignore call if it can't learn m
-    move4 = Some(m)
     this
   }
 
@@ -177,6 +159,15 @@ class PokemonBuilder (val index: Int, val level: Int) {
     speedEV(PokemonBuilder.maxEVValue)
     specialEV(PokemonBuilder.maxEVValue)
     this
+  }
+  
+  def addRandomMoves() : PokemonBuilder = {
+    val moveIndices = LearnsetData.getFourRandomMoveIndices(index)
+    var pb = new PokemonBuilder(index, level)
+    for ((moveIndex, i) <- moveIndices.view.zipWithIndex) {
+      pb.move(i+1, MoveMaker.makeMove(moveIndex))
+    }
+    pb
   }
 }
 
@@ -204,7 +195,7 @@ object PokemonBuilder {
     val level = Utils.intBetween(minLevel + 49, maxLevel + 1)  // between 50 and 100
     new PokemonBuilder(index, level)
   }
-  
+
   def generateRandomPokemonBuilder(level: Int) : PokemonBuilder = {
     val index = Utils.intBetween(1, numPokemon + 1)  // upper end exclusive
     new PokemonBuilder(index, level)

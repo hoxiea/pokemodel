@@ -6,37 +6,37 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 
 - Single-strike
     = Pound: damage
-= Drill Peck: damage
-= Peck: damage
-= Wing Attack: damage
-= Vine Whip: damage
-= Cut: damage
-= Earthquake: damage
-= Dizzy Punch: damage
-= Egg Bomb: damage
-= Horn Attack: damage
-= Mega Kick: damage
-= Mega Punch: damage
-= Pay Day: damage
-= Scratch: damage
-= Slam: damage
-= Strength: damage
-= Tackle: damage
-= Vice Grip: damage
-= Rock Slide: damage
-= Rock Throw: damage
+    = Drill Peck: damage
+    = Peck: damage
+    = Wing Attack: damage
+    = Vine Whip: damage
+    = Cut: damage
+    = Earthquake: damage
+    = Dizzy Punch: damage
+    = Egg Bomb: damage
+    = Horn Attack: damage
+    = Mega Kick: damage
+    = Mega Punch: damage
+    = Pay Day: damage
+    = Scratch: damage
+    = Slam: damage
+    = Strength: damage
+    = Tackle: damage
+    = Vice Grip: damage
+    = Rock Slide: damage
+    = Rock Throw: damage
 
 - Single-strike, special
     = Quick Attack: damage, higher priority
     = Karate Chop: damage, high crit hit rate
-= Slash: damage, high crit hit rate
-= Crabhammer: damage, high crit hit rate
+    = Slash: damage, high crit hit rate
+    = Crabhammer: damage, high crit hit rate
 
 - Single-strike + recoil
     = Struggle: do damage, 50% recoil damage. Can get crithits. Normal element rules apply
-= Submission: do damage, receive 25% of damage done to target yourself
-= Double Edge: do damage, receive 25% of damage done to target yourself
-= Take Down: do damage, receive 25% of damage done to target yourself
+    = Submission: do damage, receive 25% of damage done to target yourself
+    = Double Edge: do damage, receive 25% of damage done to target yourself
+    = Take Down: do damage, receive 25% of damage done to target yourself
 
 - Single-strike + potential status change
 = Bite: damage and 10% chance of causing a flinch

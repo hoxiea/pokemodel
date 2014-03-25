@@ -98,69 +98,278 @@ class LeechLife extends PhysicalMove {
   var maxPP = 15
   var currentPP = maxPP
 
+  // TODO: if LL breaks a substitute, no HP is restored
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
-    } else {
+      damageDealt match {
+        case 1 => attacker.gainHP(1)
+        case _ => attacker.gainHP(damageDealt / 2)
+      }
     }
   }
 }
 
 // PHYSICAL, SINGLE-STRIKE DAMAGE ONLY
-class Pound extends PhysicalMove {
+trait PhysicalSingleStrike extends PhysicalMove {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+      if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
+      defender.takeDamage(damageDealt)
+    }
+  }
+}
+
+class Pound extends PhysicalSingleStrike {
   val index = 1
   val type1 = Normal
   val power = 40
   var maxPP = 35
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
-      defender.takeDamage(damageDealt)
-    } else {
-    }
-  }
 }
 
+class DrillPeck extends PhysicalSingleStrike {
+  val index = 65
+  val type1 = Flying
+  val power = 80
+  var maxPP = 20
+  var currentPP = maxPP
+}
+
+class Peck extends PhysicalSingleStrike {
+  val index = 64
+  val type1 = Flying
+  val power = 35
+  var maxPP = 35
+  var currentPP = maxPP
+}
+
+class WingAttack extends PhysicalSingleStrike {
+  val index = 17
+  val type1 = Flying
+  val power = 35  // increased in later generations, weak in this one
+  var maxPP = 35
+  var currentPP = maxPP
+}
+
+class VineWhip extends PhysicalSingleStrike {
+  val index = 22
+  val type1 = Grass
+  val power = 45  // power and maxPP increased in later generations
+  var maxPP = 10
+  var currentPP = maxPP
+}
+
+class Cut extends PhysicalSingleStrike {
+  val index = 15
+  val type1 = Normal
+  val power = 50  // power and maxPP increased in later generations
+  var maxPP = 30
+  var currentPP = maxPP
+  override val accuracy = 0.95
+}
+
+class Earthquake extends PhysicalSingleStrike {
+  val index = 89
+  val type1 = Ground
+  val power = 100
+  var maxPP = 10
+  var currentPP = maxPP
+}
+
+class DizzyPunch extends PhysicalSingleStrike {
+  val index = 146
+  val type1 = Normal
+  val power = 70
+  var maxPP = 10
+  var currentPP = maxPP
+}
+
+class EggBomb extends PhysicalSingleStrike {
+  val index = 121
+  val type1 = Normal
+  val power = 100
+  var maxPP = 10
+  var currentPP = maxPP
+  override val accuracy = 0.75
+}
+
+class HornAttack extends PhysicalSingleStrike {
+  val index = 30
+  val type1 = Normal
+  val power = 65
+  var maxPP = 25
+  var currentPP = maxPP
+}
+
+class MegaKick extends PhysicalSingleStrike {
+  val index = 25
+  val type1 = Normal
+  val power = 120
+  var maxPP = 5
+  var currentPP = maxPP
+  override val accuracy = 0.75
+}
+
+class MegaPunch extends PhysicalSingleStrike {
+  val index = 5
+  val type1 = Normal
+  val power = 80
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.85
+}
+
+class PayDay extends PhysicalSingleStrike {
+  val index = 6
+  val type1 = Normal
+  val power = 40
+  var maxPP = 20
+  var currentPP = maxPP
+}
+
+class Scratch extends PhysicalSingleStrike {
+  val index = 10
+  val type1 = Normal
+  val power = 40
+  var maxPP = 35
+  var currentPP = maxPP
+}
+
+class Slam extends PhysicalSingleStrike {
+  val index = 21
+  val type1 = Normal
+  val power = 80
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.75
+}
+
+class Strength extends PhysicalSingleStrike {
+  val index = 70
+  val type1 = Normal
+  val power = 80
+  var maxPP = 15
+  var currentPP = maxPP
+}
+
+class Tackle extends PhysicalSingleStrike {
+  val index = 33
+  val type1 = Normal
+  val power = 50
+  var maxPP = 35
+  var currentPP = maxPP
+}
+
+class ViceGrip extends PhysicalSingleStrike {
+  val index = 11
+  val type1 = Normal
+  val power = 55
+  var maxPP = 30
+  var currentPP = maxPP
+}
+
+class RockSlide extends PhysicalSingleStrike {
+  val index = 157
+  val type1 = Rock
+  val power = 75
+  var maxPP = 10
+  var currentPP = maxPP
+  override val accuracy = 0.9
+}
+
+class RockThrow extends PhysicalSingleStrike {
+  val index = 88
+  val type1 = Rock
+  val power = 50
+  var maxPP = 15
+  var currentPP = maxPP
+  override val accuracy = 0.65  // much higher in later generations
+}
+
+
 // PHYSICAL, SINGLE-STRIKE, SPECIAL
-class QuickAttack extends PhysicalMove {
+class QuickAttack extends PhysicalSingleStrike {
   val index = 98
   val type1 = Normal
   val power = 40
   var maxPP = 30
   var currentPP = maxPP
   override val priority = 1
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
-      defender.takeDamage(damageDealt)
-    }
-  }
 }
 
-class Slash extends PhysicalMove {
+class Slash extends PhysicalSingleStrike {
   val index = 163
   val type1 = Normal
   val power = 70
   var maxPP = 20
   var currentPP = maxPP
   override val critHitRate = HIGH
+}
 
+class KarateChop extends PhysicalSingleStrike {
+  val index = 2
+  val type1 = Normal    // Fighting in later generations
+  val power = 50
+  var maxPP = 25
+  var currentPP = maxPP
+  override val critHitRate = HIGH
+}
+
+class Crabhammer extends PhysicalSingleStrike {
+  val index = 152
+  val type1 = Water
+  val power = 100
+  var maxPP = 10
+  var currentPP = maxPP
+  override val critHitRate = HIGH
+  override val accuracy = 0.9
+}
+
+
+// PHYSICAL, WITH RECOIL
+trait PhysicalSingleStrikeRecoil extends PhysicalMove {
+  // TODO: If the user of MOVE attacks first and makes itself faint due to recoil damage, the target will not attack or be subjected to recurrent damage during that round.
+  // TODO: Self-inflicted recoil damage from MOVE from the previous turn can be countered if the target does not make a move on the following turn.
+  // TODO: If MOVE breaks a substitute, the user will take no recoil damage.
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
+      val recoilDamage = damageDealt / 4
+      attacker.takeDamage(recoilDamage)
+      if (VERBOSE) println(s"${attacker.name} took $recoilDamage recoil damage")
     }
   }
 }
 
-abstract class KarateChop extends PhysicalMove
-abstract class Crabhammer extends PhysicalMove
+class Submission extends PhysicalSingleStrikeRecoil {
+  val index = 66
+  val type1 = Fighting
+  val power = 80
+  var maxPP = 25
+  var currentPP = maxPP
+  override val accuracy = 0.80
+}
 
-// PHYSICAL, WITH RECOIL
+class DoubleEdge extends PhysicalSingleStrikeRecoil {
+  val index = 38
+  val type1 = Normal
+  val power = 100  // higher in later generations
+  var maxPP = 15
+  var currentPP = maxPP
+}
+
+class TakeDown extends PhysicalSingleStrikeRecoil {
+  val index = 36
+  val type1 = Normal
+  val power = 90
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.85
+}
+
 class Struggle extends PhysicalMove {
   val index = 165
   val type1 = Normal
@@ -168,6 +377,7 @@ class Struggle extends PhysicalMove {
   var maxPP = 1
   var currentPP = 1
 
+  // Take half damage inflicted instead of 25%, so just handle separately here
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
@@ -176,7 +386,11 @@ class Struggle extends PhysicalMove {
       attacker.takeDamage(recoilDamage)     // Take 50% damage dealt as recoil
       if (VERBOSE) println(s"${attacker.name} took $recoilDamage recoil damage")
     }
-    // DO NOT DEDUCT A PP
+  }
+
+  override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // Don't deduct a PP! Just log it
+    pb.moveManager.updateLastMoveIndex(attacker, index)
   }
 }
 

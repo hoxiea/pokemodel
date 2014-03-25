@@ -70,10 +70,14 @@ class PokemonSuite extends FunSuite {
     assert(pb.speed == 190, "(Speed)")
   }
   
-  test("teach a Pokemon a move that it can definitely learn") {
+  test("a Pokemon should be able to learn a move in its learnset") {
     val pokemonIndex = 1
-    val m = new SwordsDance
-    val pb = new PokemonBuilder(pokemonIndex, 50).move1(m)
+    val pb = new PokemonBuilder(pokemonIndex, 50).move(1, new SwordsDance)
   }
-
+  
+  test("Trying out addRandomMoves... won't work, on average, until more moves implemented") {
+    val pb = PokemonBuilder.generateRandomPokemonBuilder().addRandomMoves()
+    val p = new Pokemon(pb)
+    println(p)
+  }
 }

@@ -1,18 +1,115 @@
-RANDOM NOTES
-Poison kicks in every time you try to attack, immediately after you use your attack.
-If you're Wrapped, for example, it'll hurt you each time you sit there spazzing out.
-Burn damage also kicks in after you attack.
-Both burn and poison also kick in if you switch in, on the same turn that you appear in battle.
-Confusion wears off at the beginning of the turn, at which point your Pokemon uses his move unaffected by CFN
+There are three class of Status Conditions: NonVolatile, volatile, and volatileBattle.
+
+The NonVolatile ones are the ones that Pokemon store in Pokemon.statusAilment, captured in StatusAilment.
+One at a time, new ones don't displace old ones.
+They're mostly permanent, although SLP wears off after a certain number of turns.
+
+NonVolatile:BRN
+beforeMove:
+duringMove:
+  attack stat is halved, unless there are stat mods in place; then no effect on attack
+afterMove:
+  lose 1/16 of maxHP, unless it kills opponent
+other:
+  rest gets rid of the burn/lose-HP effect, but the decrease in attack doesn't go away
+
+NonVolatile:FRZ
+beforeMove:
+  if frozen, you can't do anything
+duringMove:
+afterMove:
+other:
+  the only way to thaw out is to get hit with a Fire-type move
+  weird PP glitch
+
+NonVolatile:PAR
+beforeMove:
+  25% chance of losing your turn due to full paralysis
+duringMove:
+  speed stat is 25% of normal, unless you then use a move to change the Speed mod of the Pokemon; then ignore
+afterMove:
+other:
+  Rest cures the afflication, but doesn't fix the Speed reduction
+
+NonVolatile:PSN
+beforeMove:
+duringMove:
+afterMove:
+  lose 1/16 of maxHP, unless it kills opponent
+other:
+
+NonVolatile:BPSN
+beforeMove:
+duringMove:
+afterMove:
+  on turn 1 of BPSN, lose 1 * 1/16 maxHP
+  on turn 2 of BPSN, lose 2 * 1/16 maxHP
+other:
+  switching appears to turn BPSN into PSN
+  weird interaction with seeded (Leech Seeded)
+  weird interaction with Rest
+  weird interaction with Haze
+
+NonVolatile:SLP
+lasts for 1-7 turns
+beforeMove:
+  can't move if asleep, or on the turn you wake up
+duringMove:
+afterMove:
+other:
+  Rest puts self to sleep, but for a fixed number of turns
+
+------------
+
+The volatile ones are things like Confusion.
+Can have more than one simultaneously.
+They tend to wear off when a Pokemon is switched out, or after a certain number of turns.
+
+Volative:Confusion
+Once inflicted, wears off after 1-4 attacking turns
+beforeMove:
+  decide with 50-50 chance whether to use selected attack or hurt self with 40-power typeless physical attack
+duringMove:
+afterMove:
+other:
+  moves that take multiple turns only count as 1 attacking turn
+
+Volative:Flinch
+A one-turn status that prevents a Pokemon from attacking
+If the Pokemon who attacks first inflicts a flinch, then the second Pokemon will just spazz out
+beforeMove:
+  check if opponent inflicted Flinch; if so, do nothing
+duringMove:
+afterMove:
+other:
+
+Volative:PartiallyTrapped
+Certain moves cause this to happen: Wrap, Bind, Clamp, and Fire Spin
+Damage is inflicted for 2-5 turns (37.5, 37.5, 12.5, 12.5)
+Every attack does the same amount of damage, so critical hits carry over into later turns
+The attacking/trapping Pokemon can still choose to attack
+beforeMove:
+  check if opponent inflicted Flinch; if so, do nothing
+duringMove:
+afterMove:
+other:
+  read the description carefully... there's some weird stuff here
+
+Volatile:Seeded
+Caused by Leech Seed
+Each turn, a seeded Pokemon loses 1/16 of its maxHP and the opponent gains that same amount
+Grass-type Pokemon cannot be seeded
+beforeMove:
+duringMove:
+afterMove:
+  if you didn't KO the opponent and you're seeded, then transfer 1/16 maxHP to active opponent
+other:
 
 
-Status Conditions:
-- Non-volative: lasts a certain number of turns
-- Volative
-- While Pokemon in battle
+-----------
+volatileBattle statuses tend to be related to using/charging a specific move.
 
 
-Non-volative
 -- Burn (BRN):
 ---- Damage dealt by physical moves is halved, unless Attack was modified either up or down; then burn has no effect
 ---- Lose 1/16 of maxHP after attacking, unless it kills opponent Pokemon
@@ -77,3 +174,14 @@ Non-volative
 
 -- Sleep (SLP)
 ----
+
+RANDOM NOTES
+Poison kicks in every time you try to attack, immediately after you use your attack.
+If you're Wrapped, for example, it'll hurt you each time you sit there spazzing out.
+Burn damage also kicks in after you attack.
+Both burn and poison also kick in if you switch in, on the same turn that you appear in battle.
+Confusion wears off at the beginning of the turn, at which point your Pokemon uses his move unaffected by CFN
+
+
+
+
