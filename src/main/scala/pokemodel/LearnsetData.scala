@@ -19,7 +19,7 @@ object LearnsetData {
 
   for (line <- Source.fromFile(learnsetsFile).getLines) {
     val Array(pokemonIndex : String, moveList : String) = line.split(": ")
-    val moveIndices = scala.collection.mutable.Set[Int]()
+    val moveIndices = mutable.Set[Int]()
     val moves : Array[String] = moveList.split(", ")
     for (move : String <- moves) {
       val Array(name : String, moveIndex : String) = move.split('|')

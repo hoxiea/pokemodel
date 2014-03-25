@@ -1,6 +1,7 @@
 package pokemodel
 
 import scala.collection.mutable
+import StatusAilment._
 
 /*
  * BattleStatManagers keep track of the stages of attack, defense, speed,
@@ -70,10 +71,14 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   private def evasionStageToFraction = accuracyStageToFraction
 
   /* Ways for the Battle to interact with the stats */
-  // TODO: Take status ailments into account, like the fact that BRN reduces attack by half, etc.
   def getEffectiveAttack(p: Pokemon) : Int = {
     require(attackStages.contains(p), s"getEffectiveAttack error for $p")
-    (attackStageToFraction(attackStages(p)) * p.attack).toInt
+    val effectiveAttack = (attackStageToFraction(attackStages(p)) * p.attack).toInt
+    if (p.statusAilment == Some(BRN) && attackStages(p) == 0) {  // BRN, no Attack Stat mods in place
+      effectiveAttack / 2
+    } else {
+      effectiveAttack
+    }
   }
 
   def getEffectiveDefense(p: Pokemon) : Int = {
@@ -88,7 +93,13 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
 
   def getEffectiveSpeed(p: Pokemon) : Int = {
     require(speedStages.contains(p), s"getEffectiveSpeed error for $p")
-    (speedStageToFraction(speedStages(p)) * p.speed).toInt
+    val effectiveSpeed = (speedStageToFraction(speedStages(p)) * p.speed).toInt
+    if (p.statusAilment == Some(PAR) && speedStages(p) == 0) {  // PAR, no Speed Stat mods in place
+      effectiveSpeed / 4
+    } else {
+      effectiveSpeed
+    }
+
   }
 
   def getEffectiveAccuracy(p: Pokemon) : Int = {

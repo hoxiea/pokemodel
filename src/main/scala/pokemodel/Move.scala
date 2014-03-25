@@ -1309,7 +1309,7 @@ class Metronome extends StatusMove {
     // randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
     val randomIndex = getValidIndex()
     val moveToUse = MoveMaker.makeMove(randomIndex)
-    // moveToUse.priority = 0
+    // moveToUse.priority = 0    // TODO: make this work!
     moveToUse.use(attacker, defender, pb)
   }
 
@@ -1328,7 +1328,6 @@ class Mimic extends StatusMove {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // TODO: figure out what Mimic actually does in Gen 1, then make it happen
   }
-
 }
 
 class Recovery extends StatusMove {

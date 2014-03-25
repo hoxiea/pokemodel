@@ -127,5 +127,4 @@ class Pokemon(builder : PokemonBuilder) {
   override def toString : String = {
     allInfoString
   }
-
 }

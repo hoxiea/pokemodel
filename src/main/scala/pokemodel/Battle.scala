@@ -2,6 +2,7 @@ package pokemodel
 
 import StatusAilment._
 import Type._
+import scala.collection.mutable
 
 object Battle {
   // Battle customizations and bug fixes
@@ -38,26 +39,28 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   val team1 = trainer1.team
   val team2 = trainer2.team
 
+  // Create and register various managers and calculators for this battle
   val statManager = new BattleStatManager(team1, team2)
   val moveManager = new BattleMoveManager(team1, team2)
   val dc = new DamageCalculator()
 
   var time : Int = 0
 
-  /* Various moves cause a stat to change up/down by one level
-   * This will keep track of those levels for each Pokemon, and the values
-   * will be used when doing things like calculating damage
-   * http://www.serebii.net/games/stats.shtml
-   */
-  val statMods = Map()
-
   /* NON-VOLATIVE STATUS EFFECTS
    * Burn, Freeze, Paralysis, Poison, Badly Poison, and Sleep
    * These remain until the Pokemon is healed at a Pokecenter (which can't happen in this simulation),
    * or after a certain number of turns in battle (Sleep)
-   * The Pokemon data structure stores this type of status effect in "statusAilment"
    * Only one at a time can affect a Pokemon
+   * 
+   * The Pokemon data structure stores this type of status effect in "statusAilment".
+   * And yet we need to keep track of how long a Pokemon has been asleep for.
+   * When the battle starts, register sleeping Pokemon with some number of turns to rest
    */
+  val sleep = mutable.Map[Pokemon, Int]()
+  for (p <- team1.team ++ team2.team
+       if p.statusAilment == Some(SLP)) {
+    sleep(p) = Utils.intBetween(1, 8)
+  }
 
   /* VOLATIVE STATUS EFFECTS
    * These wear off when a Pokemon is switched out, or after a certain number of turns
@@ -68,7 +71,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
    * Seeded (leech seed, damage transfered from target to opponent's active Pokemon)
    * Mist (user is protected from all of opponent's stat mod changes; wears off when Pokemon switched out)
    */
-  val volativeStatuses = Map()
+  val flinch = mutable.Set[Pokemon]()
 
   /* THIRD KIND
    * Sky Attack -> glowing
@@ -85,7 +88,10 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     trainer2.healAll()
   }
 
+  /* METHODS FOR MAKING THE BATTLE HAPPEN */
   def takeNextTurn() : Unit = {
+    val tp = new TurnProcessor(this)
+    tp.processTurn()
     var team1Fainted = false
     var team2Fainted = false
 

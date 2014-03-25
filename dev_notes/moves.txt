@@ -85,18 +85,6 @@ STATUS MOVES (any type, don't deal damage directly):
 - Do damage in a roundabout way:
 = Leech Seed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
 
-- Change opponent's stats
-// TODO: make sure that these can be inflicted on opponent!
-    = String Shot: Speed stat -1 stage
-    = Sand Attack: Accuracy stat -1 stage
-    = Flash: Accuracy stat -1 stage
-    = Smoke Screen: Accuracy stat -1 stage
-    = Kinesis: Accuracy stat -1 stage
-    = Growl: Attack stat -1 stage
-    = Leer: Defense stat -1 stage
-    = Tail Whip: Defense stat -1 stage
-    = Screech: Defense stat -2 stages
-
 - Change your stats in a weird way
 = Focus Energy: multiply the user's Crit Hit ratio by 4 (except it was buggy in Gen 1 and divided by 4 instead)
 = Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC

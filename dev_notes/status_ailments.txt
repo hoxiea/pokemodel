@@ -9,9 +9,9 @@ beforeMove:
 duringMove:
   attack stat is halved, unless there are stat mods in place; then no effect on attack
 afterMove:
-  lose 1/16 of maxHP, unless it kills opponent
+  lose 1/16 of maxHP, unless you KO your opponent
 other:
-  rest gets rid of the burn/lose-HP effect, but the decrease in attack doesn't go away
+  Rest gets rid of the burn/lose-HP effect, but the decrease in attack doesn't go away
 
 NonVolatile:FRZ
 beforeMove:
