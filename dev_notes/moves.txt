@@ -57,27 +57,27 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Constrict: damage and 10% chance of lowering target's Speed stat by one level
 
 - Multi-strike
-= Pin Missile: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
-= Barrage: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
-= Comet Punch: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
-= Double Slap: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
-= Fury Attack: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
-= Fury Swipes: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
-= Spike Cannon: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
-= Double Kick: 2x damage
-= Bonemerang: 2x damage
+    = Pin Missile: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+    = Barrage: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Comet Punch: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Double Slap: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Fury Attack: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Fury Swipes: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Spike Cannon: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Double Kick: 2x damage
+    = Bonemerang: 2x damage
 
 - Multi-strike + potentially cause status change
 = Twineedle: 2x attack, each 20% change of PSN
 
 - Deal damage that's some function of the environment
-= Seismic Toss: inflict damage equal to the user's level; no STAB bonus
-= Super Fang: inflict damage equal to 50% of target's current HP, unaffected by Types (can hit Ghosts, for example)
+    = Seismic Toss: inflict damage equal to the user's level; no STAB bonus
+    = Super Fang: inflict damage equal to 50% of target's current HP, unaffected by Types
 
 - One-hit KOs
-= Fissure: 30% accuracy, inflict damage equal to target's HP; will not affect target whose current Speed is faster than user's current Speed
-= Guillotine: 30% accuracy, inflict damage equal to target's HP; will not affect target whose current Speed is faster than user's current Speed
-= Horn Drill: 30% accuracy, inflict damage equal to target's HP; will not affect target whose current Speed is faster than user's current Speed
+    = Fissure: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
+    = Guillotine: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
+    = Horn Drill: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
 
 - Multi-turn moves
 = Sky Attack: do nothing on turn it's used, then deal damage on next turn
@@ -97,47 +97,61 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Explosion: deal damage, kill the user, halve the opponent's defenses, etc.
 = Self-Destruct: deal damage, kill the user, halve the opponent's defenses, etc.
 = Rage: deals damage, user can't do anything except Rage until faint or battle ends. Every time user is damaged by Attack or targeted by Disable, Attack stat increases one stage (multiple times for multi-strike attacks). Stops increasing Attack stage at +6, and doesn't boost Attack stat past 999
-= Struggle: every Pokemon can use this if none of their other moves are usable, usually due to lack of PP. Struggle deals damage and user receives recoil damage equal to 1/2 damage dealt. Can get crit hits. Normal element, so Rock gets half damage and Ghost are unaffected, etc.
+    = Struggle: every Pokemon can use this if none of their other moves are usable, usually due to lack of PP. Struggle deals damage and user receives recoil damage equal to 1/2 damage dealt. Can get crit hits. Normal element, so Rock gets half damage and Ghost are unaffected, etc.
 
 
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
-= Dragon Rage: Inflict 40 damage if it hits; "it does not ignore type immunity"?
-= Sonic Boom: Inflict 20 damage if it hits; "it does not ignore type immunity"?
+    = Dragon Rage: Always inflict exactly 40 damage if it hits
+    = Sonic Boom: Always inflict exactly 20 damage if it hits
+
+    = Night Shade: deal damage equal to user's level
+    = Psywave: deal between 0.5x and 1.5x the user's level of typeless damage
+
+- Single-Strike, With Weird Stuff
+    = Gust: damage (Normal-type)
+    = Tri Attack: damage
+    = Hydro Pump: damage
+    = Surf: damage
+    = Water Gun: damage
+    = Razor Leaf: damage, high crit hit rate
+= Swift: damage, unaffected by mods to accuracy and evasion; can hit Fly and Dug Pokemon
+
+- Damage + Potential Status Change
 = Thunder: damage, 10% chance PAR
 = Thunderbolt: damage, 10% chance PAR
 = Thunder Shock: damage, 10% chance PAR
 = Ember: damage, 10% chance BRN
-= Aurora Beam: damage, 10% chance opponent's Attack -1 stage
-= Acid: damage, 10% chance opponent's Defense -1 stage
-= Psychic: damage, 30% chance opponent's Special -1 stage
-= Bubble: damage, 10% chance opponent's Speed -1 stage
-= Bubble Beam: damage, 10% chance opponent's Speed -1 stage
 = Waterfall: damage
 = Fire Blast: damage, 30% chance BRN
 = Sludge: damage, 30% chance PSN
 = Smog: damage, 40% chance PSN
-= Confusion: damage, 10% chance CONFUSE
-= Psybeam: damage, 10% chance CONFUSE
-= Fire Spin: 2-5 turns of damage, and traps the opponent
 = Flamethrower: damage, 10% chance BRN
 = Blizzard: damage, 10% chance FRZ
 = Ice Beam: damage, 10% chance FRZ
-= Gust: damage (Normal-type)
-= Night Shade: deal damage equal to user's level
-= Absorb: damage, and up to 50% of damage dealt is restored to the user
-= Mega Drain: damage, and up to 50% of damage dealt is restored to the user
+= Confusion: damage, 10% chance CONFUSE
+= Psybeam: damage, 10% chance CONFUSE
+
+- Weird Multi-Turn Moves
+= Fire Spin: 2-5 turns of damage, and traps the opponent
 = Petal Dance: inflict damage for 3-4 turns; unable to use another move or switch Pokemon while it's going. Then confused
-= Solar Beam: nothing on Move 1, then deal damage
-= Razor Wind: nothing on Move 1, then deal damage
-= Razor Leaf: damage, high crit hit rate
-= Hyper Beam: deal damage, then idle for a turn
-= Swift: damage, unaffected by mods to accuracy and evasion; can hit Fly and Dug Pokemon
-= Dream Eater: if target asleep, inflict damage and restore 50% of that damage to the user; else, nothing
-= Psywave: deal between 0.5x and 1.5x the user's level of typeless damage
-= Tri Attack: damage
-= Hydro Pump: damage
-= Surf: damage
-= Water Gun: damage
+
+- Weird 2-Turn Moves
+Solar Beam: nothing on Move 1, then deal damage
+Razor Wind: nothing on Move 1, then deal damage
+Hyper Beam: deal damage, then idle for a turn
+
+- Damage + Potential Stat Change
+Aurora Beam: damage, 10% chance opponent's Attack -1 stage
+Acid: damage, 10% chance opponent's Defense -1 stage
+Psychic: damage, 30% chance opponent's Special -1 stage
+Bubble: damage, 10% chance opponent's Speed -1 stage
+Bubble Beam: damage, 10% chance opponent's Speed -1 stage
+
+
+- Transfer HP
+    = Absorb: damage, and up to 50% of damage dealt is restored to the user
+    = Mega Drain: damage, and up to 50% of damage dealt is restored to the user
+    = Dream Eater: if target asleep, inflict damage and restore 50% of that damage to the user; else, nothing
 
 
 

@@ -328,7 +328,7 @@ class Crabhammer extends PhysicalSingleStrike {
 }
 
 
-// PHYSICAL, WITH RECOIL
+/* PHYSICAL, WITH RECOIL */
 abstract class PhysicalSingleStrikeRecoil extends PhysicalMove {
   // TODO: If the user of MOVE attacks first and makes itself faint due to recoil damage, the target will not attack or be subjected to recurrent damage during that round.
   // TODO: Self-inflicted recoil damage from MOVE from the previous turn can be countered if the target does not make a move on the following turn.
@@ -389,37 +389,397 @@ class Struggle extends PhysicalSingleStrikeRecoil {
 }
 
 
-/* SPECIAL MOVES */
-class DragonRage extends SpecialMove {
-  val index = 82
-  val type1 = Dragon
-  val power = 0
-  var maxPP = 10
-  var currentPP = maxPP
+/* PHYSICAL: SINGLE STRIKE, POTENTIAL STATUS CHANGE */
 
+
+/* PHYSICAL: SINGLE STRIKE, POTENTIAL STAT CHANGE */
+
+
+/* PHYSICAL: MULTI STRIKE */
+abstract class PhysicalMultiStrike extends PhysicalMove {
+  // TODO: Ends if opponent faints or substitute breaks
+  // TODO: Make sure that Bide and Counter only acknowledge the last attack in this sequence
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      defender.takeDamage(40)
+      val r = Random.nextDouble
+      val numStrikes = if (r < 0.375) 2
+                       else if (r < (0.375 + 0.375)) 3
+                       else if (r < (0.375 + 0.375 + 0.125)) 4
+                       else 5
+      val damageEachTime = pb.dc.calc(attacker, defender, this, pb)  // takes crit hits into account
+      for (_ <- 1 to numStrikes) {
+        defender.takeDamage(damageEachTime)
+      }
+      if (VERBOSE) println(s"$this hit ${defender.name} $numStrikes times!")
     }
   }
 }
 
-class SonicBoom extends SpecialMove {
-  val index = 49
-  override val accuracy = 0.9          // in [0.0, 1.0]
+class PinMissile extends PhysicalMultiStrike {
+  val index = 42
+  val type1 = Bug
+  val power = 14
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.85
+}
+
+class Barrage extends PhysicalMultiStrike {
+  val index = 140
   val type1 = Normal
+  val power = 15
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.85
+}
+
+class CometPunch extends PhysicalMultiStrike {
+  val index = 4
+  val type1 = Normal
+  val power = 18
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.85
+}
+
+class DoubleSlap extends PhysicalMultiStrike {
+  val index = 3
+  val type1 = Normal
+  val power = 15
+  var maxPP = 10
+  var currentPP = maxPP
+  override val accuracy = 0.85
+}
+
+class FuryAttack extends PhysicalMultiStrike {
+  val index = 31
+  val type1 = Normal
+  val power = 15
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.85
+}
+
+class FurySwipes extends PhysicalMultiStrike {
+  val index = 154
+  val type1 = Normal
+  val power = 18
+  var maxPP = 15
+  var currentPP = maxPP
+  override val accuracy = 0.80
+}
+
+class SpikeCannon extends PhysicalMultiStrike {
+  val index = 131
+  val type1 = Normal
+  val power = 20
+  var maxPP = 15
+  var currentPP = maxPP
+  // 100% accuracy
+}
+
+
+/* PHYSICAL, DOUBLE STRIKE */
+abstract class PhysicalDoubleStrike extends PhysicalMove {
+  // TODO: Ends if opponent faints or substitute breaks; see PhysicalMultiStrike
+  // TODO: Make sure that Bide and Counter only acknowledge the last attack in this sequence; see PhysicalMultiStrike
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val numStrikes = 2
+      val damageEachTime = pb.dc.calc(attacker, defender, this, pb)  // takes crit hits into account
+      for (_ <- 1 to numStrikes) {
+        defender.takeDamage(damageEachTime)
+      }
+      if (VERBOSE) println(s"$this hit ${defender.name} $numStrikes times!")
+    }
+  }
+}
+
+class DoubleKick extends PhysicalDoubleStrike {
+  val index = 24
+  val type1 = Fighting
+  val power = 30
+  var maxPP = 30
+  var currentPP = maxPP
+}
+
+class Bonemerang extends PhysicalDoubleStrike {
+  val index = 155
+  val type1 = Ground
+  val power = 50
+  var maxPP = 10
+  var currentPP = maxPP
+}
+
+
+/* PHYSICAL, FUNCTION OF ENVIRONMENT */
+class SeismicToss extends SpecialMove {
+  val index = 69
+  val type1 = Fighting
   val power = 0
   var maxPP = 20
   var currentPP = maxPP
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      defender.takeDamage(20)
+      defender.takeDamage(attacker.level)
     }
   }
 }
 
-class Thunder extends SpecialMove {
+class SuperFang extends SpecialMove {
+  val index = 162
+  val type1 = Normal
+  val power = 0
+  var maxPP = 10
+  var currentPP = maxPP
+  override val accuracy = 0.90
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val damageDealt = (defender.currentHP / 2).max(1)
+      defender.takeDamage(damageDealt)
+    }
+  }
+}
+
+
+/* PHYSICAL, ONE-HIT KO */
+abstract class PhysicalOneHitKO extends PhysicalMove {
+  // TODO: MOVE will break a Substitute if it hits
+  // TODO: MOVE can be countered for infinite damage on the turn it breaks a Substitute.
+  override val accuracy = 0.30
+  override val power = 0
+  var maxPP = 5
+  var currentPP = maxPP
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statManager.getEffectiveSpeed(attacker) >= pb.statManager.getEffectiveSpeed(defender)) {
+      defender.takeDamage(defender.currentHP)
+    }
+  }
+}
+
+class Fissure extends PhysicalOneHitKO {
+  val index = 90
+  val type1 = Ground
+}
+
+class Guillotine extends PhysicalOneHitKO {
+  val index = 12
+  val type1 = Normal
+}
+
+class HornDrill extends PhysicalOneHitKO {
+  val index = 32
+  val type1 = Normal
+}
+
+
+/* SPECIAL MOVES */
+// SPECIAL, DEAL FIXED AMOUNT OF DAMAGE
+abstract class SpecialConstantDamage extends SpecialMove {
+  override val power = 0
+  val constantDamageAmount : Int
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      defender.takeDamage(constantDamageAmount)
+    }
+  }
+}
+
+class DragonRage extends SpecialConstantDamage {
+  val index = 82
+  val type1 = Dragon
+  var maxPP = 10
+  var currentPP = maxPP
+  override val constantDamageAmount = 40
+}
+
+class SonicBoom extends SpecialConstantDamage {
+  val index = 49
+  val type1 = Normal
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.9
+  override val constantDamageAmount = 20
+}
+
+
+// SPECIAL, FUNCTION OF LEVEL
+class NightShade extends SpecialMove {
+  val index = 101
+  val type1 = Ghost
+  val power = 0
+  var maxPP = 15
+  var currentPP = maxPP
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      defender.takeDamage(attacker.level)
+    }
+  }
+}
+
+class Psywave extends SpecialMove {
+  val index = 149
+  val type1 = Psychic
+  val power = 0
+  var maxPP = 15
+  var currentPP = maxPP
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val damageDealt = ((Random.nextDouble + 0.5) * attacker.level).toInt
+      defender.takeDamage(damageDealt)
+    }
+  }
+}
+
+
+// SPECIAL, SINGLESTRIKE WITH POTENTIAL WEIRD STUFF
+abstract class SpecialSingleStrike extends SpecialMove {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
+      defender.takeDamage(damageDealt)
+    }
+  }
+}
+
+class Gust extends PhysicalSingleStrike {
+  // TODO: Why is this listed as a Special move, given that it's type Normal?
+  val index = 149
+  val type1 = Normal   // Flying in later gens
+  val power = 40
+  var maxPP = 35
+  var currentPP = maxPP
+}
+
+class TriAttack extends SpecialSingleStrike {
+  // TODO: Why is this listed as a Special move, given that it's type Normal?
+  val index = 161
+  val type1 = Normal
+  val power = 80
+  var maxPP = 10
+  var currentPP = maxPP
+}
+
+class HydroPump extends SpecialSingleStrike {
+  val index = 56
+  val type1 = Water
+  val power = 120   // down to 110 in Gen IV
+  var maxPP = 5
+  var currentPP = maxPP
+  override val accuracy = 0.8
+}
+
+class Surf extends SpecialSingleStrike {
+  val index = 57
+  val type1 = Water
+  val power = 95   // down to 90 in Gen IV
+  var maxPP = 15
+  var currentPP = maxPP
+}
+
+class WaterGun extends SpecialSingleStrike {
+  val index = 55
+  val type1 = Water
+  val power = 40
+  var maxPP = 25
+  var currentPP = maxPP
+}
+
+class RazorLeaf extends SpecialSingleStrike {
+  val index = 75
+  val type1 = Grass
+  val power = 55
+  var maxPP = 25
+  var currentPP = maxPP
+  override val accuracy = 0.95
+  override val critHitRate = HIGH
+}
+
+
+// TODO: SWIFT: IGNORE MODS TO ACCURACY AND EVASION, HIT FLY/DIG POKEMON
+
+
+// SPECIAL: TRANSFER HP
+abstract class SpecialTransferHP extends SpecialMove {
+  // TODO: If MOVE breaks a substitute, no HP will be restored to the user.
+  val transferProportion = 0.5
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
+      defender.takeDamage(damageDealt)
+      damageDealt match {
+        case 1 => attacker.gainHP(1)
+        case _ => attacker.gainHP((damageDealt * transferProportion).toInt)
+      }
+    }
+  }
+}
+
+class Absorb extends SpecialTransferHP {
+  val index = 71
+  val type1 = Grass
+  val power = 20
+  var maxPP = 20  // 25 in later gens
+  var currentPP = maxPP
+}
+
+class MegaDrain extends SpecialTransferHP {
+  val index = 72
+  val type1 = Grass
+  val power = 40
+  var maxPP = 10  // 15 in later gens
+  var currentPP = maxPP
+}
+
+class DreamEater extends SpecialMove {
+  // TODO: If DreamEater breaks a substitute, no HP will be restored to the user.
+  val index = 138
+  val type1 = Psychic
+  val power = 40
+  var maxPP = 10  // 15 in later gens
+  var currentPP = maxPP
+
+  val transferProportion = 0.5
+
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    defender.statusAilment match {
+      case Some(SLP) => {
+        if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+          val damageDealt = pb.dc.calc(attacker, defender, this, pb)
+          defender.takeDamage(damageDealt)
+          damageDealt match {
+            case 1 => attacker.gainHP(1)
+            case _ => attacker.gainHP((damageDealt * transferProportion).toInt)
+          }
+        }
+      }
+      case _ => {}
+    }
+  }
+}
+
+
+// SPECIAL, DAMAGE + POTENTIAL STAT CHANGE
+abstract class SpecialDamageStat extends SpecialMove {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // TODO: fill in!
+  }
+}
+
+
+// SPECIAL, DAMAGE + POTENTIAL STATUS CHANGE
+abstract class SpecialDamageStatus extends SpecialMove {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // TODO: fill in!
+  }
+}
+
+class Thunder extends SpecialDamageStatus {
   val index = 87
   override val accuracy = 0.7          // in [0.0, 1.0]
   val type1 = Electric
@@ -427,12 +787,12 @@ class Thunder extends SpecialMove {
   var maxPP = 10
   var currentPP = maxPP
 
-  val parChance = 0.1
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // TODO: model after Pound!
-  }
+  val statusChance = 0.1
 }
+
+abstract class Thunderbolt extends SpecialDamageStatus
+abstract class ThunderShock extends SpecialDamageStatus
+abstract class Ember extends SpecialDamageStatus
 
 
 /* STATUS MOVES */
