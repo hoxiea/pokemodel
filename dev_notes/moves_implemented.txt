@@ -1,0 +1,118 @@
+PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
+
+- Single-strike
+    = Pound: damage
+    = Drill Peck: damage
+    = Peck: damage
+    = Wing Attack: damage
+    = Vine Whip: damage
+    = Cut: damage
+    = Earthquake: damage
+    = Dizzy Punch: damage
+    = Egg Bomb: damage
+    = Horn Attack: damage
+    = Mega Kick: damage
+    = Mega Punch: damage
+    = Pay Day: damage
+    = Scratch: damage
+    = Slam: damage
+    = Strength: damage
+    = Tackle: damage
+    = Vice Grip: damage
+    = Rock Slide: damage
+    = Rock Throw: damage
+
+- Single-strike, special
+    = Quick Attack: damage, higher priority
+    = Karate Chop: damage, high crit hit rate
+    = Slash: damage, high crit hit rate
+    = Crabhammer: damage, high crit hit rate
+
+- Single-strike + recoil
+    = Struggle: do damage, 50% recoil damage. Can get crithits. Normal element rules apply
+    = Submission: do damage, receive 25% of damage done to target yourself
+    = Double Edge: do damage, receive 25% of damage done to target yourself
+    = Take Down: do damage, receive 25% of damage done to target yourself
+
+- Multi-strike
+    = Pin Missile: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+    = Barrage: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Comet Punch: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Double Slap: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Fury Attack: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Fury Swipes: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Spike Cannon: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
+    = Double Kick: 2x damage
+    = Bonemerang: 2x damage
+
+- Deal damage that's some function of the environment
+    = Seismic Toss: inflict damage equal to the user's level; no STAB bonus
+    = Super Fang: inflict damage equal to 50% of target's current HP, unaffected by Types
+
+- One-hit KOs
+    = Fissure: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
+    = Guillotine: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
+    = Horn Drill: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
+
+
+
+
+SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
+    = Dragon Rage: Always inflict exactly 40 damage if it hits
+    = Sonic Boom: Always inflict exactly 20 damage if it hits
+
+    = Night Shade: deal damage equal to user's level
+    = Psywave: deal between 0.5x and 1.5x the user's level of typeless damage
+
+- Single-Strike, With Weird Stuff
+    = Gust: damage (Normal-type)
+    = Tri Attack: damage
+    = Hydro Pump: damage
+    = Surf: damage
+    = Water Gun: damage
+    = Razor Leaf: damage, high crit hit rate
+
+- Transfer HP
+    = Absorb: damage, and up to 50% of damage dealt is restored to the user
+    = Mega Drain: damage, and up to 50% of damage dealt is restored to the user
+    = Dream Eater: if target asleep, inflict damage and restore 50% of that damage to the user; else, nothing
+
+
+
+STATUS MOVES (any type, don't deal damage directly):
+- Change your stats:
+    = Sharpen: Attack +1 stage
+    = Meditate: Attack +1 stage
+    = Swords Dance: Attack +2 stages
+    = Defense Curl: Defense +1 stage
+    = Withdraw: Defense +1 stage
+    = Harden: Defense +1 stage
+    = Acid Armor: Defense +2 stages
+    = Barrier: Defense +2 stages
+    = Double Team: Evasion +1 stage
+    = Minimize: Evasion +1 stage
+    = Agility: Speed +2 stages
+    = Growth: Special +1 stage
+    = Amnesia: Special +2 stages
+
+- Change opponent's stats
+    = String Shot: Speed stat -1 stage
+    = Sand Attack: Accuracy stat -1 stage
+    = Flash: Accuracy stat -1 stage
+    = Smoke Screen: Accuracy stat -1 stage
+    = Kinesis: Accuracy stat -1 stage
+    = Growl: Attack stat -1 stage
+    = Leer: Defense stat -1 stage
+    = Tail Whip: Defense stat -1 stage
+    = Screech: Defense stat -2 stages
+
+- Other weird effect (pretty much all have various special conditions)
+    = Mirror Move: use the last move used by the target, WSSC
+    = Recover: restore up to 50% of user's maxHP, WSSC
+    = Soft-boiled: restore up to 50% of user's maxHP, WSSC
+    = Rest: restore max HP, fall asleep and awaken two turns after it's used, WSSC
+    = Roar: no effect whatsoever in link battles (causes battle to end in wild encounters)
+    = Whirlwind: no effect whatsoever in link battles (causes battle to end in wild encounters)
+    = Teleport: no effect whatsoever in link battles (causes escape in wild encounters)
+    = Splash: no effect whatsoever anywhere
+    = Conversion: change the user's current types(s) to the target's current types(s) (Porygon unique move)

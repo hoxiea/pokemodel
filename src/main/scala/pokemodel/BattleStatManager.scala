@@ -149,8 +149,7 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
     evasionStages(p) = curbNewTotal(newTotal)
   }
 
-  // Ways to set the stats to an absolute value
-  // Useful in a few rare settings
+  // Ways to set the stats to an absolute value - useful in a few rare settings
   def setAttackStage(p: Pokemon, newValue: Int) : Unit   = { attackStages(p)   = newValue }
   def setDefenseStage(p: Pokemon, newValue: Int) : Unit  = { defenseStages(p)  = newValue }
   def setSpecialStage(p: Pokemon, newValue: Int) : Unit  = { specialStages(p)  = newValue }
@@ -158,8 +157,8 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   def setAccuracyStage(p: Pokemon, newValue: Int) : Unit = { accuracyStages(p) = newValue }
   def setEvasionStage(p: Pokemon, newValue: Int) : Unit  = { evasionStages(p)  = newValue }
 
+  // Set everything back to 0; useful for Haze, and maybe other times too
   def resetAll(p: Pokemon) : Unit = {
-    // Useful for Haze
     setAttackStage(p, 0)
     setDefenseStage(p, 0)
     setSpecialStage(p, 0)
@@ -167,4 +166,23 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
     setAccuracyStage(p, 0)
     setEvasionStage(p, 0)
   }
+  
+  /*
+   * Most of the time, the battle stats of a Pokemon can be changed.
+   * However, there are certain instances in which they can't, and
+   * these function captures that logic.
+   */
+  
+  // Can Pokemon p change its own battle stats in Battle pb?
+  def canChangeOwnStats(p: Pokemon, pb: Battle) : Boolean = {
+    // TODO: figure out if there's ever a time when a Pokemon can't change its own stats with a move
+    true
+  }
+  
+  // Can attacker change the battle stats of defender in Battle pb?
+  def canChangeDefenderStats(attacker: Pokemon, defender: Pokemon, pb: Battle) : Boolean = {
+    // TODO: when is a Pokemon immune to stat-changing moves? Mist
+    false
+  }
+
 }

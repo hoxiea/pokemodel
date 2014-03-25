@@ -3,6 +3,7 @@ package pokemodel
 import scala.collection.mutable
 import Type._
 import MoveType._
+import BattleStat._
 import StatusAilment._
 import CritHitType._
 import scala.util.Random
@@ -73,19 +74,19 @@ trait PhysicalMove extends Move {
   // Physical Moves use Attack and Defense as the relevant stats
   def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveAttack(attacker)
   def getDefenseStat(defender: Pokemon, b : Battle) = b.statManager.getEffectiveDefense(defender)
-  override val moveType = PHYSICAL
+  override val moveType = PHYSICALMOVE
 }
 
 trait SpecialMove extends Move {
   // Special Moves use Special as the relevant stat for both offense and defense in Gen 1
   def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(attacker)
   def getDefenseStat(defender: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(defender)
-  override val moveType = SPECIAL
+  override val moveType = SPECIALMOVE
 }
 
 trait StatusMove extends Move {
   // Stats don't really enter the picture with Status Moves
-  override val moveType = STATUS
+  override val moveType = STATUSMOVE
   override val power = 0
 }
 
@@ -796,188 +797,249 @@ abstract class Ember extends SpecialDamageStatus
 
 
 /* STATUS MOVES */
-class Sharpen extends StatusMove {
+abstract class StatusChangeAttackerStats extends StatusMove {
+  val statToChange : BattleStat.Value
+  val amount : Int
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (pb.statManager.canChangeOwnStats(attacker, pb)) {
+	  statToChange match {
+	    case ATTACK   => pb.statManager.changeAttackStage(attacker, amount)
+	    case DEFENSE  => pb.statManager.changeDefenseStage(attacker, amount)
+	    case SPEED    => pb.statManager.changeSpeedStage(attacker, amount)
+	    case SPECIAL  => pb.statManager.changeSpecialStage(attacker, amount)
+	    case ACCURACY => pb.statManager.changeAccuracyStage(attacker, amount)
+	    case EVASION  => pb.statManager.changeEvasionStage(attacker, amount)
+	  }
+    }
+  }
+}
+
+class Sharpen extends StatusChangeAttackerStats {
   val index = 159
   val type1 = Normal
   var maxPP = 30
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeAttackStage(attacker, 1)
-  }
+  override val statToChange = ATTACK
+  override val amount = 1
 }
 
-class Meditate extends StatusMove {
+class Meditate extends StatusChangeAttackerStats {
   val index = 96
   val type1 = Psychic
   var maxPP = 40
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeAttackStage(attacker, 1)
-  }
+  override val statToChange = ATTACK
+  override val amount = 1
 }
 
-class SwordsDance extends StatusMove {
+class SwordsDance extends StatusChangeAttackerStats {
   val index = 14
   val type1 = Normal
   var maxPP = 30
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeAttackStage(attacker, 2)
-  }
+  override val statToChange = ATTACK
+  override val amount = 2
 }
 
 
-class DefenseCurl extends StatusMove {
+class DefenseCurl extends StatusChangeAttackerStats {
   val index = 111
   val type1 = Normal
   var maxPP = 40
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeDefenseStage(attacker, 1)
-  }
+  override val statToChange = DEFENSE
+  override val amount = 1
 }
 
-class Withdraw extends StatusMove {
+class Withdraw extends StatusChangeAttackerStats {
   val index = 110
   val type1 = Water
   var maxPP = 40
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeDefenseStage(attacker, 1)
-  }
+  override val statToChange = DEFENSE
+  override val amount = 1
 }
 
-class Harden extends StatusMove {
+class Harden extends StatusChangeAttackerStats {
   val index = 106
   val type1 = Normal
   var maxPP = 30
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeDefenseStage(attacker, 1)
-  }
+  override val statToChange = DEFENSE
+  override val amount = 1
 }
 
 
-class AcidArmor extends StatusMove {
+class AcidArmor extends StatusChangeAttackerStats {
   val index = 151
   val type1 = Poison
   var maxPP = 40
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeDefenseStage(attacker, 2)
-  }
+  override val statToChange = DEFENSE
+  override val amount = 2
 }
 
 
-class Barrier extends StatusMove {
+class Barrier extends StatusChangeAttackerStats {
   val index = 112
   val type1 = Psychic
   var maxPP = 30
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeDefenseStage(attacker, 2)
-  }
+  override val statToChange = DEFENSE
+  override val amount = 2
 }
 
 
-class DoubleTeam extends StatusMove {
+class DoubleTeam extends StatusChangeAttackerStats {
   val index = 104
   val type1 = Normal
   var maxPP = 15
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeEvasionStage(attacker, 1)
-  }
+  override val statToChange = EVASION
+  override val amount = 1
 }
 
-class Minimize extends StatusMove {
+class Minimize extends StatusChangeAttackerStats {
   val index = 107
   val type1 = Normal
   var maxPP = 20
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeEvasionStage(attacker, 1)
-  }
+  override val statToChange = EVASION
+  override val amount = 1
 }
 
-class Agility extends StatusMove {
+class Agility extends StatusChangeAttackerStats {
   val index = 97
   val type1 = Psychic
   var maxPP = 30
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeSpeedStage(attacker, 2)
-  }
+  override val statToChange = SPEED
+  override val amount = 2
 }
 
-class Growth extends StatusMove {
+class Growth extends StatusChangeAttackerStats {
   val index = 74
   val type1 = Normal
   var maxPP = 40
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeSpecialStage(attacker, 1)
-  }
+  override val statToChange = SPECIAL
+  override val amount = 1
 }
 
-class Amnesia extends StatusMove {
+class Amnesia extends StatusChangeAttackerStats {
   val index = 133
   val type1 = Psychic
   var maxPP = 20
   var currentPP = maxPP
+  override val statToChange = SPECIAL
+  override val amount = 2
+}
 
+
+// STATUSMOVES that change the opponent's stats
+// TODO: Make sure that the opponent's stats can actually be changed!
+abstract class StatusChangeDefenderStats extends StatusMove {
+  val statToChange : BattleStat.Value
+  val amount : Int
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    pb.statManager.changeSpecialStage(attacker, 2)
+    if (pb.statManager.canChangeDefenderStats(attacker, defender, pb)) {
+      statToChange match {
+        case ATTACK   => pb.statManager.changeAttackStage(defender, amount)
+        case DEFENSE  => pb.statManager.changeDefenseStage(defender, amount)
+        case SPEED    => pb.statManager.changeSpeedStage(defender, amount)
+        case SPECIAL  => pb.statManager.changeSpecialStage(defender, amount)
+        case ACCURACY => pb.statManager.changeAccuracyStage(defender, amount)
+        case EVASION  => pb.statManager.changeEvasionStage(defender, amount)
+      }
+    }
   }
 }
 
-// STATUSMOVES that change the opponent's stats
-class StringShot extends StatusMove {
+class StringShot extends StatusChangeDefenderStats {
   val index = 81
   override val accuracy = .95          // in [0.0, 1.0]
   val type1 = Bug
   var maxPP = 40
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      pb.statManager.changeSpeedStage(defender, -1)
-    }
-  }
+  override val statToChange = SPEED
+  override val amount = -1
 }
 
-class SandAttack extends StatusMove {
+class SandAttack extends StatusChangeDefenderStats {
   val index = 28
   val type1 = Normal  // changed in later Gens
   var maxPP = 15
   var currentPP = maxPP
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      pb.statManager.changeAccuracyStage(defender, -1)
-    }
-  }
+  override val statToChange = ACCURACY
+  override val amount = -1
 }
 
-abstract class Flash extends StatusMove
-abstract class SmokeScreen extends StatusMove
-abstract class Kinesis extends StatusMove
-abstract class Growl extends StatusMove
-abstract class Leer extends StatusMove
-abstract class TailWhip extends StatusMove
-abstract class Screech extends StatusMove
+class Flash extends StatusChangeDefenderStats {
+  val index = 148
+  val type1 = Normal
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.7
+  override val statToChange = ACCURACY
+  override val amount = -1
+}
+
+class SmokeScreen extends StatusChangeDefenderStats {
+  val index = 108
+  val type1 = Normal
+  var maxPP = 20
+  var currentPP = maxPP
+  override val statToChange = ACCURACY
+  override val amount = -1
+}
+
+class Kinesis extends StatusChangeDefenderStats {
+  val index = 134
+  val type1 = Psychic
+  var maxPP = 15
+  var currentPP = maxPP
+  override val accuracy = 0.8
+  override val statToChange = ACCURACY
+  override val amount = -1
+}
+
+class Growl extends StatusChangeDefenderStats {
+  val index = 45
+  val type1 = Normal
+  var maxPP = 40
+  var currentPP = maxPP
+  override val statToChange = ATTACK
+  override val amount = -1
+}
+
+class Leer extends StatusChangeDefenderStats {
+  val index = 43
+  val type1 = Normal
+  var maxPP = 30
+  var currentPP = maxPP
+  override val statToChange = DEFENSE
+  override val amount = -1
+}
+
+class TailWhip extends StatusChangeDefenderStats {
+  val index = 39
+  val type1 = Normal
+  var maxPP = 30
+  var currentPP = maxPP
+  override val statToChange = DEFENSE
+  override val amount = -1
+}
+
+class Screech extends StatusChangeDefenderStats {
+  val index = 103
+  val type1 = Normal
+  var maxPP = 40
+  var currentPP = maxPP
+  override val accuracy = 0.85
+  override val statToChange = DEFENSE
+  override val amount = -2
+}
+
 
 // STATUSMOVES that change the opponent's statusAilment
 class ThunderWave extends StatusMove {

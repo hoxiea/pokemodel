@@ -41,14 +41,14 @@ class DamageCalculator {
     // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
     val modifier = calcModifier(attacker, defender, move)
     val effectiveAttack = move.moveType match {
-      case PHYSICAL => battle.statManager.getEffectiveAttack(attacker)
-      case SPECIAL  => battle.statManager.getEffectiveDefense(attacker)
-      case STATUS => throw new Exception("A Status move called calcRegularHitDamage!")
+      case PHYSICALMOVE => battle.statManager.getEffectiveAttack(attacker)
+      case SPECIALMOVE  => battle.statManager.getEffectiveDefense(attacker)
+      case STATUSMOVE   => throw new Exception("A Status move called calcRegularHitDamage!")
     }
     val effectiveDefense = move.moveType match {
-      case PHYSICAL => battle.statManager.getEffectiveSpecial(attacker)
-      case SPECIAL  => battle.statManager.getEffectiveSpecial(attacker)
-      case STATUS => throw new Exception("A Status move called calcRegularHitDamage!")
+      case PHYSICALMOVE => battle.statManager.getEffectiveSpecial(attacker)
+      case SPECIALMOVE  => battle.statManager.getEffectiveSpecial(attacker)
+      case STATUSMOVE   => throw new Exception("A Status move called calcRegularHitDamage!")
     }
     val damage = damageFormula(attacker.level, effectiveAttack, effectiveDefense, move.power, modifier)
     damage
@@ -63,14 +63,14 @@ class DamageCalculator {
      */
     val modifier = calcModifier(attacker, defender, move)
     val attack = move.moveType match {
-      case PHYSICAL => attacker.attack
-      case SPECIAL  => attacker.defense
-      case STATUS => throw new Exception("A Status move called calcCriticalHitDamage!")
+      case PHYSICALMOVE => attacker.attack
+      case SPECIALMOVE  => attacker.defense
+      case STATUSMOVE   => throw new Exception("A Status move called calcCriticalHitDamage!")
     }
     val defense = move.moveType match {
-      case PHYSICAL => attacker.special
-      case SPECIAL  => attacker.special
-      case STATUS => throw new Exception("A Status move called calcCriticalHitDamage!")
+      case PHYSICALMOVE => attacker.special
+      case SPECIALMOVE  => attacker.special
+      case STATUSMOVE   => throw new Exception("A Status move called calcCriticalHitDamage!")
     }
     val damage = damageFormula(attacker.level * 2, attack, defense, move.power, modifier)
     damage
