@@ -1,10 +1,14 @@
 package pokemodel
 
 import scala.collection.mutable
+import Battle.{verbose => VERBOSE}
 
 /*
  * A BattleStatusManager keeps track of all of the various volatile/weird status and
- * provides useful methods for accessing this information.
+ * provides useful methods for accessing this information. 
+ * 
+ * It also encapsulates the logic behind changing a Pokemon's single non-volatile status 
+ * ailment, even though you can just change it directly via a setter.
  */
 
 class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
@@ -33,17 +37,28 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   /* METHODS FOR INTERACTING WITH THIS STUFF */
   def tryToCauseConfusion(p: Pokemon) {
     if (confusionMap contains p) {
-      // Do nothing - a confused Pokemon can't become re-confused
+      if (VERBOSE) println(s"Confusion (status) had no effect of {p.name}")
     } else {
-      confusionMap(p) = Utils.intBetween(BattleStatusManager.minTurnsConfusion, BattleStatusManager.maxTurnsConfusion + 1)
+      val confusionDuration = Utils.intBetween(BattleStatusManager.minTurnsConfusion, BattleStatusManager.maxTurnsConfusion + 1) 
+      confusionMap(p) = confusionDuration
+      if (VERBOSE) println(s"{p.name} will be confused for $confusionDuration turns")  // TODO: don't actually print the number
     } 
   }
 
   def tryToSeed(p: Pokemon) {
     if (seededSet contains p) {
-      // Do nothing - a seeded Pokemon can't become re-seeded
+      if (VERBOSE) println(s"Seeding had no effect on {p.name}")
     } else {
       seededSet += p 
+      if (VERBOSE) println(s"{p.name} was seeded!")
+    } 
+  }
+
+  def tryToPartiallyTrap(p: Pokemon) {
+    if (partiallyTrappedMap contains p) {
+      // Do nothing - can't trap again while trapped
+    } else {
+      partiallyTrappedMap(p) = Utils.intBetween(BattleStatusManager.minTurnsPartiallyTrapped, BattleStatusManager.maxTurnsPartiallyTrapped + 1) 
     } 
   }
   
@@ -63,13 +78,35 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     // TODO: take care of everything that needs to be removed, zeroed, etc. when Pokemon p switches out of battle
   }
   
+  def processTurnStart() = {
+    // TODO: Do everything that happens when the turn begins
+    
+    // Confusion seems to wear off at beginning of the turn, so decrement everyone and remove people whose Confusion cleared up
+    for ((p, currentDuration) <- confusionMap) {
+      if (currentDuration == 1) confusionMap -= p   
+      else confusionMap(p) = currentDuration - 1
+    }
+  }
+  
   def processTurnEnd() = {
     // TODO: Do everything that happens when the turn ends
     flinchSet.clear()  // Flinches last for exactly 1 turn
   }
+  
+  /*
+   * Non-Volatile Status Stuff
+   */
+  def tryToChangeStatusAilment(p: Pokemon, newStatus : StatusAilment) = p.statusAilment match {
+    case None => p.statusAilment = Some(newStatus)
+    case _ => {}
+  }
+  
+
 }
 
 object BattleStatusManager {
   val minTurnsConfusion = 1
   val maxTurnsConfusion = 4
+  val minTurnsPartiallyTrapped = 1
+  val maxTurnsPartiallyTrapped = 4
 }

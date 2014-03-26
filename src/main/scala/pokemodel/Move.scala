@@ -289,6 +289,167 @@ class RockThrow extends PhysicalSingleStrike {
 }
 
 
+// PHYSICAL, SINGLE STRIKE + POTENTIAL STATUS CHANGE
+abstract class PhysicalSingleStrikeStatusChange extends PhysicalMove {
+  val statusAilmentToCause   : StatusAilment
+  val chanceOfCausingAilment : Double
+
+  def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
+
+  // TODO: Figure out if there are times when a Pokemon is immune to StatusAilment changes, and incorporate them
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
+      defender.takeDamage(damageDealt)
+      if (statusAilmentCaused) statusAilmentToCause match {
+        case (_ : NonVolatileStatusAilment) => defender.tryToChangeStatusAilment(statusAilmentToCause, pb)
+        case (_ : CONFUSION) => pb.statusManager.tryToCauseConfusion(defender)
+        case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender)
+        case (_ : PARTIALLYTRAPPED) => { pb.statusManager.tryToPartiallyTrap(defender) }
+        case (_ : SEEDED) => pb.statusManager.tryToSeed(defender)
+      }
+    }
+  }
+}
+
+class Bite extends PhysicalSingleStrikeStatusChange {
+  val index = 44
+  val type1 = Normal
+  val power = 60
+  var maxPP = 25
+  var currentPP = maxPP
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.10
+}
+
+class BoneClub extends PhysicalSingleStrikeStatusChange {
+  val index = 125
+  val type1 = Ground
+  val power = 65
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.85
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.10
+  // TODO: Bone Club cannot cause a target with a substitute to flinch.
+}
+
+class HyperFang extends PhysicalSingleStrikeStatusChange {
+  val index = 158
+  val type1 = Normal
+  val power = 80
+  var maxPP = 15
+  var currentPP = maxPP
+  override val accuracy = 0.9
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.10
+}
+
+class LowKick extends PhysicalSingleStrikeStatusChange {
+  val index = 67
+  val type1 = Fighting
+  val power = 50
+  var maxPP = 20
+  var currentPP = maxPP
+  override val accuracy = 0.9
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.30
+}
+
+class Headbutt extends PhysicalSingleStrikeStatusChange {
+  val index = 29
+  val type1 = Normal
+  val power = 70
+  var maxPP = 15
+  var currentPP = maxPP
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.30
+}
+
+class Stomp extends PhysicalSingleStrikeStatusChange {
+  val index = 23
+  val type1 = Normal
+  val power = 65
+  var maxPP = 20
+  var currentPP = maxPP
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.30
+  // TODO: Stomp cannot make a target with a substitute flinch.
+}
+
+class RollingKick extends PhysicalSingleStrikeStatusChange {
+  val index = 27
+  val type1 = Fighting
+  val power = 60
+  var maxPP = 15
+  var currentPP = maxPP
+  override val accuracy = 0.85
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.30
+  // TODO: Rolling Kick cannot make a target with a substitute flinch.
+}
+
+class ThunderPunch extends PhysicalSingleStrikeStatusChange {
+  val index = 9
+  val type1 = Electric
+  val power = 75
+  var maxPP = 15
+  var currentPP = maxPP
+  override val statusAilmentToCause = new PAR
+  override val chanceOfCausingAilment = 0.10
+}
+
+class IcePunch extends PhysicalSingleStrikeStatusChange {
+  val index = 8
+  val type1 = Ice
+  val power = 75
+  var maxPP = 15
+  var currentPP = maxPP
+  override val statusAilmentToCause = new FRZ
+  override val chanceOfCausingAilment = 0.10
+}
+
+class FirePunch extends PhysicalSingleStrikeStatusChange {
+  val index = 7
+  val type1 = Fire
+  val power = 75
+  var maxPP = 15
+  var currentPP = maxPP
+  override val statusAilmentToCause = new BRN
+  override val chanceOfCausingAilment = 0.10
+}
+
+class Lick extends PhysicalSingleStrikeStatusChange {
+  val index = 122
+  val type1 = Ghost
+  val power = 20
+  var maxPP = 30
+  var currentPP = maxPP
+  override val statusAilmentToCause = new PAR
+  override val chanceOfCausingAilment = 0.3
+}
+
+class BodySlam extends PhysicalSingleStrikeStatusChange {
+  val index = 34
+  val type1 = Normal
+  val power = 85
+  var maxPP = 15
+  var currentPP = maxPP
+  override val statusAilmentToCause = new PAR
+  override val chanceOfCausingAilment = 0.3
+}
+
+class PoisonSting extends PhysicalSingleStrikeStatusChange {
+  val index = 40
+  val type1 = Poison
+  val power = 15
+  var maxPP = 35
+  var currentPP = maxPP
+  override val statusAilmentToCause = new PSN
+  override val chanceOfCausingAilment = 0.3
+}
+
+
 // PHYSICAL, SINGLE-STRIKE, SPECIAL
 class QuickAttack extends PhysicalSingleStrike {
   val index = 98
@@ -387,20 +548,6 @@ class Struggle extends PhysicalSingleStrikeRecoil {
     pb.moveManager.updateLastMoveIndex(attacker, index)
   }
 }
-
-
-/* PHYSICAL: SINGLE STRIKE, POTENTIAL STATUS CHANGE */
-abstract class PhysicalSingleStrikeStatusChange extends PhysicalMove {
-  val chanceStatusChange : Double
-  val status : StatusAilment
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-      if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
-      defender.takeDamage(damageDealt)
-    }
-  }
-}
-
 
 
 /* PHYSICAL: SINGLE STRIKE, POTENTIAL STAT CHANGE */
@@ -1065,8 +1212,8 @@ abstract class StatusCauseStatusAilment extends StatusMove {
         case (_ : NonVolatileStatusAilment) => defender.tryToChangeStatusAilment(statusAilmentToCause, pb)
         case (_ : CONFUSION) => pb.statusManager.tryToCauseConfusion(defender)
         case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender)
-        case (_ : PARTIALLYTRAPPED) => {}  // TODO: Update trapped manager
-        case (_ : SEEDED) => {}     // TODO: Update seeded manager
+        case (_ : PARTIALLYTRAPPED) => { pb.statusManager.tryToPartiallyTrap(defender) }
+        case (_ : SEEDED) => pb.statusManager.tryToSeed(defender)
       }
     }
   }

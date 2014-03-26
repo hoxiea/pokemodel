@@ -44,6 +44,7 @@ duringMove:
 afterMove:
   on turn 1 of BPSN, lose 1 * 1/16 maxHP
   on turn 2 of BPSN, lose 2 * 1/16 maxHP
+  ...
 other:
   switching appears to turn BPSN into PSN
   weird interaction with seeded (Leech Seeded)
