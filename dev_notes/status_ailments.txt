@@ -99,12 +99,16 @@ Volatile:Seeded
 Caused by Leech Seed
 Each turn, a seeded Pokemon loses 1/16 of its maxHP and the opponent gains that same amount
 Grass-type Pokemon cannot be seeded
+
 beforeMove:
 duringMove:
 afterMove:
   if you didn't KO the opponent and you're seeded, then transfer 1/16 maxHP to active opponent
 other:
-
+  If the target has less than 16 HP, Leech Seed will drain 1 HP per turn.
+  Leech Seed draining will occur even if the seeded Pokémon knocks itself out with crash damage, recoil damage, or self-inflicted confusion damage, or by making a substitute before the end of its turn.
+  Draining from Leech Seed is done after continuing partial trapping damage and recurrent poison or burn damage.
+  Leech Seed can be removed by Haze or switching.
 
 -----------
 volatileBattle statuses tend to be related to using/charging a specific move.

@@ -391,6 +391,17 @@ class Struggle extends PhysicalSingleStrikeRecoil {
 
 
 /* PHYSICAL: SINGLE STRIKE, POTENTIAL STATUS CHANGE */
+abstract class PhysicalSingleStrikeStatusChange extends PhysicalMove {
+  val chanceStatusChange : Double
+  val status : StatusAilment
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+      if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
+      defender.takeDamage(damageDealt)
+    }
+  }
+}
+
 
 
 /* PHYSICAL: SINGLE STRIKE, POTENTIAL STAT CHANGE */
@@ -1438,6 +1449,7 @@ class Transform extends StatusMove {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // http://bulbapedia.bulbagarden.net/wiki/Transform_(move)
     // http://www.smogon.com/rb/moves/Transform
+
     // Change the user's current type to that of the target
     attacker.type1 = defender.type1
     attacker.type2 = defender.type2
