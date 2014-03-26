@@ -186,13 +186,13 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   // Can Pokemon p change its own battle stats in Battle pb?
   def canChangeOwnStats(p: Pokemon, pb: Battle) : Boolean = {
     // TODO: figure out if there's ever a time when a Pokemon can't change its own stats with a move
+    // "Mist does not prevent the user or allied Pokemon from lowering their own stats."
     true
   }
   
   // Can attacker change the battle stats of defender in Battle pb?
   def canChangeDefenderStats(attacker: Pokemon, defender: Pokemon, pb: Battle) : Boolean = {
     // TODO: when is a Pokemon immune to stat-changing moves? Mist
-    false
+    !pb.statusManager.hasMist(defender)
   }
-
 }

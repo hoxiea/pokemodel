@@ -41,6 +41,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   // Create and register various managers and calculators for this battle
   val statManager = new BattleStatManager(team1, team2)
   val moveManager = new BattleMoveManager(team1, team2)
+  val statusManager = new BattleStatusManager(team1, team2)
   val dc = new DamageCalculator()
 
   var time : Int = 0

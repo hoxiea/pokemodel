@@ -1063,10 +1063,10 @@ abstract class StatusCauseStatusAilment extends StatusMove {
     if (Random.nextDouble < chanceHit(attacker, defender, pb) && statusAilmentCaused) {
       statusAilmentToCause match {
         case (_ : NonVolatileStatusAilment) => defender.tryToChangeStatusAilment(statusAilmentToCause, pb)
-        case (_ : CONFUSION) => {}  //TODO: Update confusion manager with random confusion; should check for existing confusion
-        case (_ : FLINCH) => {}     //TODO: Update flinch manager with $defender
-        case (_ : PARTIALLYTRAPPED) => {}  //TODO: Update trapped manager
-        case (_ : SEEDED) => {}     //TODO: Update seeded manager
+        case (_ : CONFUSION) => pb.statusManager.tryToCauseConfusion(defender)
+        case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender)
+        case (_ : PARTIALLYTRAPPED) => {}  // TODO: Update trapped manager
+        case (_ : SEEDED) => {}     // TODO: Update seeded manager
       }
     }
   }
