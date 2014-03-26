@@ -1,28 +1,28 @@
 package pokemodel
 
-object StatusAilment extends Enumeration {
-  type StatusAilment = Value
-  val SLP = Value("SLP")    // Sleep
-  val PSN = Value("PSN")    // Poison
-  val BPSN = Value("PSN")   // Bad Poison
-  val BRN = Value("BRN")    // Burn
-  val FRZ = Value("FRZ")    // Freeze
-  val PAR = Value("PAR")    // Paralyzed
-}
+//object StatusAilment extends Enumeration {
+//  type StatusAilment = Value
+//  val SLP = Value("SLP")    // Sleep
+//  val PSN = Value("PSN")    // Poison
+//  val BPSN = Value("PSN")   // Bad Poison
+//  val BRN = Value("BRN")    // Burn
+//  val FRZ = Value("FRZ")    // Freeze
+//  val PAR = Value("PAR")    // Paralyzed
+//}
 
-//sealed abstract class StatusAilment
-//
-//sealed abstract class NonVolatileStatusAilment extends StatusAilment
-//case class SLP  extends NonVolatileStatusAilment
-//case class PSN  extends NonVolatileStatusAilment
-//case class BPSN extends NonVolatileStatusAilment
-//case class BRN  extends NonVolatileStatusAilment
-//case class FRZ  extends NonVolatileStatusAilment
-//case class PAR  extends NonVolatileStatusAilment
-//
-//sealed abstract class VolatileStatusAilment extends StatusAilment
-//case class FLINCH extends VolatileStatusAilment
-//case class CONFUSION extends VolatileStatusAilment
-//case class PARTIALLYTRAPPED extends VolatileStatusAilment
-//case class SEEDED extends VolatileStatusAilment
-//
+sealed abstract class StatusAilment
+
+sealed abstract class NonVolatileStatusAilment extends StatusAilment
+case class SLP  extends NonVolatileStatusAilment
+case class PSN  extends NonVolatileStatusAilment
+case class BPSN extends NonVolatileStatusAilment
+case class BRN  extends NonVolatileStatusAilment
+case class FRZ  extends NonVolatileStatusAilment
+case class PAR  extends NonVolatileStatusAilment
+
+sealed abstract class VolatileStatusAilment extends StatusAilment
+case class FLINCH extends VolatileStatusAilment
+case class CONFUSION extends VolatileStatusAilment
+case class PARTIALLYTRAPPED extends VolatileStatusAilment
+case class SEEDED extends VolatileStatusAilment
+

@@ -42,7 +42,7 @@ class PokemonBuilder (val index: Int, val level: Int) {
   var move3: Option[Move] = None
   var move4: Option[Move] = None
 
-  var statusAilment : Option[StatusAilment.Value] = None
+  var statusAilment : Option[StatusAilment] = None
 
   /* Those are actually the only values that the user can input...
    * Everything else is a function of the above values
@@ -131,7 +131,7 @@ class PokemonBuilder (val index: Int, val level: Int) {
     this
   }
 
-  def statusAilment(value : StatusAilment.Value) : PokemonBuilder = {
+  def statusAilment(value : StatusAilment) : PokemonBuilder = {
     statusAilment = Some(value)
     this
   }

@@ -3,7 +3,6 @@ package pokemodel
 import scala.Array.canBuildFrom
 import scala.io.Source
 import Type._
-import StatusAilment._
 
 class Pokemon(builder : PokemonBuilder) {
   private val attackIV  = builder.attackIV
@@ -43,7 +42,7 @@ class Pokemon(builder : PokemonBuilder) {
   val maxHP   = builder.maxHP
 
   var currentHP = maxHP
-  var statusAilment : Option[StatusAilment.Value] = builder.statusAilment
+  var statusAilment : Option[StatusAilment] = builder.statusAilment
 
 
   /* METHODS */
@@ -53,7 +52,7 @@ class Pokemon(builder : PokemonBuilder) {
     currentHP = if (damage >= currentHP) 0 else currentHP - damage
   }
   
-  def tryToChangeStatusAilment(newStatus : StatusAilment.Value) : Unit = statusAilment match {
+  def tryToChangeStatusAilment(newStatus : StatusAilment) : Unit = statusAilment match {
     case None => { statusAilment = Some(newStatus) }
     case Some(s) => {}  // new status ailments don't overwrite old ones
   }
@@ -99,8 +98,8 @@ class Pokemon(builder : PokemonBuilder) {
   }
 
   def takeStatusAilmentDamage() : Unit = statusAilment match {
-    case PSN => takeDamage(maxHP / 16)
-    case BRN => takeDamage(maxHP / 16)
+    case Some(_ : PSN) => takeDamage(maxHP / 16)
+    case Some(_ : BRN) => takeDamage(maxHP / 16)
     case _ => {}
   }
 

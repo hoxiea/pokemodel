@@ -1,6 +1,5 @@
 package pokemodel
 
-import StatusAilment._
 import Type._
 import scala.collection.mutable
 

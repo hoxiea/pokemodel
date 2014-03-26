@@ -4,7 +4,6 @@ import scala.collection.mutable
 import Type._
 import MoveType._
 import BattleStat._
-import StatusAilment._
 import CritHitType._
 import scala.util.Random
 import Battle.{verbose=>VERBOSE}
@@ -760,7 +759,7 @@ class DreamEater extends SpecialMove {
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     defender.statusAilment match {
-      case Some(SLP) => {
+      case Some(_ : SLP) => {
         if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
           val damageDealt = pb.dc.calc(attacker, defender, this, pb)
           defender.takeDamage(damageDealt)
@@ -1053,6 +1052,10 @@ class Screech extends StatusChangeDefenderStats {
 
 
 // STATUSMOVES that change the opponent's statusAilment
+abstract class StatusCauseStatusAilment extends StatusMove {
+  
+}
+
 class ThunderWave extends StatusMove {
   val index = 86
   val type1 = Electric
@@ -1063,7 +1066,7 @@ class ThunderWave extends StatusMove {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chancePAR) {
-        defender.tryToChangeStatusAilment(PAR)
+        defender.tryToChangeStatusAilment(new PAR)
       }
     }
   }
@@ -1080,7 +1083,7 @@ class StunSpore extends StatusMove {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chancePAR) {
-        defender.tryToChangeStatusAilment(PAR)
+        defender.tryToChangeStatusAilment(new PAR)
       }
     }
   }
@@ -1097,7 +1100,7 @@ class Glare extends StatusMove {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chancePAR) {
-        defender.tryToChangeStatusAilment(PAR)
+        defender.tryToChangeStatusAilment(new PAR)
       }
     }
   }
@@ -1151,7 +1154,7 @@ class SleepPowder extends StatusMove {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chanceSLP) {
-        defender.tryToChangeStatusAilment(SLP)
+        defender.tryToChangeStatusAilment(new SLP)
       }
     }
   }
@@ -1168,7 +1171,7 @@ class Hypnosis extends StatusMove {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chanceSLP) {
-        defender.tryToChangeStatusAilment(SLP)
+        defender.tryToChangeStatusAilment(new SLP)
       }
     }
   }
@@ -1185,7 +1188,7 @@ class PoisonGas extends StatusMove {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       if (Random.nextDouble < chancePSN) {
-        defender.tryToChangeStatusAilment(PSN)
+        defender.tryToChangeStatusAilment(new PSN)
       }
     }
   }
@@ -1199,13 +1202,9 @@ class Toxic extends StatusMove {
   val chancePSN = 1.0
   override val accuracy = 0.85
 
-  // TODO: Toxic is a mess and requires a battle data structure
+
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      if (Random.nextDouble < chancePSN) {
-        defender.tryToChangeStatusAilment(BPSN)
-      }
-    }
+    // TODO: Toxic is a mess and almost surely requires a battle data structure
   }
 }
 

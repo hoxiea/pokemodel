@@ -1,7 +1,6 @@
 package pokemodel
 
 import scala.collection.mutable
-import StatusAilment._
 
 /*
  * BattleStatManagers keep track of the stages of attack, defense, speed,
