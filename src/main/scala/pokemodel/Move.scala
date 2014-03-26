@@ -1053,145 +1053,104 @@ class Screech extends StatusChangeDefenderStats {
 
 // STATUSMOVES that change the opponent's statusAilment
 abstract class StatusCauseStatusAilment extends StatusMove {
-  
+  val statusAilmentToCause : StatusAilment
+  val chanceOfCausingAilment : Double
+
+  def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
+
+  // TODO: Figure out if there are times when a Pokemon is immune to StatusAilment changes, and incorporate them
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) && statusAilmentCaused) {
+      statusAilmentToCause match {
+        case (_ : NonVolatileStatusAilment) => defender.tryToChangeStatusAilment(statusAilmentToCause, pb)
+        case (_ : CONFUSION) => {}  //TODO: Update confusion manager with random confusion; should check for existing confusion
+        case (_ : FLINCH) => {}     //TODO: Update flinch manager with $defender
+        case (_ : PARTIALLYTRAPPED) => {}  //TODO: Update trapped manager
+        case (_ : SEEDED) => {}     //TODO: Update seeded manager
+      }
+    }
+  }
 }
 
-class ThunderWave extends StatusMove {
+class ThunderWave extends StatusCauseStatusAilment {
   val index = 86
   val type1 = Electric
   var maxPP = 20
   var currentPP = maxPP
-  val chancePAR = 1.0
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      if (Random.nextDouble < chancePAR) {
-        defender.tryToChangeStatusAilment(new PAR)
-      }
-    }
-  }
+  val statusAilmentToCause = new PAR
+  val chanceOfCausingAilment = 1.0
 }
 
-class StunSpore extends StatusMove {
+class StunSpore extends StatusCauseStatusAilment {
   val index = 78
   val type1 = Grass
   var maxPP = 30
   var currentPP = maxPP
-  val chancePAR = 1.0
+  val statusAilmentToCause = new PAR
+  val chanceOfCausingAilment = 1.0
   override val accuracy = 0.75
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      if (Random.nextDouble < chancePAR) {
-        defender.tryToChangeStatusAilment(new PAR)
-      }
-    }
-  }
 }
 
-class Glare extends StatusMove {
+class Glare extends StatusCauseStatusAilment {
   val index = 137
   val type1 = Normal
   var maxPP = 30
   var currentPP = maxPP
-  val chancePAR = 1.0
+  val statusAilmentToCause = new PAR
+  val chanceOfCausingAilment = 1.0
   override val accuracy = 0.75  // increased in later generations
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      if (Random.nextDouble < chancePAR) {
-        defender.tryToChangeStatusAilment(new PAR)
-      }
-    }
-  }
 }
 
-class ConfuseRay extends StatusMove {
+class ConfuseRay extends StatusCauseStatusAilment {
   val index = 109
   val type1 = Ghost
   var maxPP = 10
   var currentPP = maxPP
-  val chanceCON = 1.0
-
+  val statusAilmentToCause = new CONFUSION
+  val chanceOfCausingAilment = 1.0
   // TODO: ConfuseRay will fail if the target has a substitute
-  // TODO: Confusion is volative and requires a data structure! Probably a map from Pokemon to number of turns left with confusion
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      if (Random.nextDouble < chanceCON) {
-        // defender.tryToChangeStatusAilment(CON)
-      }
-    }
-  }
 }
 
-//class Supersonic extends StatusMove {
-//  val index = 48
-//  val type1 = Normal
-//  var maxPP = 20
-//  var currentPP = maxPP
-//  val chanceCON = 1.0
-//  override val accuracy = 0.55
-//
-//  // TODO: Supersonic will fail if the target has a substitute
-//  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-//    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-//      if (Random.nextDouble < chanceCON) {
-//        defender.tryToChangeStatusAilment(CON)
-//      }
-//    }
-//  }
-//}
+class Supersonic extends StatusCauseStatusAilment {
+  val index = 48
+  val type1 = Normal
+  var maxPP = 20
+  var currentPP = maxPP
+  val statusAilmentToCause = new CONFUSION
+  val chanceOfCausingAilment = 1.0
+  override val accuracy = 0.55
+  // TODO: Supersonic will fail if the target has a substitute
+}
 
-class SleepPowder extends StatusMove {
+class SleepPowder extends StatusCauseStatusAilment {
   val index = 79
   val type1 = Grass
   var maxPP = 15
   var currentPP = maxPP
-  val chanceSLP = 1.0
+  val statusAilmentToCause = new SLP
+  val chanceOfCausingAilment = 1.0
   override val accuracy = 0.75
-
   // TODO: SleepPowder will fail if the target has a substitute
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      if (Random.nextDouble < chanceSLP) {
-        defender.tryToChangeStatusAilment(new SLP)
-      }
-    }
-  }
 }
 
-class Hypnosis extends StatusMove {
+class Hypnosis extends StatusCauseStatusAilment {
   val index = 95
   val type1 = Psychic
   var maxPP = 15
   var currentPP = maxPP
-  val chanceSLP = 1.0
+  val statusAilmentToCause = new SLP
+  val chanceOfCausingAilment = 1.0
   override val accuracy = 0.60
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      if (Random.nextDouble < chanceSLP) {
-        defender.tryToChangeStatusAilment(new SLP)
-      }
-    }
-  }
 }
 
-class PoisonGas extends StatusMove {
+class PoisonGas extends StatusCauseStatusAilment {
   val index = 139
   val type1 = Poison
   var maxPP = 40
   var currentPP = maxPP
-  val chancePSN = 1.0
+  val statusAilmentToCause = new PSN
+  val chanceOfCausingAilment = 1.0
   override val accuracy = 0.55
-
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      if (Random.nextDouble < chancePSN) {
-        defender.tryToChangeStatusAilment(new PSN)
-      }
-    }
-  }
 }
 
 class Toxic extends StatusMove {
@@ -1208,7 +1167,8 @@ class Toxic extends StatusMove {
   }
 }
 
-// SUPER WEIRD STATUS MOVES
+
+/* SUPER WEIRD STATUS MOVES */
 class MirrorMove extends StatusMove {
   val index = 119
   val type1 = Flying
