@@ -3,6 +3,7 @@ package pokemodel
 import scala.util.Random
 import CritHitType._
 import MoveType._
+import Battle.{verbose=>VERBOSE}
 
 class DamageCalculator {
   /*
@@ -16,6 +17,7 @@ class DamageCalculator {
     // The key method, through which all damages are calculated
     val criticalChance = calcCriticalChance(attacker, defender, move, battle)
     if (Random.nextDouble < criticalChance) {
+      if (VERBOSE) println(s"Critical hit for $move")
       calcCriticalHitDamage(attacker, defender, move, battle)
     } else {
       calcRegularHitDamage(attacker, defender, move, battle)

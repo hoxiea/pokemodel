@@ -20,6 +20,7 @@ import Battle.{verbose=>VERBOSE}
 // TODO: moveSpecificStuff could return true/false if it succeeds/fails. This would let you, for example, print "It succeeded!" or "It failed!"
 // TODO: Build some integrated way to figure out if a move hits that takes RNG, accuracy, attacker accuracy, evasion, statuses, Fly/Dig/Haze/etc. into account
 // TODO: Build some way to capture the logic of inflicting a status ailment. Should check for: pre-existing condition, Haze, missed attack, etc.
+// TODO: Redo this with traits like SingleStrike, MultiStrike, CauseStatusAilment, Recoil, etc. Then you can reuse the "cause status ailment" logic in all moves that do it instead of copying/pasting for Physical AND Special
 
 abstract class Move {
   /* ABSTRACT STUFF */
@@ -40,12 +41,14 @@ abstract class Move {
   def restorePP(amount : Int) = { currentPP = intWrapper(maxPP) min (currentPP + amount) }
   def restorePP() = { currentPP = maxPP }
 
-  def startUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) : Unit = {
+  def startUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
+    // Function called before move-specific stuff happens
     assert(currentPP > 0, s"tried to use $this with 0 PP")
     if (VERBOSE) println(s"${attacker.name} used $this on ${defender.name}")
   }
 
-  def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) : Unit = {
+  def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
+    // Function called after move-specific stuff happens
     currentPP -= 1
     pb.moveManager.updateLastMoveIndex(attacker, index)
   }
@@ -69,21 +72,39 @@ abstract class Move {
   }
 }
 
-trait PhysicalMove extends Move {
+abstract class PhysicalMove extends Move {
   // Physical Moves use Attack and Defense as the relevant stats
   def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveAttack(attacker)
   def getDefenseStat(defender: Pokemon, b : Battle) = b.statManager.getEffectiveDefense(defender)
   override val moveType = PHYSICALMOVE
 }
 
-trait SpecialMove extends Move {
+trait SingleStrike extends PhysicalMove {
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+      if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val damageDealt = pb.dc.calc(attacker, defender, this, pb)
+      defender.takeDamage(damageDealt)
+    }
+  }
+}
+
+class VineWhip extends PhysicalMove with SingleStrike {
+  val index = 22
+  val type1 = Grass
+  val power = 45  // power and maxPP increased in later generations
+  var maxPP = 10
+  var currentPP = maxPP
+}
+
+
+abstract class SpecialMove extends Move {
   // Special Moves use Special as the relevant stat for both offense and defense in Gen 1
   def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(attacker)
   def getDefenseStat(defender: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(defender)
   override val moveType = SPECIALMOVE
 }
 
-trait StatusMove extends Move {
+abstract class StatusMove extends Move {
   // Stats don't really enter the picture with Status Moves
   override val moveType = STATUSMOVE
   override val power = 0
@@ -150,14 +171,6 @@ class WingAttack extends PhysicalSingleStrike {
   val type1 = Flying
   val power = 35  // increased in later generations, weak in this one
   var maxPP = 35
-  var currentPP = maxPP
-}
-
-class VineWhip extends PhysicalSingleStrike {
-  val index = 22
-  val type1 = Grass
-  val power = 45  // power and maxPP increased in later generations
-  var maxPP = 10
   var currentPP = maxPP
 }
 
@@ -302,7 +315,7 @@ abstract class PhysicalSingleStrikeStatusChange extends PhysicalMove {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
       if (statusAilmentCaused) statusAilmentToCause match {
-        case (_ : NonVolatileStatusAilment) => defender.tryToChangeStatusAilment(statusAilmentToCause, pb)
+        case (_ : NonVolatileStatusAilment) => pb.statusManager.tryToChangeStatusAilment(defender, statusAilmentToCause)
         case (_ : CONFUSION) => pb.statusManager.tryToCauseConfusion(defender)
         case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender)
         case (_ : PARTIALLYTRAPPED) => { pb.statusManager.tryToPartiallyTrap(defender) }
@@ -450,7 +463,7 @@ class PoisonSting extends PhysicalSingleStrikeStatusChange {
 }
 
 
-// PHYSICAL, SINGLE-STRIKE, SPECIAL
+// PHYSICAL, SINGLE-STRIKE WITH A TWIST
 class QuickAttack extends PhysicalSingleStrike {
   val index = 98
   val type1 = Normal
@@ -1209,7 +1222,7 @@ abstract class StatusCauseStatusAilment extends StatusMove {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb) && statusAilmentCaused) {
       statusAilmentToCause match {
-        case (_ : NonVolatileStatusAilment) => defender.tryToChangeStatusAilment(statusAilmentToCause, pb)
+        case (_ : NonVolatileStatusAilment) => pb.statusManager.tryToChangeStatusAilment(defender, statusAilmentToCause)
         case (_ : CONFUSION) => pb.statusManager.tryToCauseConfusion(defender)
         case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender)
         case (_ : PARTIALLYTRAPPED) => { pb.statusManager.tryToPartiallyTrap(defender) }

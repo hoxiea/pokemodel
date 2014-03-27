@@ -52,11 +52,6 @@ class Pokemon(builder : PokemonBuilder) {
     currentHP = if (damage >= currentHP) 0 else currentHP - damage
   }
   
-  def tryToChangeStatusAilment(newStatus : StatusAilment, battle : Battle) : Unit = statusAilment match {
-    case None => { statusAilment = Some(newStatus) }
-    case Some(s) => {}  // new status ailments don't overwrite old ones
-  }
-
   def heal() {
     currentHP = maxHP
     statusAilment = None

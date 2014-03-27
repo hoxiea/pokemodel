@@ -28,11 +28,14 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
    * Structures for tracking yes/no stuff
    * A Pokemon appearing in one of these means that that status ailment is in effect
    */
+  // Status Ailments
   private val flinchSet = mutable.Set[Pokemon]()
   private val seededSet = mutable.Set[Pokemon]()
-  private val mistSet   = mutable.Set[Pokemon]()
   
-  def hasMist(p : Pokemon) : Boolean = mistSet contains p
+  // Moves
+  private val mistSet = mutable.Set[Pokemon]()
+  private val digSet  = mutable.Set[Pokemon]()
+  private val flySet  = mutable.Set[Pokemon]()
   
   /* METHODS FOR INTERACTING WITH THIS STUFF */
   def tryToCauseConfusion(p: Pokemon) {
@@ -73,6 +76,7 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     flinchSet += p
   }
 
+  def hasMist(p : Pokemon) : Boolean = mistSet contains p
 
   def processSwitchOut(p : Pokemon) = {
     // TODO: take care of everything that needs to be removed, zeroed, etc. when Pokemon p switches out of battle

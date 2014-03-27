@@ -2,7 +2,7 @@ package pokemodel
 
 object MoveMaker {
   def makeMove(moveIndex : Int) : Move = {
-    require(1 <= moveIndex && moveIndex <= 165)
+    require(1 <= moveIndex && moveIndex <= 165, "illegal move index passed to makeMove")
     moveIndex match {
       case 1 => new Pound
 //      case 2 => new KarateChop

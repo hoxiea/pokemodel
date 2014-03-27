@@ -4,21 +4,6 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 - Transfer HP from opponent to self
 = Leech Life (Bug)
 
-- Single-strike + potential status change
-    = Bite: damage and 10% chance of causing a flinch
-    = Bone Club: damage and 10% chance of causing a flinch
-    = Hyper Fang: damage and 10% chance of causing a flinch
-    = Low Kick: damage and 30% chance of causing a flinch
-    = Headbutt: damage and 30% chance of causing a flinch
-    = Stomp: damage and 30% chance of causing a flinch
-    = Rolling Kick: damage and 30% chance of causing a flinch
-    = Thunder Punch: damage and 10% chance of PAR
-    = Ice Punch: damage and 10% chance of FRZ
-    = Lick: damage and 30% chance of PAR
-    = Body Slam: damage and 30% chance of PAR
-= Fire Punch: damage and 10% chance of BRN
-= Poison Sting: damage and 30% chance of PSN
-
 - Single-strike + potential stat change
 = Constrict: damage and 10% chance of lowering target's Speed stat by one level
 
