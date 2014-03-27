@@ -71,9 +71,8 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
 
   /* Ways for the Battle to interact with the stats */
   def getEffectiveAttack(p: Pokemon) : Int = {
-    require(attackStages contains p, s"getEffectiveAttack error for $p")
+    require(attackStages contains p, s"${p.name} doesn't have an Attack stage in this battle")
     val effectiveAttack = (attackStageToFraction(attackStages(p)) * p.attack).toInt
-    println(s"effectiveAttack in StatManager.getEffectiveAttack = $effectiveAttack")
     if (p.statusAilment == Some(BRN) && attackStages(p) == 0) {  // BRN, no Attack Stat mods in place
       (effectiveAttack / 2) min 999
     } else {
@@ -82,34 +81,32 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   def getEffectiveDefense(p: Pokemon) : Int = {
-    require(defenseStages.contains(p), s"getEffectiveDefense error for $p")
+    require(defenseStages.contains(p), s"${p.name} doesn't have a Defense stage in this battle")
     (defenseStageToFraction(defenseStages(p)) * p.defense).toInt min 999
   }
 
   def getEffectiveSpecial(p: Pokemon) : Int = {
-    require(specialStages.contains(p), s"getEffectiveSpecial error for $p")
-    println((specialStageToFraction(specialStages(p)) * p.special).toInt)
+    require(specialStages.contains(p), s"${p.name} doesn't have a Special stage in this battle")
     (specialStageToFraction(specialStages(p)) * p.special).toInt min 999
   }
 
   def getEffectiveSpeed(p: Pokemon) : Int = {
-    require(speedStages.contains(p), s"getEffectiveSpeed error for $p")
+    require(speedStages.contains(p), s"${p.name} doesn't have a Speed stage in this battle")
     val effectiveSpeed = (speedStageToFraction(speedStages(p)) * p.speed).toInt
     if (p.statusAilment == Some(PAR) && speedStages(p) == 0) {  // PAR, no Speed Stat mods in place
       (effectiveSpeed / 4) min 999
     } else {
       effectiveSpeed min 999
     }
-
   }
 
   def getEffectiveAccuracy(p: Pokemon) : Int = {
-    require(accuracyStages.contains(p), s"getEffectiveAccuracy error for $p")
+    require(accuracyStages.contains(p), s"${p.name} doesn't have an Accuracy stage in this battle")
     accuracyStageToFraction(accuracyStages(p)).toInt min 999
   }
 
   def getEffectiveEvasion(p: Pokemon) : Int = {
-    require(evasionStages.contains(p), s"getEffectiveEvasion error for $p")
+    require(evasionStages.contains(p), s"${p.name} doesn't have an Evasion stage in this battle")
     evasionStageToFraction(evasionStages(p)).toInt min 999
   }
 
@@ -180,9 +177,8 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   /*
-   * Most of the time, the battle stats of a Pokemon can be changed.
-   * However, there are certain instances in which they can't, and
-   * these function captures that logic.
+   * Most of the time, the battle stats of a Pokemon can be changed by both active Pokemon.
+   * However, there are certain instances in which they can't, and these function captures that logic.
    */
 
   // Can Pokemon p change its own battle stats in Battle pb?

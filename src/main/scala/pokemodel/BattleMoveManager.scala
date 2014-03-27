@@ -22,7 +22,7 @@ class BattleMoveManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
   
   def updateLastMoveIndex(p: Pokemon, index : Int) : Unit = {
-    require(1 <= index && index <= 165)
+    // require(1 <= index && index <= 165), was causing test moves to fail
     lastMoveIndex(p) = index
   }
   

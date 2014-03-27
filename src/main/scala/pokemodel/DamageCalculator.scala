@@ -22,6 +22,7 @@ class DamageCalculator {
     } else {
       calcRegularHitDamage(attacker, defender, move, battle)
     }
+    
   }
 
   private def damageFormula(level: Int, attack: Int, defense: Int, base: Int, mod: Double) : Int = {

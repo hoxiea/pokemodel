@@ -89,6 +89,14 @@ trait SingleStrike extends Move {
   }
 }
 
+class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
+  val index = 999
+  val type1 = Normal
+  val power = 40
+  var maxPP = 20
+  var currentPP = maxPP  
+}
+
 abstract class SpecialMove extends Move {
   // Special Moves use Special as the relevant stat for both offense and defense in Gen 1
   def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(attacker)

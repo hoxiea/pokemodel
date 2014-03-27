@@ -26,13 +26,11 @@ class StatManagerSuite extends FunSuite {
       val pikachu = new Pokemon(pb)
 
       val venusaur = new Pokemon(new PokemonBuilder("Venusaur", 50).maxOut().move(1, new VineWhip))
-      val machop = new Pokemon(new PokemonBuilder("Machop", 50).maxOut().move(1, new KarateChop))
       val team1 = new PokemonTeam(pikachu)
-      val team2 = new PokemonTeam(machop)
+      val team2 = new PokemonTeam(venusaur)
       val trainer1 = new UseFirstAvailableMove(team1)
       val trainer2 = new UseFirstAvailableMove(team2)
       val battle = new Battle(trainer1, trainer2)
-
     }
 
   test("Stats returned with no modifications should be same as current stats") {
@@ -101,6 +99,23 @@ class StatManagerSuite extends FunSuite {
     assert(battle.statManager.getEffectiveAttack(pikachu) == (137 * 2.0/6).toInt)
   }
 
+  test("Absolute changes to Pikachu's stats") {
+    val f = fixture
+    import f._
+
+    battle.statManager.setAttackStage(pikachu, 1)
+    assert(battle.statManager.getEffectiveAttack(pikachu) == (137 * 1.5).toInt)
+
+    battle.statManager.setAttackStage(pikachu, 4)
+    assert(battle.statManager.getEffectiveAttack(pikachu) == (137 * 3.0).toInt)
+
+    battle.statManager.setAttackStage(pikachu, -2)
+    assert(battle.statManager.getEffectiveAttack(pikachu) == (137 * 2.0/4).toInt)
+
+    battle.statManager.setAttackStage(pikachu, -6)
+    assert(battle.statManager.getEffectiveAttack(pikachu) == (137 * 2.0/8).toInt)
+  }
+
   test("Stat stages can't go above +6 or below -6") {
     val f = fixture
     import f._
@@ -116,4 +131,23 @@ class StatManagerSuite extends FunSuite {
     assert(battle.statManager.getEffectiveDefense(pikachu) == (101 * 2.0/8).toInt) // unchanged
   }
 
+  test("Basic tests with Venusaur instead of Pikachu") {
+    val f = fixture
+    import f._
+
+    val level50MaxedVenusaurAttack  = 133
+    val level50MaxedVenusaurSpecial = 151
+    assert(battle.statManager.getEffectiveAttack(venusaur) == level50MaxedVenusaurAttack)
+
+    battle.statManager.changeAttackStage(venusaur, 6)
+    assert(battle.statManager.getEffectiveAttack(venusaur) == (level50MaxedVenusaurAttack * 4.0).toInt)
+
+    battle.statManager.changeSpecialStage(venusaur, 3)
+    assert(battle.statManager.getEffectiveSpecial(venusaur) == (level50MaxedVenusaurSpecial * 5.0/2).toInt)
+
+    battle.statManager.changeSpecialStage(venusaur, -3)
+    assert(battle.statManager.getEffectiveSpecial(venusaur) == level50MaxedVenusaurSpecial)
+  }
+
+  // TODO: test weird stat changes with BRN and PAR
 }

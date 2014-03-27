@@ -138,7 +138,8 @@ class PokemonBuilder (val index: Int, val level: Int) {
 
   def move(moveIndex : Int, m : Move) : PokemonBuilder = {
     require(1 <= moveIndex && moveIndex <= 4, "must have 1 <= moveIndex <= 4")
-    require(LearnsetData.learnsets(index) contains m.index, s"$name can't learn $m")
+    require(LearnsetData.learnsets(index).contains(m.index) || m.toString.startsWith("Test"),
+            s"$name can't learn $m")
     moveIndex match {
       case 1 => move1 = Some(m)
       case 2 => move2 = Some(m)
@@ -160,7 +161,7 @@ class PokemonBuilder (val index: Int, val level: Int) {
     specialEV(PokemonBuilder.maxEVValue)
     this
   }
-  
+
   def addRandomMoves() : PokemonBuilder = {
     val moveIndices = LearnsetData.getFourRandomMoveIndices(index)
     var pb = new PokemonBuilder(index, level)
