@@ -14,6 +14,7 @@ class PokemonTeam(val team: List[Pokemon]) {
     
     // Take care of things that happen to the previously-active opponent when they switch out
     pb.moveManager.clearLastMove(activePokemon)  // clear the last move of the Pokemon leaving battle
+    pb.statManager.resetAll(activePokemon)
     // TODO: clear the effects of Mist
     
     // Update the index

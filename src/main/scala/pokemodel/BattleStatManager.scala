@@ -34,18 +34,18 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   private val attackStageToFraction = Map(
-      -6 -> 0.25,
-      -5 -> 0.29,
-      -4 -> 0.33,
-      -3 -> 0.40,
-      -2 -> 0.50,
-      -1 -> 0.67,
+      -6 -> 2.0/8,
+      -5 -> 2.0/7,
+      -4 -> 2.0/6,
+      -3 -> 2.0/5,
+      -2 -> 2.0/4,
+      -1 -> 2.0/3,
       0 -> 1.0,
-      1 -> 1.5,
+      1 -> 3.0/2,
       2 -> 2.0,
-      3 -> 2.5,
+      3 -> 5.0/2,
       4 -> 3.0,
-      5 -> 3.5,
+      5 -> 7.0/2,
       6 -> 4.0
   )
   private def defenseStageToFraction = attackStageToFraction
@@ -53,62 +53,64 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   private def speedStageToFraction = attackStageToFraction
 
   private val accuracyStageToFraction = Map(
-      -6 -> 0.33,
-      -5 -> 0.38,
-      -4 -> 0.43,
-      -3 -> 0.50,
-      -2 -> 0.60,
-      -1 -> 0.75,
+      -6 -> 3.0/9,
+      -5 -> 3.0/8,
+      -4 -> 3.0/7,
+      -3 -> 3.0/6,
+      -2 -> 3.0/5,
+      -1 -> 3.0/4,
       0 -> 1.0,
-      1 -> 1.33,
-      2 -> 1.67,
+      1 -> 4.0/3,
+      2 -> 5.0/3,
       3 -> 2.0,
-      4 -> 2.33,
-      5 -> 2.66,
+      4 -> 7.0/3,
+      5 -> 8.0/3,
       6 -> 3.0
   )
   private def evasionStageToFraction = accuracyStageToFraction
 
   /* Ways for the Battle to interact with the stats */
   def getEffectiveAttack(p: Pokemon) : Int = {
-    require(attackStages.contains(p), s"getEffectiveAttack error for $p")
+    require(attackStages contains p, s"getEffectiveAttack error for $p")
     val effectiveAttack = (attackStageToFraction(attackStages(p)) * p.attack).toInt
+    println(s"effectiveAttack in StatManager.getEffectiveAttack = $effectiveAttack")
     if (p.statusAilment == Some(BRN) && attackStages(p) == 0) {  // BRN, no Attack Stat mods in place
-      effectiveAttack / 2
+      (effectiveAttack / 2) min 999
     } else {
-      effectiveAttack
+      effectiveAttack min 999
     }
   }
 
   def getEffectiveDefense(p: Pokemon) : Int = {
     require(defenseStages.contains(p), s"getEffectiveDefense error for $p")
-    (defenseStageToFraction(defenseStages(p)) * p.defense).toInt
+    (defenseStageToFraction(defenseStages(p)) * p.defense).toInt min 999
   }
 
   def getEffectiveSpecial(p: Pokemon) : Int = {
     require(specialStages.contains(p), s"getEffectiveSpecial error for $p")
-    (specialStageToFraction(specialStages(p)) * p.special).toInt
+    println((specialStageToFraction(specialStages(p)) * p.special).toInt)
+    (specialStageToFraction(specialStages(p)) * p.special).toInt min 999
   }
 
   def getEffectiveSpeed(p: Pokemon) : Int = {
     require(speedStages.contains(p), s"getEffectiveSpeed error for $p")
     val effectiveSpeed = (speedStageToFraction(speedStages(p)) * p.speed).toInt
     if (p.statusAilment == Some(PAR) && speedStages(p) == 0) {  // PAR, no Speed Stat mods in place
-      effectiveSpeed / 4
+      (effectiveSpeed / 4) min 999
     } else {
-      effectiveSpeed
+      effectiveSpeed min 999
     }
 
   }
 
   def getEffectiveAccuracy(p: Pokemon) : Int = {
     require(accuracyStages.contains(p), s"getEffectiveAccuracy error for $p")
-    accuracyStageToFraction(accuracyStages(p)).toInt
+    accuracyStageToFraction(accuracyStages(p)).toInt min 999
   }
 
   def getEffectiveEvasion(p: Pokemon) : Int = {
     require(evasionStages.contains(p), s"getEffectiveEvasion error for $p")
-    evasionStageToFraction(evasionStages(p)).toInt
+    evasionStageToFraction(evasionStages(p)).toInt min 999
   }
 
   /* Ways to increase/decrease stages for Pokemon
@@ -176,20 +178,20 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
     setAccuracyStage(p, 0)
     setEvasionStage(p, 0)
   }
-  
+
   /*
    * Most of the time, the battle stats of a Pokemon can be changed.
    * However, there are certain instances in which they can't, and
    * these function captures that logic.
    */
-  
+
   // Can Pokemon p change its own battle stats in Battle pb?
   def canChangeOwnStats(p: Pokemon, pb: Battle) : Boolean = {
     // TODO: figure out if there's ever a time when a Pokemon can't change its own stats with a move
     // "Mist does not prevent the user or allied Pokemon from lowering their own stats."
     true
   }
-  
+
   // Can attacker change the battle stats of defender in Battle pb?
   def canChangeDefenderStats(attacker: Pokemon, defender: Pokemon, pb: Battle) : Boolean = {
     // TODO: when is a Pokemon immune to stat-changing moves? Mist

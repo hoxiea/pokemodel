@@ -25,7 +25,8 @@ class DamageCalculator {
   }
 
   private def damageFormula(level: Int, attack: Int, defense: Int, base: Int, mod: Double) : Int = {
-    val A = (2 * level.toDouble + 10) / 250
+    // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
+    val A = (2 * level.toDouble + 10) / 25
     val B = attack.toDouble / defense
     ((A * B * base + 2) * mod).toInt
   }
@@ -52,6 +53,8 @@ class DamageCalculator {
       case SPECIALMOVE  => battle.statManager.getEffectiveSpecial(attacker)
       case STATUSMOVE   => throw new Exception("A Status move called calcRegularHitDamage!")
     }
+    println(s"effectiveAttack for $move = $effectiveAttack")
+    println(s"effectiveDefense against $move = $effectiveDefense")
     val damage = damageFormula(attacker.level, effectiveAttack, effectiveDefense, move.power, modifier)
     damage
   }

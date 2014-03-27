@@ -79,29 +79,29 @@ abstract class PhysicalMove extends Move {
   override val moveType = PHYSICALMOVE
 }
 
-trait SingleStrike extends PhysicalMove {
+trait SingleStrike extends Move {
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-      if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+    println("Calling SingleStrike's moveSpecificStuff")
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(damageDealt)
     }
   }
 }
 
-class VineWhip extends PhysicalMove with SingleStrike {
-  val index = 22
-  val type1 = Grass
-  val power = 45  // power and maxPP increased in later generations
-  var maxPP = 10
-  var currentPP = maxPP
-}
-
-
 abstract class SpecialMove extends Move {
   // Special Moves use Special as the relevant stat for both offense and defense in Gen 1
   def getAttackStat(attacker: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(attacker)
   def getDefenseStat(defender: Pokemon, b : Battle)  = b.statManager.getEffectiveSpecial(defender)
   override val moveType = SPECIALMOVE
+}
+
+class VineWhip extends SpecialMove with SingleStrike {
+  val index = 22
+  val type1 = Grass
+  val power = 45  // power and maxPP increased in later generations
+  var maxPP = 10
+  var currentPP = maxPP
 }
 
 abstract class StatusMove extends Move {
