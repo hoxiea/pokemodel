@@ -89,12 +89,27 @@ trait SingleStrike extends Move {
   }
 }
 
-class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
+trait Normal extends Move { override val type1 = Normal }
+trait Fighting extends Move { override val type1 = Fighting }
+trait Flying extends Move { override val type1 = Flying }
+trait Poison extends Move { override val type1 = Poison }
+trait Ground extends Move { override val type1 = Ground }
+trait Rock extends Move { override val type1 = Rock }
+trait Bug extends Move { override val type1 = Bug }
+trait Ghost extends Move { override val type1 = Ghost }
+trait Fire extends Move { override val type1 = Fire }
+trait Water extends Move { override val type1 = Water }
+trait Grass extends Move { override val type1 = Grass }
+trait Electric extends Move { override val type1 = Electric }
+trait Psychic extends Move { override val type1 = Psychic }
+trait Ice extends Move { override val type1 = Ice }
+trait Dragon extends Move { override val type1 = Dragon }
+
+class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike with Normal {
   val index = 999
-  val type1 = Normal
   val power = 40
   var maxPP = 20
-  var currentPP = maxPP  
+  var currentPP = maxPP
 }
 
 abstract class SpecialMove extends Move {
