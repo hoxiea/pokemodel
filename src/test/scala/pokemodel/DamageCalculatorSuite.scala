@@ -178,8 +178,29 @@ class DamageCalculatorSuite extends FunSuite {
   }
 
   test("Plain old damage formula with numbers I found online") {
+    // This example appeared at http://www.serebii.net/games/damage.shtml
+    // But they did the math wrong, so I emailed the webmaster
+    // With the correct math, the answer is around 120
+    // And http://www.math.miami.edu/~jam/azure/compendium/battdam.htm confirms that
+    // the max damage that can be done by this move is 120, which would correspond to the
+    // fact that the serebii example assumes the RNG spit out a 100
     val f = fixture
     import f._
-    assert(battle.dc.damageFormula(100, 219, 289, 60, 3.0, 1.0) == 120)
+    assert(battle.dc.damageFormula(100, 219, 289, 60, 1.5, 2.0, 1.0) == 120)
+  }
+
+  test("More math.miami examples of damage calculations given damage calc inputs") {
+    /* I decided to just start punching in random values and using a max-RNG
+     * each time to compare my answers to his
+     */
+    val f = fixture
+    import f._
+    assert(battle.dc.damageFormula(100, 300, 289, 60, 1.5, 2, 1.0) == 162)
+    assert(battle.dc.damageFormula(100, 500, 289, 60, 1.5, 2, 1.0) == 266)
+    assert(battle.dc.damageFormula(100, 200, 289, 70, 1.5, 2, 1.0) == 126)
+    assert(battle.dc.damageFormula(100, 200, 289, 70, 1.0, 2, 1.0) == 84)
+    assert(battle.dc.damageFormula(100, 200, 153, 70, 1.0, 4, 1.0) == 312)
+    assert(battle.dc.damageFormula(75, 400, 350, 60, 1.5, 0.5, 1.0) == 33)
+    assert(battle.dc.damageFormula(80, 400, 270, 60, 1.5, 1.0, 1.0) == 93)
   }
 }

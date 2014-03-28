@@ -70,6 +70,9 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   private val mistSet = mutable.Set[Pokemon]()
   private val digSet  = mutable.Set[Pokemon]()
   private val flySet  = mutable.Set[Pokemon]()
+  private val focusEnergySet = mutable.Set[Pokemon]()
+  private val lightScreenSet = mutable.Set[Pokemon]()
+  private val reflectSet     = mutable.Set[Pokemon]()
 
   /* METHODS FOR INTERACTING WITH THIS STUFF */
   def tryToCauseConfusion(p: Pokemon) {
@@ -111,6 +114,9 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   }
 
   def hasMist(p : Pokemon) : Boolean = mistSet contains p
+  def hasFocusEnergy(p : Pokemon) : Boolean = focusEnergySet contains p
+  def hasReflect(p : Pokemon) : Boolean = reflectSet contains p
+  def hasLightScreen(p : Pokemon) : Boolean = lightScreenSet contains p
 
   def processSwitchOut(p : Pokemon) = {
     // TODO: take care of everything that needs to be removed, zeroed, etc. when Pokemon p switches out of battle

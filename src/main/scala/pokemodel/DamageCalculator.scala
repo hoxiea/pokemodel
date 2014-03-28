@@ -61,40 +61,35 @@ class DamageCalculator {
    * everything is accounted for elsewhere.
    *
    * Also, according to the math.miami source, you have to truncate to an Int every step of the way.
-   * But that makes things really dependent on the order you do them. So instead, I kept everything a
-   * Double, let decimals accumulate, and truncate at the end. More computationally efficient too.
+   * I ended up looking at the Javascript code of the math.miami calculator and sort of implementing it here
    */
   def damageFormula(level: Int,
                     effectiveAttack: Int,
                     effectiveDefense: Int,
                     basePower: Int,
-                    allTypeStuff: Double,
+                    stabBonus: Double,
+                    typeEffectiveness: Double,
                     r: Double = (Utils.intBetween(85,101).toDouble / 100)): Int = {
-    val q1 = (2 * level.toDouble / 5) + 2
-    val q2 = (q1 * effectiveAttack * basePower) / effectiveDefense
-    val q3 = q2 / 50
-    val q4 = (q3 + 2)
-    val result = (q4 * allTypeStuff * r)
-    println(s"q1 = $q1")
-    println(s"q2 = $q2")
-    println(s"q3 = $q3")
-    println(s"q4 = $q4")
-    println(s"result = $result")
+    val q1: Int = (2 * level.toDouble / 5).toInt + 2
+    val q2: Int = q1 * effectiveAttack * basePower
+    val q3: Int = (q2.toDouble / effectiveDefense).toInt
+    val q4: Int = (q3.toDouble / 50).toInt + 2
+    val q5: Int = (q4 * stabBonus).toInt
+    val q6: Int = (q5 * typeEffectiveness).toInt
+    val result = q6 * r
+    // println(s"level=$level, eA = $effectiveAttack, eD = $effectiveDefense, power = $basePower")
+    // println(s"q1 = $q1")
+    // println(s"q2 = $q2")
+    // println(s"q3 = $q3")
+    // println(s"q4 = $q4")
+    // println(s"q5 = $q5")
+    // println(s"q6 = $q6")
+    // println(s"result = $result\n")
     result.toInt
-  }
-
-  def calcModifier(attacker: Pokemon,
-                   defender: Pokemon,
-                   move: Move): Double = {
-    // Used in both calcRegularHit and calcCriticalHit
-    val typeMult = calculateTypeMultiplier(move.type1, defender)
-    val STAB = stabBonus(attacker, move)
-    STAB * typeMult
   }
 
   def calcRegularHitDamage(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Int = {
     // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
-    val modifier = calcModifier(attacker, defender, move)
     val effectiveAttack = move.moveType match {
       case PHYSICALMOVE => battle.statManager.getEffectiveAttack(attacker)
       case SPECIALMOVE  => battle.statManager.getEffectiveDefense(attacker)
@@ -105,9 +100,9 @@ class DamageCalculator {
       case SPECIALMOVE  => battle.statManager.getEffectiveSpecial(attacker)
       case STATUSMOVE   => throw new Exception("A Status move called calcRegularHitDamage!")
     }
-    println(s"effectiveAttack for $move = $effectiveAttack")
-    println(s"effectiveDefense against $move = $effectiveDefense")
-    val damage = damageFormula(attacker.level, effectiveAttack, effectiveDefense, move.power, modifier)
+    val STAB = stabBonus(attacker, move)
+    val typeMod = calculateTypeMultiplier(move.type1, defender)
+    val damage = damageFormula(attacker.level, effectiveAttack, effectiveDefense, move.power, STAB, typeMod)
     damage
   }
 
@@ -118,7 +113,6 @@ class DamageCalculator {
      * - Ignore halved attack from BRN
      * - Ignore all stat mods, even beneficial ones, for both Pokemon
      */
-    val modifier = calcModifier(attacker, defender, move)
     val attack = move.moveType match {
       case PHYSICALMOVE => attacker.attack
       case SPECIALMOVE  => attacker.defense
@@ -129,18 +123,21 @@ class DamageCalculator {
       case SPECIALMOVE  => attacker.special
       case STATUSMOVE   => throw new Exception("A Status move called calcCriticalHitDamage!")
     }
-    val damage = damageFormula(attacker.level * 2, attack, defense, move.power, modifier)
+    val STAB = stabBonus(attacker, move)
+    val typeMod = calculateTypeMultiplier(move.type1, defender)
+    val damage = damageFormula(attacker.level * 2, attack, defense, move.power, STAB, typeMod)
     damage
   }
 
 
   def calcCriticalChance(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Double = {
-  // TODO: take FocusEnergy status (and Battle.focusEnergyHelps) into account when calculating criticalChance
     val criticalChance = move.critHitRate match {
       case LOW  => PokeData.getBaseSpeed(attacker.index).toDouble / 512
       case HIGH => PokeData.getBaseSpeed(attacker.index).toDouble / 64
     }
-    criticalChance
+    if (battle.statusManager.hasFocusEnergy(attacker)) {
+      if (Battle.focusEnergyHelps) criticalChance * 4
+      else criticalChance / 4
+    } else criticalChance
   }
-
 }
