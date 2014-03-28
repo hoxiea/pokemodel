@@ -176,4 +176,10 @@ class DamageCalculatorSuite extends FunSuite {
     assert(battle.dc.calculateTypeMultiplier(Ice, charizard) == 2.0)
     assert(battle.dc.calculateTypeMultiplier(Grass, charizard) == 0.25)  // double
   }
+
+  test("Plain old damage formula with numbers I found online") {
+    val f = fixture
+    import f._
+    assert(battle.dc.damageFormula(100, 219, 289, 60, 3.0, 1.0) == 120)
+  }
 }

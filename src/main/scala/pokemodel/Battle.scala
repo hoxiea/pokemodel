@@ -14,7 +14,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   val statusManager = new BattleStatusManager(team1, team2)
   val dc = new DamageCalculator()
 
-  var time : Int = 0
+  var time: Int = 0
 
   /* NON-VOLATIVE STATUS EFFECTS
    * Burn, Freeze, Paralysis, Poison, Badly Poison, and Sleep

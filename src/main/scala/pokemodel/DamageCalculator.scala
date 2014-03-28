@@ -54,21 +54,44 @@ class DamageCalculator {
    * From http://www.serebii.net/games/damage.shtml:
    * ((((2 * Level / 5 + 2) * AttackStat * AttackPower / DefenseStat) / 50) + 2) * STAB * Weakness/Resistance * Random[85,100] / 100
    * This third one parses, and uses the correct stuff, and seems legit, so that's what I'll do
+   *
+   * Note: In this formula, attack and defense are the EFFECTIVE attack and defense, which depend on things
+   * like battle stat mods, statuses (BRN halves attack, for example), and whether the move is Physical or
+   * Special. Rather than worrying about all that here, we'll capture the formula here and make sure that
+   * everything is accounted for elsewhere.
+   *
+   * Also, according to the math.miami source, you have to truncate to an Int every step of the way.
+   * But that makes things really dependent on the order you do them. So instead, I kept everything a
+   * Double, let decimals accumulate, and truncate at the end. More computationally efficient too.
    */
-  def damageFormula(level: Int, attack: Int, defense: Int, base: Int, mod: Double): Int = {
-    val A = ((((2 * level / 5 + 2) * attack * base / defense) / 50) + 2)
-    val r = (Utils.intBetween(85,101).toDouble / 100)
-    (A * mod * r).toInt
+  def damageFormula(level: Int,
+                    effectiveAttack: Int,
+                    effectiveDefense: Int,
+                    basePower: Int,
+                    allTypeStuff: Double,
+                    r: Double = (Utils.intBetween(85,101).toDouble / 100)): Int = {
+    val q1 = (2 * level.toDouble / 5) + 2
+    val q2 = (q1 * effectiveAttack * basePower) / effectiveDefense
+    val q3 = q2 / 50
+    val q4 = (q3 + 2)
+    val result = (q4 * allTypeStuff * r)
+    println(s"q1 = $q1")
+    println(s"q2 = $q2")
+    println(s"q3 = $q3")
+    println(s"q4 = $q4")
+    println(s"result = $result")
+    result.toInt
   }
 
-  def calcModifier(attacker: Pokemon, defender: Pokemon, move: Move): Double = {
-    // "Modifier" value in http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
+  def calcModifier(attacker: Pokemon,
+                   defender: Pokemon,
+                   move: Move): Double = {
     // Used in both calcRegularHit and calcCriticalHit
     val typeMult = calculateTypeMultiplier(move.type1, defender)
     val STAB = stabBonus(attacker, move)
-    val r = 0.85 + Random.nextDouble * (1.0 - 0.85)
-    STAB * typeMult * r
+    STAB * typeMult
   }
+
   def calcRegularHitDamage(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Int = {
     // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
     val modifier = calcModifier(attacker, defender, move)
