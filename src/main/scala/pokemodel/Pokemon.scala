@@ -69,24 +69,24 @@ class Pokemon(builder : PokemonBuilder) {
   }
 
   // TODO: take no PP into account?
-  def useMove(index : Int, enemy : Pokemon, battle : Battle): Boolean = {
+  def useMove(index : Int, enemy : Pokemon, battle : Battle): MoveResult = {
     // returns whether or not a critical hit was landed
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
     index match {
       case 1 => move1 match {
-        case None => { false }
+        case None => { new MoveResultBuilder().toMoveResult }  // TODO: improve?
         case Some(m) => m.use(this, enemy, battle)
       }
       case 2 => move2 match {
-        case None => { false }
+        case None => { new MoveResultBuilder().toMoveResult }  // TODO: improve?
         case Some(m) => m.use(this, enemy, battle)
       }
       case 3 => move3 match {
-        case None => { false }
+        case None => { new MoveResultBuilder().toMoveResult }  // TODO: improve?
         case Some(m) => m.use(this, enemy, battle)
       }
       case 4 => move4 match {
-        case None => { false }
+        case None => { new MoveResultBuilder().toMoveResult }  // TODO: improve?
         case Some(m) => m.use(this, enemy, battle)
       }
       case 5 => move5.use(this, enemy, battle)

@@ -8,12 +8,10 @@ import CritHitType._
 import scala.util.Random
 import Battle.{verbose=>VERBOSE}
 
-/* In the Gameboy game, each Move is stored exactly once in memory, and the Pokemon Data Structure keeps
- * track of which Moves the Pokemon knows and how many PP are left for each Move the Pokemon has.
- *
- * I took a more object-oriented approach and modeled Moves as objects that
- * maintain their own statistics and state, and know how to do things like use
- * themselves against another Pokemon in a battle.
+/*
+ * TODO: Overview of the final version of the Move design goes here
+ * Ideally, something about stackable traits with a MoveResultBuilder that gets passed up and appended as it goes,
+ * until it's converted to a MoveResult by either PhysicalMove, SpecialMove, or StatusMove
  */
 
 // TODO: Any move that can cause a stat change to opponent needs to make sure that the opponent's stats can change via the battle's statManager
@@ -37,6 +35,13 @@ abstract class Move {
   val critHitRate = LOW   // True for 99% of moves, outliers can override
   val priority = 0        // True for 99% of moves, outliers can override
   val accuracy = 1.0      // in [0.0, 1.0], true for ~60% of moves, others can override
+  val mrb = new MoveResultBuilder()
+  
+  // Even moves with 100% accuracy might miss because of accuracy/evasion adjustments in battle
+  def chanceHit(attacker : Pokemon, defender : Pokemon, pb : Battle): Double = {
+    accuracy * (pb.statManager.getEffectiveAccuracy(attacker).toDouble / pb.statManager.getEffectiveEvasion(defender))
+  }
+
 
   def startUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
     // Function called before move-specific stuff happens
@@ -44,25 +49,20 @@ abstract class Move {
   }
 
   // This is what each specific move is ultimately responsible for providing, along with basic information
-  def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle): Boolean
+  def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder): MoveResult
 
   def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
     // Function called after move-specific stuff happens
     pb.moveManager.updateLastMoveIndex(attacker, index)
   }
 
-  final def use(attacker: Pokemon, defender: Pokemon, pb: Battle): Boolean = {
-    // returns whether or not a critical hit happened
+  final def use(attacker: Pokemon, defender: Pokemon, pb: Battle): MoveResult = {
     startUsingMove(attacker, defender, pb)
-    val critHit = moveSpecificStuff(attacker, defender, pb)
+    val result = moveSpecificStuff(attacker, defender, pb, mrb)
     finishUsingMove(attacker, defender, pb)
-    critHit
+    result
   }
 
-  // Even moves with 100% accuracy might miss because of accuracy/evasion adjustments in battle
-  def chanceHit(attacker : Pokemon, defender : Pokemon, pb : Battle): Double = {
-    accuracy * (pb.statManager.getEffectiveAccuracy(attacker).toDouble / pb.statManager.getEffectiveEvasion(defender))
-  }
 
   override def toString() = {
     val moveName = this.getClass().getName()
@@ -86,7 +86,7 @@ class PhysicalMove extends Move {
   override val power = 0
   override val maxPP = 0
   override val moveType = PHYSICALMOVE
-  def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle): Boolean = false
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder) = mrb.toMoveResult
 }
 
 class SpecialMove extends Move {
@@ -95,7 +95,7 @@ class SpecialMove extends Move {
   override val power = 0
   override val maxPP = 0
   override val moveType = SPECIALMOVE
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle): Boolean = false
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder) = mrb.toMoveResult
 }
 
 class StatusMove extends Move {
@@ -104,7 +104,7 @@ class StatusMove extends Move {
   override val power = 0
   override val maxPP = 0
   override val moveType = STATUSMOVE
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle): Boolean = false
+  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder) = mrb.toMoveResult
 }
 
 
@@ -136,69 +136,71 @@ trait Dragon extends Move { override val type1 = Dragon }
 
 // Next, we capture commonalities in terms of the different things that Moves do
 trait SingleStrike extends Move {
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    super.moveSpecificStuff(attacker, defender, pb, mrb)
     println("Calling SingleStrike's moveSpecificStuff")
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      val (damageDealt, critHit) = pb.dc.calc(attacker, defender, this, pb)
-      defender.takeDamage(damageDealt)
-      critHit
-    } else false
+      val result = pb.dc.calc(attacker, defender, this, pb)
+      defender.takeDamage(result.damageDealt)
+      result.KO(defender.isAlive)
+      result.toMoveResult
+    } else new MoveResultBuilder().toMoveResult  // default values are actually correct here
   }
 }
 
-trait StatusChange extends Move {
-  // Cause some kind of StatusAilment to the opponent, non-volatile or volatile,
-  // with a probability that depends on the move
-  def statusAilmentToCause   : StatusAilment
-  def chanceOfCausingAilment : Double
-  
-  def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
+//trait StatusChange extends Move {
+//  // Cause some kind of StatusAilment to the opponent, non-volatile or volatile,
+//  // with a probability that depends on the move
+//  def statusAilmentToCause   : StatusAilment
+//  def chanceOfCausingAilment : Double
+//  
+//  def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
+//
+//  abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+//    super.moveSpecificStuff(attacker, defender, pb, mrb)
+//    if (statusAilmentCaused) { 
+//      statusAilmentToCause match {
+//        case (_ : NonVolatileStatusAilment) => {
+//          val changeWorked = pb.statusManager.tryToChangeStatusAilment(defender, statusAilmentToCause)
+//          if (changeWorked) new MoveResultBuilder().statusChange(statusAilmentToCause).toMoveResult
+//          else new MoveResultBuilder().toMoveResult
+//        }
+//        case (_ : CONFUSION) => {
+//          val changeWorked = pb.statusManager.tryToCauseConfusion(defender)
+//          if (changeWorked) new MoveResultBuilder().statusChange(new CONFUSION).toMoveResult
+//          else new MoveResultBuilder().toMoveResult
+//        }
+//        case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender); false
+//        case (_ : PARTIALLYTRAPPED) => pb.statusManager.tryToPartiallyTrap(defender); false
+//        case (_ : SEEDED) => pb.statusManager.tryToSeed(defender); false
+//        case _ => false
+//      }
+//    } else false
+//  }
+//}
 
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (statusAilmentCaused) { 
-      statusAilmentToCause match {
-        case (_ : NonVolatileStatusAilment) => pb.statusManager.tryToChangeStatusAilment(defender, statusAilmentToCause); false
-        case (_ : CONFUSION) => pb.statusManager.tryToCauseConfusion(defender); false
-        case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender); false
-        case (_ : PARTIALLYTRAPPED) => pb.statusManager.tryToPartiallyTrap(defender); false
-        case (_ : SEEDED) => pb.statusManager.tryToSeed(defender); false
-        case _ => false
-      }
-    } else false
-  }
-}
-
-trait Recoil extends Move {
-  // Take damage equal to some proportion of the damage dealt to the opponent, usually 25%
-  def recoilProportion: Double
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      val (damageDealt, critHit) = pb.dc.calc(attacker, defender, this, pb)
-      defender.takeDamage(damageDealt)
-      val recoilDamage = (damageDealt * recoilProportion).toInt
-      attacker.takeDamage(recoilDamage)
-      if (VERBOSE) println(s"${attacker.name} took $recoilDamage recoil damage")
-      critHit
-    } else false
-  }
-}
+//trait Recoil extends Move {
+//  // Take damage equal to some proportion of the damage dealt to the opponent, usually 25%
+//  def recoilProportion: Double
+//  abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+//    super.moveSpecificStuff(attacker, defender, pb, mrb)
+//    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+//      val result = pb.dc.calc(attacker, defender, this, pb)
+//      defender.takeDamage(result.damageDealt)
+//      val recoilDamage = (result.damageDealt * recoilProportion).toInt
+//      attacker.takeDamage(recoilDamage)
+//      if (VERBOSE) println(s"${attacker.name} took $recoilDamage recoil damage")
+//      result.KO(defender.isAlive)
+//      result.selfKO(attacker.isAlive)
+//      result.toMoveResult
+//    } else false
+//  }
+//}
 
 trait ConstantDamage extends Move {
   def damageAmount: Int
 }
 
-class Struggle extends PhysicalMove with SingleStrike with Recoil {
-  override val index = 165
-  override val type1 = Normal
-  override val power = 50
-  override val maxPP = 1
-  override val recoilProportion = 0.5   // different from others!
-
-  override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // Don't deduct a PP! Just log it
-    pb.moveManager.updateLastMoveIndex(attacker, index)
-  }
-}
 
 class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike with Normal {
   override val index = 999
@@ -206,38 +208,40 @@ class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike with Norma
   override val maxPP = 20
 }
 
-class TestPhysicalMultiStrike extends PhysicalMove with MultiStrike with Normal {
-  override val index = 999
-  override val power = 25
-  override val maxPP = 20
-}
+//class TestPhysicalMultiStrike extends PhysicalMove with MultiStrike with Normal {
+//  override val index = 999
+//  override val power = 25
+//  override val maxPP = 20
+//}
 
-trait MultiStrike extends Move {
-  // Hit the opponent 2, 3, 4, or 5 times with the Gen 1 probabilities (0.375, 0.375, 0.125, 0.125)
-  // TODO: Ends if substitute breaks
-  // TODO: Make sure that Bide and Counter only acknowledge the last attack in this sequence
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-      val r = Random.nextDouble
-      val numStrikes = if (r < 0.375) 2
-                       else if (r < (0.375 + 0.375)) 3
-                       else if (r < (0.375 + 0.375 + 0.125)) 4
-                       else 5
-
-      // In later generations, each hit was considered separately and could be critical/not
-      // In Gen 1, damage was calculated once and then used for each blow
-      val (damageEachTime, critHit) = pb.dc.calc(attacker, defender, this, pb)
-
-      // There's no harm in doing damage once the enemy is dead, since takeDamage stops at 0 HP
-      for (_ <- 1 to numStrikes) {
-        defender.takeDamage(damageEachTime)
-      }
-
-      if (VERBOSE) println(s"$this hit ${defender.name} $numStrikes times!")
-      critHit
-    } else false
-  }
-}
+//trait MultiStrike extends Move {
+//  // Hit the opponent 2, 3, 4, or 5 times with the Gen 1 probabilities (0.375, 0.375, 0.125, 0.125)
+//  // TODO: Ends if substitute breaks
+//  // TODO: Make sure that Bide and Counter only acknowledge the last attack in this sequence
+//  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+//    super.moveSpecificStuff(attacker, defender, pb, mrb)
+//    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+//      val r = Random.nextDouble
+//      val numStrikes = if (r < 0.375) 2
+//                       else if (r < (0.375 + 0.375)) 3
+//                       else if (r < (0.375 + 0.375 + 0.125)) 4
+//                       else 5
+//
+//      // In later generations, each hit was considered separately and could be critical/not
+//      // In Gen 1, damage was calculated once and then used for each blow
+//      val result = pb.dc.calc(attacker, defender, this, pb)
+//
+//      // There's no harm in doing damage once the enemy is dead, since takeDamage stops at 0 HP
+//      for (_ <- 1 to numStrikes) {
+//        defender.takeDamage(result.damageDealt)
+//      }
+//
+//      if (VERBOSE) println(s"$this hit ${defender.name} $numStrikes times!")
+//      result.KO(defender.isAlive)
+//      result.toMoveResult
+//    } else false
+//  }
+//}
 
 
 /* Using just these few pieces, we can implement a surprising number of moves */
@@ -270,16 +274,30 @@ class DragonRage extends SpecialMove with ConstantDamage {
   override def damageAmount = 40
 }
 
-class Thunder extends SpecialMove with SingleStrike with StatusChange {
+class Thunder extends SpecialMove with SingleStrike {
+//  TODO: add StatusChange
   override val index = 87
   override val type1 = Electric
   override val power = 110
   override val maxPP = 10
   override val accuracy = 0.7
 
-  override def statusAilmentToCause = new PAR
-  override def chanceOfCausingAilment = 0.1
+//  override def statusAilmentToCause = new PAR
+//  override def chanceOfCausingAilment = 0.1
 }
 
+class Struggle extends PhysicalMove with SingleStrike {
+  // TODO: Add Recoil! 50%
+  override val index = 165
+  override val type1 = Normal
+  override val power = 50
+  override val maxPP = 1
+//  override val recoilProportion = 0.5   // different from others!
+
+  override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // Don't deduct a PP! Just log it
+    pb.moveManager.updateLastMoveIndex(attacker, index)
+  }
+}
 
 

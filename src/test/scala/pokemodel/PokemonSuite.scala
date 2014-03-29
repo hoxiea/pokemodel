@@ -75,6 +75,7 @@ class PokemonSuite extends FunSuite {
     val pb = new PokemonBuilder(pokemonIndex, 50).move(1, new Tackle)
   }
   
+  // TODO: run this once all Moves implemented
 //  test("Trying out addRandomMoves... won't work, on average, until more moves implemented") {
 //    val pb = PokemonBuilder.generateRandomPokemonBuilder().addRandomMoves()
 //    val p = new Pokemon(pb)

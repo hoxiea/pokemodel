@@ -14,9 +14,9 @@ class MoveSuite extends FunSuite {
     val trainer2 = new UseFirstAvailableMove(team2)
     val battle = new Battle(trainer1, trainer2)
     println(battle)
-    val critHit: Boolean = venusaur.useMove(1, machop, battle)
+    val result = venusaur.useMove(1, machop, battle)
     val damageDealt = machop.maxHP - machop.currentHP
-    if (!critHit) assert(21 <= damageDealt && damageDealt <= 25)  // values from math.miami calculator
+    if (!result.critHit) assert(21 <= damageDealt && damageDealt <= 25)  // values from math.miami calculator
     else assert(39 <= damageDealt && damageDealt <= 46)
   }
 }

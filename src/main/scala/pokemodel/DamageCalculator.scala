@@ -13,7 +13,7 @@ class DamageCalculator {
    * occurred, comes up with the appropriate stat values either way, and computes damage
    */
 
-  def calc(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle) = {
+  def calc(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): MoveResultBuilder = {
     // The key method, through which all damages are calculated
     // Returns a 2tuple of (damage: Int, critHit: Boolean), since this is where critHit
     // occurrences are calculated
@@ -21,10 +21,18 @@ class DamageCalculator {
     if (Random.nextDouble < criticalChance) {
       if (VERBOSE) println(s"Critical hit for $move")
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
-      (chd, true)
+      new MoveResultBuilder()
+          .damageDealt(chd)
+          .critHit(true)
+          .STAB(stabBonus(attacker, move) == 1.5)
+          .typeMult(calculateTypeMultiplier(move.type1, defender))
     } else {
       val rhd = calcRegularHitDamage(attacker, defender, move, battle)
-      (rhd, false)
+      new MoveResultBuilder()
+          .damageDealt(rhd)
+          .critHit(false)
+          .STAB(stabBonus(attacker, move) == 1.5)
+          .typeMult(calculateTypeMultiplier(move.type1, defender))
     }
   }
 
@@ -82,7 +90,7 @@ class DamageCalculator {
     val q5: Int = (q4 * stabBonus).toInt
     val q6: Int = (q5 * typeEffectiveness).toInt
     val result = q6 * r
-    // println(s"level=$level, eA = $effectiveAttack, eD = $effectiveDefense, power = $basePower")
+    // println(s"level = $level, eA = $effectiveAttack, eD = $effectiveDefense, power = $basePower")
     // println(s"q1 = $q1")
     // println(s"q2 = $q2")
     // println(s"q3 = $q3")

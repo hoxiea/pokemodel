@@ -36,7 +36,7 @@ object MoveMaker {
 //      case 30 => new HornAttack
 //      case 31 => new FuryAttack
 //      case 32 => new HornDrill
-//      case 33 => new Tackle
+      case 33 => new Tackle
 //      case 34 => new BodySlam
 //      case 35 => new Wrap
 //      case 36 => new TakeDown
