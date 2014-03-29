@@ -68,14 +68,30 @@ class Pokemon(builder : PokemonBuilder) {
     currentHP = intWrapper(maxHP).min(currentHP + amount)
   }
 
-  // TODO: take no PP into account?
+  private def canUseMove(index: Int): Boolean = {
+    require(1 <= index && index <= 4, s"illegal index $index passed to canUMove - $name($level)")
+
+    // A Pokemon must have Some(Move) to be able to use it
+    val moveOption = getMove(index)
+    if (moveOption.isEmpty) throw new Exception(s"$name tried to use Move${index}, but it doesn't have a Move!")
+
+    // It also has to have Some(pp)
+    val ppOption = getPP(index)
+    if (ppOption.isEmpty) throw new Exception(s"$name tried to use Move${index} and it has a Move${index}, but pp${index} = None!")
+
+    // And that Some(pp) has to feature pp > 0
+    if (ppOption.get <= 0) throw new Exception(s"$name tried to use Move${index} but pp${index} = 0!")
+
+    // Looks good to me!
+    true
+  }
+
   def useMove(index : Int, enemy : Pokemon, battle : Battle): MoveResult = {
-    // returns whether or not a critical hit was landed
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
     index match {
-      case 1 => move1 match {
-        case None => { new MoveResultBuilder().toMoveResult }  // TODO: improve?
-        case Some(m) => m.use(this, enemy, battle)
+      case 1 => {
+        val m1 = move1.get
+        m1.use(this, enemy, battle)
       }
       case 2 => move2 match {
         case None => { new MoveResultBuilder().toMoveResult }  // TODO: improve?
@@ -103,10 +119,10 @@ class Pokemon(builder : PokemonBuilder) {
   private def checkConsistency {
     assert(1 <= index && index <= 165)
     assert(0 <= currentHP && currentHP <= maxHP)
-    
+
     // Check that moves that exist have existing PPs, and that non-existant moves don't
-    
-    
+
+
   }
   private def allInfoString : String = {
     val repr = new StringBuilder()
