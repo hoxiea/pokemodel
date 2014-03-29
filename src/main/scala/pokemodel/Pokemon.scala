@@ -35,6 +35,13 @@ class Pokemon(builder : PokemonBuilder) {
   // they're out of PP / disabled with every other move
   val move5 : Move = new Struggle()
 
+  // Pokemon keep track of the PP they have left for each move; start out full
+  var pp1 : Option[Int] = move1.map(_.maxPP)
+  var pp2 : Option[Int] = move2.map(_.maxPP)
+  var pp3 : Option[Int] = move3.map(_.maxPP)
+  var pp4 : Option[Int] = move4.map(_.maxPP)
+  val pp5 : Option[Int] = Some(1)
+
   val attack  = builder.attack
   val defense = builder.defense
   val speed   = builder.speed
@@ -51,41 +58,35 @@ class Pokemon(builder : PokemonBuilder) {
   def takeDamage(damage : Int) {
     currentHP = if (damage >= currentHP) 0 else currentHP - damage
   }
-  
+
   def heal() {
     currentHP = maxHP
     statusAilment = None
-    for (m <- List(move1, move2, move3, move4)) {
-      m match {
-        case Some(move) => move.restorePP
-        case None => {}
-      }
-    }
   }
-  
+
   def gainHP(amount : Int) {
     currentHP = intWrapper(maxHP).min(currentHP + amount)
   }
 
-  // TODO: take Disable into account?
   // TODO: take no PP into account?
-  def useMove(index : Int, enemy : Pokemon, battle : Battle) : Unit = {
+  def useMove(index : Int, enemy : Pokemon, battle : Battle): Boolean = {
+    // returns whether or not a critical hit was landed
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
     index match {
       case 1 => move1 match {
-        case None => {}
+        case None => { false }
         case Some(m) => m.use(this, enemy, battle)
       }
       case 2 => move2 match {
-        case None => {}
+        case None => { false }
         case Some(m) => m.use(this, enemy, battle)
       }
       case 3 => move3 match {
-        case None => {}
+        case None => { false }
         case Some(m) => m.use(this, enemy, battle)
       }
       case 4 => move4 match {
-        case None => {}
+        case None => { false }
         case Some(m) => m.use(this, enemy, battle)
       }
       case 5 => move5.use(this, enemy, battle)
@@ -99,6 +100,14 @@ class Pokemon(builder : PokemonBuilder) {
   }
 
   /* NICETIES */
+  private def checkConsistency {
+    assert(1 <= index && index <= 165)
+    assert(0 <= currentHP && currentHP <= maxHP)
+    
+    // Check that moves that exist have existing PPs, and that non-existant moves don't
+    
+    
+  }
   private def allInfoString : String = {
     val repr = new StringBuilder()
     repr.append(s"$name, level $level\n")

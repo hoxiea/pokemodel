@@ -31,19 +31,16 @@ class UseFirstAvailableMove(override val team: PokemonTeam) extends Trainer(team
   def getSwitch(battle: Battle) : SwitchPokemon = new SwitchPokemon(team.firstPokemonAliveIndex)
   
   def getBestAction(battle : Battle) : UseMove = {
-    team.activePokemon.move1 match {
-      case Some(move) if (move.currentPP > 0) => return new UseMove(1)
-      case None => team.activePokemon.move2 match {
-        case Some(move) if (move.currentPP > 0) => return new UseMove(2)
-        case None => team.activePokemon.move3 match {
-          case Some(move) if (move.currentPP > 0) => return new UseMove(3)
-          case None => team.activePokemon.move4 match {
-            case Some(move) if (move.currentPP > 0) => return new UseMove(4)
-            case None => return new UseMove(5)
-          }
-        } 
-      }
-    } 
+    // Always just use the first move with PP > 0
+    val activePokemon = team.activePokemon
+    
+    val moveIndex: Int = 
+      if (!activePokemon.pp1.isEmpty && activePokemon.pp1.get > 0) 1
+      else if (!activePokemon.pp2.isEmpty && activePokemon.pp2.get > 0) 2
+      else if (!activePokemon.pp3.isEmpty && activePokemon.pp3.get > 0) 3
+      else if (!activePokemon.pp4.isEmpty && activePokemon.pp4.get > 0) 4
+      else 5
+    return UseMove(moveIndex)
   }
 }
 

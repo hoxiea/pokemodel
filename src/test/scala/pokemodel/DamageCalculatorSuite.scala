@@ -14,7 +14,9 @@ class DamageCalculatorSuite extends FunSuite {
       val alakazam = new Pokemon(new PokemonBuilder("Alakazam", 50))
 
       // Multiple types, especially unique combinations
-      val venusaur = new Pokemon(new PokemonBuilder("Venusaur", 50))
+      val venusaur = new Pokemon(new PokemonBuilder("Venusaur", 50)
+                                   .maxOut().
+                                   move(1, new TestPhysicalSingleStrike))
       val golbat = new Pokemon(new PokemonBuilder("Golbat", 50))  // Poison/Flying
       val haunter = new Pokemon(new PokemonBuilder("Haunter", 50))  // Ghost/Poison
       val aero = new Pokemon(new PokemonBuilder("Aerodactyl", 50))  // Rock/Flying
@@ -202,5 +204,15 @@ class DamageCalculatorSuite extends FunSuite {
     assert(battle.dc.damageFormula(100, 200, 153, 70, 1.0, 4, 1.0) == 312)
     assert(battle.dc.damageFormula(75, 400, 350, 60, 1.5, 0.5, 1.0) == 33)
     assert(battle.dc.damageFormula(80, 400, 270, 60, 1.5, 1.0, 1.0) == 93)
+  }
+
+  test("Venusaur values") {
+    /* I decided to just start punching in random values and using a max-RNG
+     * each time to compare my answers to his
+     */
+    val f = fixture
+    import f._
+    assert(battle.dc.damageFormula(50, 133, 101, 40, 1.0, 1, 0.85) == 21)
+    assert(battle.dc.damageFormula(50, 133, 101, 40, 1.0, 1, 1.0) == 25)
   }
 }

@@ -25,7 +25,7 @@ class StatManagerSuite extends FunSuite {
       assert(pb.speed == 190, "(Speed)")
       val pikachu = new Pokemon(pb)
 
-      val venusaur = new Pokemon(new PokemonBuilder("Venusaur", 50).maxOut().move(1, new VineWhip))
+      val venusaur = new Pokemon(new PokemonBuilder("Venusaur", 50).maxOut().move(1, new Tackle))
       val team1 = new PokemonTeam(pikachu)
       val team2 = new PokemonTeam(venusaur)
       val trainer1 = new UseFirstAvailableMove(team1)

@@ -46,6 +46,6 @@ class BattleSuite extends FunSuite {
     // moves will almost never be used like this, but the opponent was using Struggle and hurting himself,
     // so the damages didn't line up
     p1.move1.get.use(p1, p2, battle) 
-    assert(p1.move1.get.currentPP == p1.move1.get.maxPP - 1)
+    assert(p1.pp1.get == p1.move1.get.maxPP - 1)
   }
 }
