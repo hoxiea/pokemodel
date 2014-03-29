@@ -82,7 +82,6 @@ class DamageCalculator {
                     stabBonus: Double,
                     typeEffectiveness: Double,
                     r: Double = (Utils.intBetween(85,101).toDouble / 100)): Int = {
-    println(s"level=$level, eA = $effectiveAttack, eD = $effectiveDefense, power = $basePower")
     val q1: Int = (2 * level.toDouble / 5).toInt + 2
     val q2: Int = q1 * effectiveAttack * basePower
     val q3: Int = (q2.toDouble / effectiveDefense).toInt
@@ -90,14 +89,6 @@ class DamageCalculator {
     val q5: Int = (q4 * stabBonus).toInt
     val q6: Int = (q5 * typeEffectiveness).toInt
     val result = q6 * r
-    // println(s"level = $level, eA = $effectiveAttack, eD = $effectiveDefense, power = $basePower")
-    // println(s"q1 = $q1")
-    // println(s"q2 = $q2")
-    // println(s"q3 = $q3")
-    // println(s"q4 = $q4")
-    // println(s"q5 = $q5")
-    // println(s"q6 = $q6")
-    // println(s"result = $result\n")
     result.toInt
   }
 

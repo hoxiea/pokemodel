@@ -2,7 +2,7 @@ package pokemodel
 
 import org.scalatest.FunSuite
 
-class StatManagerSuite extends FunSuite {
+class BattleStatManagerSuite extends FunSuite {
 
   def fixture =
     new {

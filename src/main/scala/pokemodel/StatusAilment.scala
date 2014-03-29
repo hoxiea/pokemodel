@@ -25,4 +25,3 @@ case class FLINCH()           extends VolatileStatusAilment
 case class CONFUSION()        extends VolatileStatusAilment
 case class PARTIALLYTRAPPED() extends VolatileStatusAilment
 case class SEEDED()           extends VolatileStatusAilment
-
