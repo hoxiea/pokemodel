@@ -17,8 +17,6 @@ import Battle.{verbose=>VERBOSE}
 // TODO: Any move that can cause a stat change to opponent needs to make sure that the opponent's stats can change via the battle's statManager
 // TODO: moveSpecificStuff could return true/false if it succeeds/fails. This would let you, for example, print "It succeeded!" or "It failed!"
 // TODO: Build some integrated way to figure out if a move hits that takes RNG, accuracy, attacker accuracy, evasion, statuses, Fly/Dig/Haze/etc. into account
-// TODO: Build some way to capture the logic of inflicting a status ailment. Should check for: pre-existing condition, Haze, missed attack, etc.
-// TODO: Redo this with traits like SingleStrike, MultiStrike, CauseStatusAilment, Recoil, etc. Then you can reuse the "cause status ailment" logic in all moves that do it instead of copying/pasting for Physical AND Special
 
 /*
  * All Moves are a subclass of type Move, which defines what it means to be a move.
@@ -31,17 +29,16 @@ abstract class Move {
   val moveType : MoveType.Value  // PHYSICAL, SPECIAL, or STATUS
   val power : Int                // base power of the move
   val maxPP : Int
-  
+
   val critHitRate = LOW   // True for 99% of moves, outliers can override
   val priority = 0        // True for 99% of moves, outliers can override
   val accuracy = 1.0      // in [0.0, 1.0], true for ~60% of moves, others can override
   val mrb = new MoveResultBuilder()
-  
+
   // Even moves with 100% accuracy might miss because of accuracy/evasion adjustments in battle
   def chanceHit(attacker : Pokemon, defender : Pokemon, pb : Battle): Double = {
     accuracy * (pb.statManager.getEffectiveAccuracy(attacker).toDouble / pb.statManager.getEffectiveEvasion(defender))
   }
-
 
   def startUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
     // Function called before move-specific stuff happens
@@ -115,9 +112,10 @@ class StatusMove extends Move {
  * traits was the way to go.
  */
 
-// These allow you to change the type of a move on the fly, which is insanely useful
-// for testing purposes. For example,
-// val m = new TestPhysicalSingleStrike with Electric/Psychic/Whatever
+// These allow you to change the type of a move on the fly. For example,
+// val m1 = new TestPhysicalSingleStrike with Electric
+// val m2 = new TestPhysicalSingleStrike with Psychic
+// Very useful for testing effectivenesses, etc.
 trait Normal extends Move { override val type1 = Normal }
 trait Fighting extends Move { override val type1 = Fighting }
 trait Flying extends Move { override val type1 = Flying }
@@ -134,19 +132,111 @@ trait Psychic extends Move { override val type1 = Psychic }
 trait Ice extends Move { override val type1 = Ice }
 trait Dragon extends Move { override val type1 = Dragon }
 
-// Next, we capture commonalities in terms of the different things that Moves do
+// Likewise, handy ways to change the base power on the fly
+trait Power40 extends Move  { override val power = 40 }
+trait Power80 extends Move  { override val power = 80 }
+trait Power120 extends Move { override val power = 120 }
+
+/* Next, we capture commonalities in terms of the different things that Moves do */
 trait SingleStrike extends Move {
-  abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-    super.moveSpecificStuff(attacker, defender, pb, mrb)
+  abstract override def moveSpecificStuff(attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle, 
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
     println("Calling SingleStrike's moveSpecificStuff")
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+    super.moveSpecificStuff(attacker, defender, pb, mrb)
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) && pb.statusManager.canBeHit(defender)) {
       val result = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(result.damageDealt)
-      result.KO(defender.isAlive)
+      result.KO(!defender.isAlive)
+      result.selfKO(!attacker.isAlive)
       result.toMoveResult
     } else new MoveResultBuilder().toMoveResult  // default values are actually correct here
+
   }
 }
+
+trait ConstantDamage extends Move {
+  def damageAmount: Int
+  abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    super.moveSpecificStuff(attacker, defender, pb, mrb)
+    println("Calling ConstantDamage's moveSpecificStuff")
+
+    val result = new MoveResultBuilder
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) && pb.statusManager.canBeHit(defender)) {
+      defender.takeDamage(damageAmount)
+      result.damageDealt(damageAmount)
+      result.KO(!defender.isAlive)
+      result.selfKO(!attacker.isAlive)
+    }
+    result.toMoveResult
+  }
+}
+
+class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
+  override val index = 999
+  override val type1 = Normal
+  override val power = 40
+  override val maxPP = 20
+}
+
+/* Using just these few pieces, we can implement a surprising number of moves */
+class Pound extends PhysicalMove with SingleStrike {
+  override val index = 1
+  override val type1 = Normal
+  override val power = 40
+  override val maxPP = 35
+}
+
+class Tackle extends PhysicalMove with SingleStrike {
+  override val index = 33
+  override val type1 = Normal
+  override val power = 50
+  override val maxPP = 35
+}
+
+class KarateChop extends PhysicalMove with SingleStrike {
+  override val index = 2
+  override val type1 = Normal    // Fighting in later generations
+  override val power = 50
+  override val maxPP = 25
+  override val critHitRate = HIGH
+}
+
+class DragonRage extends PhysicalMove with ConstantDamage {
+  // TODO: change to SpecialMove
+  override val index = 82
+  override val type1 = Dragon
+  override val maxPP = 10
+  override def damageAmount = 40
+}
+
+class Thunder extends SpecialMove with SingleStrike {
+//  TODO: add StatusChange
+  override val index = 87
+  override val type1 = Electric
+  override val power = 110
+  override val maxPP = 10
+  override val accuracy = 0.7
+
+//  override def statusAilmentToCause = new PAR
+//  override def chanceOfCausingAilment = 0.1
+}
+
+class Struggle extends PhysicalMove with SingleStrike {
+  // TODO: Add Recoil! 50%
+  override val index = 165
+  override val type1 = Normal
+  override val power = 50
+  override val maxPP = 1
+//  override val recoilProportion = 0.5   // different from others!
+
+  override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+    // Don't deduct a PP! Just log it
+    pb.moveManager.updateLastMoveIndex(attacker, index)
+  }
+}
+
 
 //trait StatusChange extends Move {
 //  // Cause some kind of StatusAilment to the opponent, non-volatile or volatile,
@@ -197,17 +287,6 @@ trait SingleStrike extends Move {
 //  }
 //}
 
-trait ConstantDamage extends Move {
-  def damageAmount: Int
-}
-
-
-class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike with Normal {
-  override val index = 999
-  override val power = 40
-  override val maxPP = 20
-}
-
 //class TestPhysicalMultiStrike extends PhysicalMove with MultiStrike with Normal {
 //  override val index = 999
 //  override val power = 25
@@ -242,62 +321,4 @@ class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike with Norma
 //    } else false
 //  }
 //}
-
-
-/* Using just these few pieces, we can implement a surprising number of moves */
-class Pound extends PhysicalMove with SingleStrike {
-  override val index = 1
-  override val type1 = Normal
-  override val power = 40
-  override val maxPP = 35
-}
-
-class Tackle extends PhysicalMove with SingleStrike {
-  override val index = 33
-  override val type1 = Normal
-  override val power = 50
-  override val maxPP = 35
-}
-
-class KarateChop extends PhysicalMove with SingleStrike {
-  override val index = 2
-  override val type1 = Normal    // Fighting in later generations
-  override val power = 50
-  override val maxPP = 25
-  override val critHitRate = HIGH
-}
-
-class DragonRage extends SpecialMove with ConstantDamage {
-  override val index = 82
-  override val type1 = Dragon
-  override val maxPP = 10
-  override def damageAmount = 40
-}
-
-class Thunder extends SpecialMove with SingleStrike {
-//  TODO: add StatusChange
-  override val index = 87
-  override val type1 = Electric
-  override val power = 110
-  override val maxPP = 10
-  override val accuracy = 0.7
-
-//  override def statusAilmentToCause = new PAR
-//  override def chanceOfCausingAilment = 0.1
-}
-
-class Struggle extends PhysicalMove with SingleStrike {
-  // TODO: Add Recoil! 50%
-  override val index = 165
-  override val type1 = Normal
-  override val power = 50
-  override val maxPP = 1
-//  override val recoilProportion = 0.5   // different from others!
-
-  override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // Don't deduct a PP! Just log it
-    pb.moveManager.updateLastMoveIndex(attacker, index)
-  }
-}
-
 

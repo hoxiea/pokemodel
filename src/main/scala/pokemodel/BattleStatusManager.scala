@@ -126,6 +126,10 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   def hasReflect(p : Pokemon) : Boolean = reflectSet contains p
   def hasLightScreen(p : Pokemon) : Boolean = lightScreenSet contains p
 
+  def canBeHit(p: Pokemon): Boolean = {
+    !flySet.contains(p) && !digSet.contains(p)
+  }
+
   def processSwitchOut(p : Pokemon) = {
     // TODO: take care of everything that needs to be removed, zeroed, etc. when Pokemon p switches out of battle
   }

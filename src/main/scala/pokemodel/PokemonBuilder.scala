@@ -68,6 +68,7 @@ class PokemonBuilder (val index: Int, val level: Int) {
   def type1   = PokeData.getType1(index)
   def type2   = PokeData.getType2(index)
 
+  // Now that we know maxHP, make full-health the default
   var currentHP = maxHP
 
   /* Methods to change changeable values while building */
@@ -138,7 +139,9 @@ class PokemonBuilder (val index: Int, val level: Int) {
 
   def move(moveIndex : Int, m : Move) : PokemonBuilder = {
     require(1 <= moveIndex && moveIndex <= 4, "must have 1 <= moveIndex <= 4")
-    require(LearnsetData.learnsets(index).contains(m.index) || m.toString.startsWith("Test"),
+    require(LearnsetData.learnsets(index).contains(m.index) ||
+            m.toString.startsWith("Test") ||
+            m.toString.contains("$$"),  // mixing in traits seems to change the name
             s"$name can't learn $m")
     moveIndex match {
       case 1 => move1 = Some(m)
@@ -150,6 +153,11 @@ class PokemonBuilder (val index: Int, val level: Int) {
   }
 
   def maxOut() : PokemonBuilder = {
+    // Push all variable stats to their max
+    // Not only do competitive players do this, but having the ability
+    // to do so makes it very easy to create a Pokemon of a given
+    // species/level with exactly the same stats every time.
+    // Very useful for testing, since then you can do damage calculations
     attackIV(PokemonBuilder.maxIVValue)
     defenseIV(PokemonBuilder.maxIVValue)
     speedIV(PokemonBuilder.maxIVValue)
@@ -159,6 +167,7 @@ class PokemonBuilder (val index: Int, val level: Int) {
     defenseEV(PokemonBuilder.maxEVValue)
     speedEV(PokemonBuilder.maxEVValue)
     specialEV(PokemonBuilder.maxEVValue)
+    currentHP = maxHP
     this
   }
 
@@ -201,5 +210,4 @@ object PokemonBuilder {
     val index = Utils.intBetween(1, numPokemon + 1)  // upper end exclusive
     new PokemonBuilder(index, level)
   }
-
 }

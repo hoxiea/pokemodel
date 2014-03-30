@@ -18,7 +18,20 @@ class MoveResult (val damageDealt: Int,  // how much damage was dealt?
                   val typeMult: Double,  // what was your move's type effectiveness against defender?
                   val statusChange : Option[StatusAilment],  // did you cause a status change? if so, which one?
                   val KO: Boolean,       // did you knock the active Pokemon on the other team out?
-                  val selfKO: Boolean)   // did you knock yourself out using this move?
+                  val selfKO: Boolean) { // did you knock yourself out using this move?
+
+  override def toString: String = {
+    val repr = new StringBuilder()
+    repr.append(s"damageDealt = $damageDealt\n")
+    repr.append(s"critHit = $critHit\n")
+    repr.append(s"STAB = $STAB\n")
+    repr.append(s"typeMult = $typeMult\n")
+    repr.append(s"statusChange = $statusChange\n")
+    repr.append(s"KO = $KO\n")
+    repr.append(s"selfKO = $selfKO\n")
+    repr.toString()
+  }
+}
 
 class MoveResultBuilder {
   // default values
@@ -30,10 +43,18 @@ class MoveResultBuilder {
   var KO = false
   var selfKO = false
 
+  val validTypeMults: Set[Double] = Set(0.25, 0.5, 1.0, 2.0, 4.0)
+
   def damageDealt(x: Int): MoveResultBuilder = { damageDealt = x ; this}
   def critHit(c: Boolean): MoveResultBuilder = { critHit = c ; this}
   def STAB(s: Boolean): MoveResultBuilder = { STAB = s ; this}
-  def typeMult(t: Double): MoveResultBuilder = { typeMult = t ; this}
+
+  def typeMult(t: Double): MoveResultBuilder = {
+    require(validTypeMults contains t, "MoveResultBuilder.typeMult was given an invalid value")
+    typeMult = t
+    this
+  }
+
   def statusChange(sa: StatusAilment): MoveResultBuilder = { statusChange = Some(sa) ; this}
   def resetStatusChange: MoveResultBuilder = { statusChange = None ; this}
   def KO(k: Boolean): MoveResultBuilder = { KO = k ; this }
@@ -41,5 +62,17 @@ class MoveResultBuilder {
 
   def toMoveResult: MoveResult = {
     new MoveResult(damageDealt, critHit, STAB, typeMult, statusChange, KO, selfKO)
+  }
+
+  override def toString: String = {
+    val repr = new StringBuilder()
+    repr.append(s"damageDealt = $damageDealt\n")
+    repr.append(s"critHit = $critHit\n")
+    repr.append(s"STAB = $STAB\n")
+    repr.append(s"typeMult = $typeMult\n")
+    repr.append(s"statusChange = $statusChange\n")
+    repr.append(s"KO = $KO\n")
+    repr.append(s"selfKO = $selfKO\n")
+    repr.toString()
   }
 }

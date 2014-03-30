@@ -48,7 +48,7 @@ class Pokemon(builder : PokemonBuilder) {
   val special = builder.special
   val maxHP   = builder.maxHP
 
-  var currentHP = maxHP
+  var currentHP = builder.currentHP
   var statusAilment : Option[StatusAilment] = builder.statusAilment
 
 
@@ -68,8 +68,27 @@ class Pokemon(builder : PokemonBuilder) {
     currentHP = intWrapper(maxHP).min(currentHP + amount)
   }
 
+  def getMove(index: Int): Option[Move] = {
+    require(1 <= index && index <= 4, s"illegal index $index passed to getMove - $name($level)")
+    index match {
+      case 1 => move1
+      case 2 => move2
+      case 3 => move3
+      case 4 => move4
+    }
+  }
+
+  def getPP(index: Int): Option[Int] = {
+    require(1 <= index && index <= 4, s"illegal index $index passed to getPP - $name($level)")
+    index match {
+      case 1 => pp1
+      case 2 => pp2
+      case 3 => pp3
+      case 4 => pp4
+    }
+  }
   private def canUseMove(index: Int): Boolean = {
-    require(1 <= index && index <= 4, s"illegal index $index passed to canUMove - $name($level)")
+    require(1 <= index && index <= 4, s"illegal index $index passed to canUseMove - $name($level)")
 
     // A Pokemon must have Some(Move) to be able to use it
     val moveOption = getMove(index)
@@ -88,22 +107,25 @@ class Pokemon(builder : PokemonBuilder) {
 
   def useMove(index : Int, enemy : Pokemon, battle : Battle): MoveResult = {
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
+    canUseMove(index)
+
+    // At this point, both move${index} and pp$(index) exist and are valid (canUseMove checks)
     index match {
       case 1 => {
-        val m1 = move1.get
-        m1.use(this, enemy, battle)
+        pp1 = Some(pp1.get - 1)
+        move1.get.use(this, enemy, battle)
       }
-      case 2 => move2 match {
-        case None => { new MoveResultBuilder().toMoveResult }  // TODO: improve?
-        case Some(m) => m.use(this, enemy, battle)
+      case 2 => {
+        pp2 = Some(pp2.get - 1)
+        move2.get.use(this, enemy, battle)
       }
-      case 3 => move3 match {
-        case None => { new MoveResultBuilder().toMoveResult }  // TODO: improve?
-        case Some(m) => m.use(this, enemy, battle)
+      case 3 => {
+        pp3 = Some(pp3.get - 1)
+        move3.get.use(this, enemy, battle)
       }
-      case 4 => move4 match {
-        case None => { new MoveResultBuilder().toMoveResult }  // TODO: improve?
-        case Some(m) => m.use(this, enemy, battle)
+      case 4 => {
+        pp4 = Some(pp4.get - 1)
+        move4.get.use(this, enemy, battle)
       }
       case 5 => move5.use(this, enemy, battle)
     }
