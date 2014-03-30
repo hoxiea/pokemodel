@@ -43,7 +43,7 @@ class MoveResultBuilder {
   var KO = false
   var selfKO = false
 
-  val validTypeMults: Set[Double] = Set(0.25, 0.5, 1.0, 2.0, 4.0)
+  val validTypeMults: Set[Double] = Set(0.0, 0.25, 0.5, 1.0, 2.0, 4.0)
 
   def damageDealt(x: Int): MoveResultBuilder = { damageDealt = x ; this}
   def critHit(c: Boolean): MoveResultBuilder = { critHit = c ; this}

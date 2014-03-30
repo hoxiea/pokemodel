@@ -37,15 +37,17 @@ abstract class Move {
 
   // Even moves with 100% accuracy might miss because of accuracy/evasion adjustments in battle
   def chanceHit(attacker : Pokemon, defender : Pokemon, pb : Battle): Double = {
-    accuracy * (pb.statManager.getEffectiveAccuracy(attacker).toDouble / pb.statManager.getEffectiveEvasion(defender))
+    val attackerAccuracy = pb.statManager.getEffectiveAccuracy(attacker).toDouble
+    val defenderEvasion = pb.statManager.getEffectiveEvasion(defender)
+    accuracy * attackerAccuracy / defenderEvasion
   }
 
   def startUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
     // Function called before move-specific stuff happens
-    if (VERBOSE) println(s"${attacker.name} used $this on ${defender.name}")
   }
 
-  // This is what each specific move is ultimately responsible for providing, along with basic information
+  // This is what each specific move is ultimately responsible for filling in
+  // along with index and type and that stuff
   def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder): MoveResult
 
   def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
@@ -59,7 +61,6 @@ abstract class Move {
     finishUsingMove(attacker, defender, pb)
     result
   }
-
 
   override def toString() = {
     val moveName = this.getClass().getName()
@@ -107,71 +108,131 @@ class StatusMove extends Move {
 
 /*
  * I originally just subclassed these three guys to specialize them further:
- * PhysicalSingleStrike, PhysicalSingleStrikeStatusChange, SpecialSingleStrikeStatChange,
- * stuff like that. But I found myself duplicating efforts, and realized that mixing in
- * traits was the way to go.
+ * PhysicalSingleStrike, PhysicalSingleStrikeStatusChange,
+ * SpecialSingleStrikeStatChange, stuff like that. But I found myself
+ * duplicating efforts: for example, there are PhysicalSingleStrike moves and
+ * there are SpecialSingleStrike moves, and the logic for both was basically
+ * the same, just the stats involved changed.
+ *
+ * I then realized that stacking traits would be the perfect way to capture the
+ * different types of moves just once.
  */
 
 // These allow you to change the type of a move on the fly. For example,
 // val m1 = new TestPhysicalSingleStrike with Electric
 // val m2 = new TestPhysicalSingleStrike with Psychic
 // Very useful for testing effectivenesses, etc.
-trait Normal extends Move { override val type1 = Normal }
+trait Normal extends Move   { override val type1 = Normal }
 trait Fighting extends Move { override val type1 = Fighting }
-trait Flying extends Move { override val type1 = Flying }
-trait Poison extends Move { override val type1 = Poison }
-trait Ground extends Move { override val type1 = Ground }
-trait Rock extends Move { override val type1 = Rock }
-trait Bug extends Move { override val type1 = Bug }
-trait Ghost extends Move { override val type1 = Ghost }
-trait Fire extends Move { override val type1 = Fire }
-trait Water extends Move { override val type1 = Water }
-trait Grass extends Move { override val type1 = Grass }
+trait Flying extends Move   { override val type1 = Flying }
+trait Poison extends Move   { override val type1 = Poison }
+trait Ground extends Move   { override val type1 = Ground }
+trait Rock extends Move     { override val type1 = Rock }
+trait Bug extends Move      { override val type1 = Bug }
+trait Ghost extends Move    { override val type1 = Ghost }
+trait Fire extends Move     { override val type1 = Fire }
+trait Water extends Move    { override val type1 = Water }
+trait Grass extends Move    { override val type1 = Grass }
 trait Electric extends Move { override val type1 = Electric }
-trait Psychic extends Move { override val type1 = Psychic }
-trait Ice extends Move { override val type1 = Ice }
-trait Dragon extends Move { override val type1 = Dragon }
+trait Psychic extends Move  { override val type1 = Psychic }
+trait Ice extends Move      { override val type1 = Ice }
+trait Dragon extends Move   { override val type1 = Dragon }
 
 // Likewise, handy ways to change the base power on the fly
 trait Power40 extends Move  { override val power = 40 }
 trait Power80 extends Move  { override val power = 80 }
 trait Power120 extends Move { override val power = 120 }
 
+// Quick way to get more critical hits, for testing purposes
+trait CritHit extends Move  { override val critHitRate = HIGH }
+
 /* Next, we capture commonalities in terms of the different things that Moves do */
 trait SingleStrike extends Move {
-  abstract override def moveSpecificStuff(attacker: Pokemon,
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
       defender: Pokemon,
-      pb: Battle, 
+      pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
     println("Calling SingleStrike's moveSpecificStuff")
-    super.moveSpecificStuff(attacker, defender, pb, mrb)
     if (Random.nextDouble < chanceHit(attacker, defender, pb) && pb.statusManager.canBeHit(defender)) {
       val result = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(result.damageDealt)
-      result.KO(!defender.isAlive)
-      result.selfKO(!attacker.isAlive)
-      result.toMoveResult
-    } else new MoveResultBuilder().toMoveResult  // default values are actually correct here
 
+    /* Mutate the mrb that was passed in, then pass that mutated mrb to the next trait via super
+     * A SingleStrike attack can do the following things:
+     * - Deal Damage
+     * - Get a critical hit
+     * - STAB
+     * - typeMult
+     * - KO
+     * - selfKO?
+     */
+      mrb.damageDealt(result.damageDealt)
+      mrb.critHit(result.critHit)
+      mrb.STAB(result.STAB)
+      mrb.typeMult(result.typeMult)
+      mrb.KO(!defender.isAlive)
+      mrb.selfKO(!attacker.isAlive)
+    }
+
+    // Pass these changes along to the next moveSpecificStuff
+    super.moveSpecificStuff(attacker, defender, pb, mrb)
   }
 }
 
 trait ConstantDamage extends Move {
   def damageAmount: Int
-  abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-    super.moveSpecificStuff(attacker, defender, pb, mrb)
-    println("Calling ConstantDamage's moveSpecificStuff")
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val result = new MoveResultBuilder
+    println("Calling ConstantDamage's moveSpecificStuff")
+    /*
+     * A ConstantDamage attack can do the following things:
+     * - Deal Damage
+     * - KO
+     * - selfKO?
+     */
+
     if (Random.nextDouble < chanceHit(attacker, defender, pb) && pb.statusManager.canBeHit(defender)) {
       defender.takeDamage(damageAmount)
-      result.damageDealt(damageAmount)
-      result.KO(!defender.isAlive)
-      result.selfKO(!attacker.isAlive)
+      mrb.damageDealt(damageAmount)
+      mrb.KO(!defender.isAlive)
+      mrb.selfKO(!attacker.isAlive)
     }
-    result.toMoveResult
+    super.moveSpecificStuff(attacker, defender, pb, mrb)
   }
 }
+
+trait Recoil extends Move {
+  // Take damage equal to some proportion of the damage dealt to the opponent, usually 25%
+  // Because of the fact that the damage must be dealt first, Recoil should only be mixed
+  // in TO THE LEFT of SingleStrike. I check for this below
+  def recoilProportion: Double
+
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    println("Calling Recoil's moveSpecificStuff")
+    /*
+     * A Recoil just hurts the user itself, so we have to worry about
+     * - selfKO
+     */
+    if (mrb.damageDealt == 0)
+      println("Recoil lacks damage in moveSpecificStuff - attack missed, or Recoil mixed in wrong")
+    val damageToTake = (mrb.damageDealt * recoilProportion).toInt
+    attacker.takeDamage(damageToTake)
+    mrb.selfKO(!attacker.isAlive)
+    super.moveSpecificStuff(attacker, defender, pb, mrb)
+  }
+}
+
 
 class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
   override val index = 999
@@ -223,13 +284,12 @@ class Thunder extends SpecialMove with SingleStrike {
 //  override def chanceOfCausingAilment = 0.1
 }
 
-class Struggle extends PhysicalMove with SingleStrike {
-  // TODO: Add Recoil! 50%
+class Struggle extends PhysicalMove with Recoil with SingleStrike {
   override val index = 165
   override val type1 = Normal
   override val power = 50
-  override val maxPP = 1
-//  override val recoilProportion = 0.5   // different from others!
+  override val maxPP = 10
+  override val recoilProportion = 0.5   // different from others!
 
   override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // Don't deduct a PP! Just log it
@@ -243,12 +303,12 @@ class Struggle extends PhysicalMove with SingleStrike {
 //  // with a probability that depends on the move
 //  def statusAilmentToCause   : StatusAilment
 //  def chanceOfCausingAilment : Double
-//  
+//
 //  def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
 //
 //  abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 //    super.moveSpecificStuff(attacker, defender, pb, mrb)
-//    if (statusAilmentCaused) { 
+//    if (statusAilmentCaused) {
 //      statusAilmentToCause match {
 //        case (_ : NonVolatileStatusAilment) => {
 //          val changeWorked = pb.statusManager.tryToChangeStatusAilment(defender, statusAilmentToCause)
@@ -265,24 +325,6 @@ class Struggle extends PhysicalMove with SingleStrike {
 //        case (_ : SEEDED) => pb.statusManager.tryToSeed(defender); false
 //        case _ => false
 //      }
-//    } else false
-//  }
-//}
-
-//trait Recoil extends Move {
-//  // Take damage equal to some proportion of the damage dealt to the opponent, usually 25%
-//  def recoilProportion: Double
-//  abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-//    super.moveSpecificStuff(attacker, defender, pb, mrb)
-//    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-//      val result = pb.dc.calc(attacker, defender, this, pb)
-//      defender.takeDamage(result.damageDealt)
-//      val recoilDamage = (result.damageDealt * recoilProportion).toInt
-//      attacker.takeDamage(recoilDamage)
-//      if (VERBOSE) println(s"${attacker.name} took $recoilDamage recoil damage")
-//      result.KO(defender.isAlive)
-//      result.selfKO(attacker.isAlive)
-//      result.toMoveResult
 //    } else false
 //  }
 //}

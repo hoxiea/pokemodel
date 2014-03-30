@@ -64,9 +64,7 @@ class Pokemon(builder : PokemonBuilder) {
     statusAilment = None
   }
 
-  def gainHP(amount : Int) {
-    currentHP = intWrapper(maxHP).min(currentHP + amount)
-  }
+  def gainHP(amount : Int) { currentHP = intWrapper(maxHP).min(currentHP + amount) }
 
   def getMove(index: Int): Option[Move] = {
     require(1 <= index && index <= 4, s"illegal index $index passed to getMove - $name($level)")
@@ -87,19 +85,23 @@ class Pokemon(builder : PokemonBuilder) {
       case 4 => pp4
     }
   }
+
   private def canUseMove(index: Int): Boolean = {
     require(1 <= index && index <= 4, s"illegal index $index passed to canUseMove - $name($level)")
 
     // A Pokemon must have Some(Move) to be able to use it
     val moveOption = getMove(index)
-    if (moveOption.isEmpty) throw new Exception(s"$name tried to use Move${index}, but it doesn't have a Move!")
+    if (moveOption.isEmpty)
+      throw new Exception(s"$name tried to use Move${index}, but it doesn't have a Move!")
 
     // It also has to have Some(pp)
     val ppOption = getPP(index)
-    if (ppOption.isEmpty) throw new Exception(s"$name tried to use Move${index} and it has a Move${index}, but pp${index} = None!")
+    if (ppOption.isEmpty)
+      throw new Exception(s"$name tried to use Move${index} and it has a Move${index}, but pp${index} = None!")
 
     // And that Some(pp) has to feature pp > 0
-    if (ppOption.get <= 0) throw new Exception(s"$name tried to use Move${index} but pp${index} = 0!")
+    if (ppOption.get <= 0)
+      throw new Exception(s"$name tried to use Move${index} but pp${index} = 0!")
 
     // Looks good to me!
     true
@@ -107,27 +109,30 @@ class Pokemon(builder : PokemonBuilder) {
 
   def useMove(index : Int, enemy : Pokemon, battle : Battle): MoveResult = {
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
-    canUseMove(index)
 
     // At this point, both move${index} and pp$(index) exist and are valid (canUseMove checks)
     index match {
       case 1 => {
+        canUseMove(index)
         pp1 = Some(pp1.get - 1)
         move1.get.use(this, enemy, battle)
       }
       case 2 => {
+        canUseMove(index)
         pp2 = Some(pp2.get - 1)
         move2.get.use(this, enemy, battle)
       }
       case 3 => {
+        canUseMove(index)
         pp3 = Some(pp3.get - 1)
         move3.get.use(this, enemy, battle)
       }
       case 4 => {
+        canUseMove(index)
         pp4 = Some(pp4.get - 1)
         move4.get.use(this, enemy, battle)
       }
-      case 5 => move5.use(this, enemy, battle)
+      case 5 => move5.use(this, enemy, battle)  // can always use
     }
   }
 

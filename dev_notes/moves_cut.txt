@@ -141,14 +141,6 @@ class Strength extends PhysicalSingleStrike {
   var currentPP = maxPP
 }
 
-class Tackle extends PhysicalSingleStrike {
-  val index = 33
-  val type1 = Normal
-  val power = 50
-  var maxPP = 35
-  var currentPP = maxPP
-}
-
 class ViceGrip extends PhysicalSingleStrike {
   val index = 11
   val type1 = Normal
@@ -609,13 +601,6 @@ abstract class SpecialConstantDamage extends SpecialMove {
   }
 }
 
-class DragonRage extends SpecialConstantDamage {
-  val index = 82
-  val type1 = Dragon
-  var maxPP = 10
-  var currentPP = maxPP
-  override val constantDamageAmount = 40
-}
 
 class SonicBoom extends SpecialConstantDamage {
   val index = 49
@@ -798,16 +783,6 @@ abstract class SpecialDamageStatus extends SpecialMove {
   }
 }
 
-class Thunder extends SpecialDamageStatus {
-  val index = 87
-  override val accuracy = 0.7          // in [0.0, 1.0]
-  val type1 = Electric
-  val power = 110
-  var maxPP = 10
-  var currentPP = maxPP
-
-  val statusChance = 0.1
-}
 
 abstract class Thunderbolt extends SpecialDamageStatus
 abstract class ThunderShock extends SpecialDamageStatus

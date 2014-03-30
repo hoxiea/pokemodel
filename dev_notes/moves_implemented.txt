@@ -1,5 +1,4 @@
 PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
-
 - Single-strike
     = Pound: damage
 = Drill Peck: damage
@@ -38,8 +37,8 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Poison Sting: damage and 30% chance of PSN
 
 - Single-strike, special
-= Quick Attack: damage, higher priority
-= Karate Chop: damage, high crit hit rate
+    = Karate Chop: damage, high crit hit rate
+= Quick Attack: damage, higher PRIORITY
 = Slash: damage, high crit hit rate
 = Crabhammer: damage, high crit hit rate
 

@@ -68,37 +68,46 @@ class PokemonBuilder (val index: Int, val level: Int) {
   def type1   = PokeData.getType1(index)
   def type2   = PokeData.getType2(index)
 
-  // Now that we know maxHP, make full-health the default
+  // currentHP is a bit of a mess. It needs to be a var (instead of a val, or ideally a def),
+  // since it changes. But this next line just uses the maxHP value that's relevant when the
+  // Builder is first created and NOT after making modifications to HPIV or HPEV.
+  // But of course, HPIV is a function of the other four IVs and can't be modified itself,
+  // so we have to update currentHP in HPEV and the other four IV setters
   var currentHP = maxHP
 
   /* Methods to change changeable values while building */
   def attackIV(value : Int) : PokemonBuilder = {
     require(PokemonBuilder.minIVValue <= value && value <= PokemonBuilder.maxIVValue)
     attackIV = value
+    currentHP = maxHP  // adjust
     this
   }
 
   def defenseIV(value : Int) : PokemonBuilder = {
     require(PokemonBuilder.minIVValue <= value && value <= PokemonBuilder.maxIVValue)
     defenseIV = value
+    currentHP = maxHP  // adjust
     this
   }
 
   def speedIV(value : Int) : PokemonBuilder = {
     require(PokemonBuilder.minIVValue <= value && value <= PokemonBuilder.maxIVValue)
     speedIV = value
+    currentHP = maxHP  // adjust
     this
   }
 
   def specialIV(value : Int) : PokemonBuilder = {
     require(PokemonBuilder.minIVValue <= value && value <= PokemonBuilder.maxIVValue)
     specialIV = value
+    currentHP = maxHP  // adjust
     this
   }
 
   def hpEV(value : Int) : PokemonBuilder = {
     require(PokemonBuilder.minEVValue <= value && value <= PokemonBuilder.maxEVValue)
     hpEV = value
+    currentHP = maxHP  // adjust
     this
   }
 
@@ -141,7 +150,8 @@ class PokemonBuilder (val index: Int, val level: Int) {
     require(1 <= moveIndex && moveIndex <= 4, "must have 1 <= moveIndex <= 4")
     require(LearnsetData.learnsets(index).contains(m.index) ||
             m.toString.startsWith("Test") ||
-            m.toString.contains("$$"),  // mixing in traits seems to change the name
+            m.toString.contains("$$") ||   // mixing in traits seems to change the name
+            m.index == 165,              // Struggle, useful for testing Struggle
             s"$name can't learn $m")
     moveIndex match {
       case 1 => move1 = Some(m)
@@ -167,7 +177,6 @@ class PokemonBuilder (val index: Int, val level: Int) {
     defenseEV(PokemonBuilder.maxEVValue)
     speedEV(PokemonBuilder.maxEVValue)
     specialEV(PokemonBuilder.maxEVValue)
-    currentHP = maxHP
     this
   }
 

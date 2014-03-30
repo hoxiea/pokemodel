@@ -72,6 +72,8 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     // Check volativeStatuses and weirdStatuses to see if player2 gets to select a BattleAction
     // Process the status if not
 
+    // TODO: Battles are responsible for printing move stuff, so that testing isn't clogged up with move-use info
+
     // Get submitted Actions from both players
     val team1Action = trainer1.getDecision(this)
     val team2Action = trainer2.getDecision(this)

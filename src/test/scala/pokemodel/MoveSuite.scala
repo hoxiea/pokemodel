@@ -3,6 +3,7 @@ package pokemodel
 import org.scalatest.FunSuite
 
 class MoveSuite extends FunSuite {
+
   test("Using a move should cause PP to decrease by 1") {
     val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new DragonRage)
     val dragonite = new Pokemon(pb1)
@@ -33,7 +34,7 @@ class MoveSuite extends FunSuite {
 
     // used calculators for these values
     if (!result.critHit) {
-      assert (29 <= result.damageDealt, "reg damage too low")
+      assert (29 <= result.damageDealt, s"reg damage ${result.damageDealt} too low")
       assert (result.damageDealt <= 35, "reg damage too high")
     } else {
       assert (57 <= result.damageDealt, "crithit damage too low")
@@ -49,8 +50,9 @@ class MoveSuite extends FunSuite {
   }
 
   test("Trying TestPhysicalSingleStrike, Power80") {
+    val m = new TestPhysicalSingleStrike with Power80 with CritHit
     val pb1 = new PokemonBuilder("Charizard", 100)
-                  .move(1, new TestPhysicalSingleStrike with Power80)
+                  .move(1, m)
                   .maxOut()
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
@@ -62,7 +64,7 @@ class MoveSuite extends FunSuite {
     val battle = new Battle(trainer1, trainer2)
     val result = charizard.useMove(1, venusaur, battle)
 
-    // used calculators for these values
+    // used calculator for these values
     if (!result.critHit) {
       assert (58 <= result.damageDealt, "reg damage too low")
       assert (result.damageDealt <= 69, "reg damage too high")
@@ -128,7 +130,7 @@ class MoveSuite extends FunSuite {
       assert (result.damageDealt <= 506, "reg damage too high")
     } else {
       assert (839 <= result.damageDealt, "crithit damage too low")
-      assert (result.damageDealt <= 906, "crithit damage too high")
+      assert (result.damageDealt <= 986, "crithit damage too high")
     }
 
     assert (result.STAB == true, "stab")  // Charizard is Type1 Fire
@@ -173,4 +175,64 @@ class MoveSuite extends FunSuite {
     assert (result.KO == true, "KO")
   }
 
+  test("Struggle: test HP reduction") {
+    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new Struggle)
+    val dragonite = new Pokemon(pb1)
+    val pb2 = PokemonBuilder.generateRandomPokemonBuilder(100)
+    val p2 = new Pokemon(pb2)
+    val team1 = new PokemonTeam(dragonite)
+    val team2 = new PokemonTeam(p2)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    val result = dragonite.useMove(1, p2, battle)
+    println(battle)
+    println(result)
+    assert(p2.currentHP == p2.maxHP - result.damageDealt)
+    assert(dragonite.maxHP - dragonite.currentHP == result.damageDealt / 2)
+  }
+
+  test("Struggle: no PP is deducted") {
+    val pb1 = new PokemonBuilder("Dragonite", 100)
+    val dragonite = new Pokemon(pb1)
+    val pb2 = PokemonBuilder.generateRandomPokemonBuilder(100)
+    val p2 = new Pokemon(pb2)
+    val team1 = new PokemonTeam(dragonite)
+    val team2 = new PokemonTeam(p2)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    battle.takeNextTurn()
+    println(battle)
+  }
+
+  test("Struggle: Normal-type damage, so Rock takes half and Ghost takes none") {
+    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new Struggle)
+    val dragonite = new Pokemon(pb1)
+    val geodude = new Pokemon(new PokemonBuilder("Geodude", 100))
+    val gengar = new Pokemon(new PokemonBuilder("Gengar", 100))
+    val team1 = new PokemonTeam(dragonite)
+    val team2 = new PokemonTeam(List(geodude, gengar))
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    // Ghost, do this first so that Dragonite doesn't lose HP
+    val result1 = dragonite.useMove(1, gengar, battle)
+    println(battle)
+    println(result1)
+    assert(result1.typeMult == 0.0)
+    assert(gengar.currentHP == gengar.maxHP)
+    assert(dragonite.currentHP == dragonite.maxHP)
+
+    // Rock - geodude
+    val result2 = dragonite.useMove(1, geodude, battle)
+    println(battle)
+    println(result2)
+    assert(result2.typeMult == 0.5)
+    assert(geodude.currentHP == geodude.maxHP - result2.damageDealt)
+    assert(dragonite.maxHP - dragonite.currentHP == result2.damageDealt / 2)
+  }
 }

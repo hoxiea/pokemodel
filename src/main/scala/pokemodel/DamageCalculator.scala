@@ -19,7 +19,6 @@ class DamageCalculator {
     // occurrences are calculated
     val criticalChance = calcCriticalChance(attacker, defender, move, battle)
     if (Random.nextDouble < criticalChance) {
-      if (VERBOSE) println(s"Critical hit for $move")
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
       new MoveResultBuilder()
           .damageDealt(chd)
@@ -92,7 +91,7 @@ class DamageCalculator {
     result.toInt
   }
 
-  def calcRegularHitDamage(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Int = {
+  private def calcRegularHitDamage(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Int = {
     // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
     val effectiveAttack = move.moveType match {
       case PHYSICALMOVE => battle.statManager.getEffectiveAttack(attacker)
@@ -110,7 +109,7 @@ class DamageCalculator {
     damage
   }
 
-  def calcCriticalHitDamage(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Int = {
+  private def calcCriticalHitDamage(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Int = {
     /*
      * http://bulbapedia.bulbagarden.net/wiki/Critical_hit
      * - Attacker's level is temporarily doubled for damage calculation
@@ -134,7 +133,7 @@ class DamageCalculator {
   }
 
 
-  def calcCriticalChance(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Double = {
+  private def calcCriticalChance(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Double = {
     val criticalChance = move.critHitRate match {
       case LOW  => PokeData.getBaseSpeed(attacker.index).toDouble / 512
       case HIGH => PokeData.getBaseSpeed(attacker.index).toDouble / 64
