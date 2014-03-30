@@ -53,6 +53,9 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   private val sleepMap     = mutable.Map[Pokemon, Int]()
   private val partiallyTrappedMap = mutable.Map[Pokemon, Int]()
 
+  // Each Pokemon has a Map moveIndex -> number of turns it's disabled for
+  private val disabledMoveMap = mutable.Map[Pokemon, mutable.Map[Int, Int]]()
+
   /*
    * Structures for things that get worse with time, and need to track their progression
    */
@@ -155,7 +158,7 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   def tryToChangeStatusAilment(p: Pokemon, newStatus : StatusAilment): Boolean = {
     p.statusAilment match {
       case None => { p.statusAilment = Some(newStatus); true }
-      case _ => false 
+      case _ => false
     }
   }
 }

@@ -56,7 +56,11 @@ class Pokemon(builder : PokemonBuilder) {
   def isAlive: Boolean = currentHP > 0
 
   def takeDamage(damage : Int) {
-    currentHP = if (damage >= currentHP) 0 else currentHP - damage
+    require(0 <= damage && damage <= currentHP, 
+        "Don't expect Pokemon.takeDamage to truncate for you!")
+    val newHP = currentHP - damage
+    assert(newHP >= 0)
+    currentHP = newHP
   }
 
   def heal() {
@@ -86,7 +90,7 @@ class Pokemon(builder : PokemonBuilder) {
     }
   }
 
-  private def canUseMove(index: Int): Boolean = {
+  private def canUseMove(index: Int, battle: Battle): Boolean = {
     require(1 <= index && index <= 4, s"illegal index $index passed to canUseMove - $name($level)")
 
     // A Pokemon must have Some(Move) to be able to use it
@@ -103,36 +107,35 @@ class Pokemon(builder : PokemonBuilder) {
     if (ppOption.get <= 0)
       throw new Exception(s"$name tried to use Move${index} but pp${index} = 0!")
 
-    // Looks good to me!
+    // TODO: check battle for disabled
     true
   }
 
   def useMove(index : Int, enemy : Pokemon, battle : Battle): MoveResult = {
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
 
-    // At this point, both move${index} and pp$(index) exist and are valid (canUseMove checks)
     index match {
       case 1 => {
-        canUseMove(index)
+        canUseMove(index, battle)
         pp1 = Some(pp1.get - 1)
         move1.get.use(this, enemy, battle)
       }
       case 2 => {
-        canUseMove(index)
+        canUseMove(index, battle)
         pp2 = Some(pp2.get - 1)
         move2.get.use(this, enemy, battle)
       }
       case 3 => {
-        canUseMove(index)
+        canUseMove(index, battle)
         pp3 = Some(pp3.get - 1)
         move3.get.use(this, enemy, battle)
       }
       case 4 => {
-        canUseMove(index)
+        canUseMove(index, battle)
         pp4 = Some(pp4.get - 1)
         move4.get.use(this, enemy, battle)
       }
-      case 5 => move5.use(this, enemy, battle)  // can always use
+      case 5 => move5.use(this, enemy, battle)  // can always use, don't deduct PP
     }
   }
 

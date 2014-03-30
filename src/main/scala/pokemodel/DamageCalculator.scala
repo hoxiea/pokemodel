@@ -13,22 +13,36 @@ class DamageCalculator {
    * occurred, comes up with the appropriate stat values either way, and computes damage
    */
 
+  /* In both branches of calc, the full damage calculation is done, but then
+   * the result is truncated so that it doesn't exceed the defender's
+   * currentHP. This is the correct behavior: MoveResult.damageDealt value
+   * should reflect how much damage is actually done to the Pokemon, rather
+   * than just hitting him with all of it and letting Pokemon.takeDamage
+   * truncate it. (For example, if you use a Recoil move, the attacking Pokemon
+   * should take (usually) 25% of the damage ACTUALLY DEALT to the Pokemon. If
+   * the move would have dealt 60 damage, but the defender only had 4 HP, then
+   * the attacker should take 1 damage instead of 15 damage. So having a
+   * correct value for damageDealt is the way to go
+   */
   def calc(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): MoveResultBuilder = {
     // The key method, through which all damages are calculated
-    // Returns a 2tuple of (damage: Int, critHit: Boolean), since this is where critHit
-    // occurrences are calculated
+    // Returns a partially-completed MoveResultBuilder
     val criticalChance = calcCriticalChance(attacker, defender, move, battle)
     if (Random.nextDouble < criticalChance) {
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
+      println(s"chd = $chd")
+      val damageToDeal = chd min defender.currentHP
       new MoveResultBuilder()
-          .damageDealt(chd)
+          .damageDealt(damageToDeal)
           .critHit(true)
           .STAB(stabBonus(attacker, move) == 1.5)
           .typeMult(calculateTypeMultiplier(move.type1, defender))
     } else {
       val rhd = calcRegularHitDamage(attacker, defender, move, battle)
+      println(s"rhd = $rhd")
+      val damageToDeal = rhd min defender.currentHP
       new MoveResultBuilder()
-          .damageDealt(rhd)
+          .damageDealt(damageToDeal)
           .critHit(false)
           .STAB(stabBonus(attacker, move) == 1.5)
           .typeMult(calculateTypeMultiplier(move.type1, defender))

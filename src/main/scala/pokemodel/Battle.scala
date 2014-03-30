@@ -113,7 +113,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
 
     // Another turn passes
     time = time + 1
-    println(this)
+    if (Battle.verbose) println(this)
   }
 
   def runBattle() : Unit = {

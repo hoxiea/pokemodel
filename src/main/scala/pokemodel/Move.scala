@@ -10,8 +10,9 @@ import Battle.{verbose=>VERBOSE}
 
 /*
  * TODO: Overview of the final version of the Move design goes here
- * Ideally, something about stackable traits with a MoveResultBuilder that gets passed up and appended as it goes,
- * until it's converted to a MoveResult by either PhysicalMove, SpecialMove, or StatusMove
+ * Ideally, something about stackable traits with a MoveResultBuilder that gets
+ * passed up and appended as it goes, until it's converted to a MoveResult by
+ * either PhysicalMove, SpecialMove, or StatusMove
  */
 
 // TODO: Any move that can cause a stat change to opponent needs to make sure that the opponent's stats can change via the battle's statManager
@@ -48,7 +49,11 @@ abstract class Move {
 
   // This is what each specific move is ultimately responsible for filling in
   // along with index and type and that stuff
-  def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder): MoveResult
+  def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder): MoveResult
 
   def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
     // Function called after move-specific stuff happens
@@ -73,10 +78,12 @@ abstract class Move {
 
 /*
  * Below a Move in the class hierarchy are the three different types of Moves:
- * Physical, Special, and Status. These tack on a moveType value, which
- * the Battle's DamageCalculator uses to determine the correct stats to use.
- * They also give default values to the abstract members of Move, so that
- * the stackable traits pattern will fly
+ * Physical, Special, and Status. These tack on a moveType value, which the
+ * Battle's DamageCalculator uses to determine the correct stats to use.  They
+ * also give default values to the abstract members of Move, so that the
+ * stackable traits pattern will fly. Importantly, they convert the
+ * MoveResultBuilder that's been passed up along the chain of traits and
+ * convert it to a MoveResult, to be returned
  */
 class PhysicalMove extends Move {
   override val index = 0
@@ -84,7 +91,11 @@ class PhysicalMove extends Move {
   override val power = 0
   override val maxPP = 0
   override val moveType = PHYSICALMOVE
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder) = mrb.toMoveResult
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder) = mrb.toMoveResult
 }
 
 class SpecialMove extends Move {
@@ -93,7 +104,11 @@ class SpecialMove extends Move {
   override val power = 0
   override val maxPP = 0
   override val moveType = SPECIALMOVE
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder) = mrb.toMoveResult
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder) = mrb.toMoveResult
 }
 
 class StatusMove extends Move {
@@ -102,7 +117,11 @@ class StatusMove extends Move {
   override val power = 0
   override val maxPP = 0
   override val moveType = STATUSMOVE
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder) = mrb.toMoveResult
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder) = mrb.toMoveResult
 }
 
 
@@ -146,34 +165,24 @@ trait Power120 extends Move { override val power = 120 }
 // Quick way to get more critical hits, for testing purposes
 trait CritHit extends Move  { override val critHitRate = HIGH }
 
-/* Next, we capture commonalities in terms of the different things that Moves do */
+// High priority, for testing purposes
+trait HighPriority extends Move  { override val priority = 1 }
+
+
+/* Next, capture common behaviors of Moves - damage, stats, status, etc. */
 trait SingleStrike extends Move {
   abstract override def moveSpecificStuff(
-      attacker: Pokemon,
-      defender: Pokemon,
-      pb: Battle,
-      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    println("Calling SingleStrike's moveSpecificStuff")
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) && pb.statusManager.canBeHit(defender)) {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
       val result = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(result.damageDealt)
-
-    /* Mutate the mrb that was passed in, then pass that mutated mrb to the next trait via super
-     * A SingleStrike attack can do the following things:
-     * - Deal Damage
-     * - Get a critical hit
-     * - STAB
-     * - typeMult
-     * - KO
-     * - selfKO?
-     */
-      mrb.damageDealt(result.damageDealt)
-      mrb.critHit(result.critHit)
-      mrb.STAB(result.STAB)
-      mrb.typeMult(result.typeMult)
-      mrb.KO(!defender.isAlive)
-      mrb.selfKO(!attacker.isAlive)
+      result.KO(!defender.isAlive)
+      mrb.merge(result)
     }
 
     // Pass these changes along to the next moveSpecificStuff
@@ -198,8 +207,10 @@ trait ConstantDamage extends Move {
      */
 
     if (Random.nextDouble < chanceHit(attacker, defender, pb) && pb.statusManager.canBeHit(defender)) {
-      defender.takeDamage(damageAmount)
-      mrb.damageDealt(damageAmount)
+      // Bypass DamageCalculator, so we have to do this stuff ourselves
+      val damageToDeal = damageAmount min defender.currentHP
+      defender.takeDamage(damageToDeal)
+      mrb.damageDealt(damageToDeal)
       mrb.KO(!defender.isAlive)
       mrb.selfKO(!attacker.isAlive)
     }
@@ -288,7 +299,7 @@ class Struggle extends PhysicalMove with Recoil with SingleStrike {
   override val index = 165
   override val type1 = Normal
   override val power = 50
-  override val maxPP = 10
+  override val maxPP = 999
   override val recoilProportion = 0.5   // different from others!
 
   override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
@@ -298,36 +309,36 @@ class Struggle extends PhysicalMove with Recoil with SingleStrike {
 }
 
 
-//trait StatusChange extends Move {
-//  // Cause some kind of StatusAilment to the opponent, non-volatile or volatile,
-//  // with a probability that depends on the move
-//  def statusAilmentToCause   : StatusAilment
-//  def chanceOfCausingAilment : Double
-//
-//  def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
-//
-//  abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-//    super.moveSpecificStuff(attacker, defender, pb, mrb)
-//    if (statusAilmentCaused) {
-//      statusAilmentToCause match {
-//        case (_ : NonVolatileStatusAilment) => {
-//          val changeWorked = pb.statusManager.tryToChangeStatusAilment(defender, statusAilmentToCause)
-//          if (changeWorked) new MoveResultBuilder().statusChange(statusAilmentToCause).toMoveResult
-//          else new MoveResultBuilder().toMoveResult
-//        }
-//        case (_ : CONFUSION) => {
-//          val changeWorked = pb.statusManager.tryToCauseConfusion(defender)
-//          if (changeWorked) new MoveResultBuilder().statusChange(new CONFUSION).toMoveResult
-//          else new MoveResultBuilder().toMoveResult
-//        }
-//        case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender); false
-//        case (_ : PARTIALLYTRAPPED) => pb.statusManager.tryToPartiallyTrap(defender); false
-//        case (_ : SEEDED) => pb.statusManager.tryToSeed(defender); false
-//        case _ => false
-//      }
-//    } else false
-//  }
-//}
+// trait StatusChange extends Move {
+//   // Cause some kind of StatusAilment to the opponent, non-volatile or volatile,
+//   // with a probability that depends on the move
+//   def statusAilmentToCause   : StatusAilment
+//   def chanceOfCausingAilment : Double
+
+//   def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
+
+//   abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+//     super.moveSpecificStuff(attacker, defender, pb, mrb)
+//     if (statusAilmentCaused) {
+//       statusAilmentToCause match {
+//         case (_ : NonVolatileStatusAilment) => {
+//           val changeWorked = pb.statusManager.tryToChangeStatusAilment(defender, statusAilmentToCause)
+//           if (changeWorked) new MoveResultBuilder().statusChange(statusAilmentToCause).toMoveResult
+//           else new MoveResultBuilder().toMoveResult
+//         }
+//         case (_ : CONFUSION) => {
+//           val changeWorked = pb.statusManager.tryToCauseConfusion(defender)
+//           if (changeWorked) new MoveResultBuilder().statusChange(new CONFUSION).toMoveResult
+//           else new MoveResultBuilder().toMoveResult
+//         }
+//         case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender); false
+//         case (_ : PARTIALLYTRAPPED) => pb.statusManager.tryToPartiallyTrap(defender); false
+//         case (_ : SEEDED) => pb.statusManager.tryToSeed(defender); false
+//         case _ => false
+//       }
+//     } else false
+//   }
+// }
 
 //class TestPhysicalMultiStrike extends PhysicalMove with MultiStrike with Normal {
 //  override val index = 999
