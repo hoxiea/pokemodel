@@ -2,11 +2,10 @@
 /* PHYSICAL MOVES */
 // PHYSICAL, HP TRANSFER
 class LeechLife extends PhysicalMove {
-  val index = 141
-  val type1 = Bug
-  val power = 20
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 141
+  override val type1 = Bug
+  override val power = 20
+  override val maxPP = 15
 
   // TODO: if LL breaks a substitute, no HP is restored
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
@@ -22,148 +21,129 @@ class LeechLife extends PhysicalMove {
 }
 
 // PHYSICAL, SINGLE-STRIKE DAMAGE ONLY
-
-
-class DrillPeck extends PhysicalSingleStrike {
-  val index = 65
-  val type1 = Flying
-  val power = 80
-  var maxPP = 20
-  var currentPP = maxPP
+class DrillPeck extends PhysicalMove with SingleStrike {
+  override val index = 65
+  override val type1 = Flying
+  override val power = 80
+  override val maxPP = 20
 }
 
-class Peck extends PhysicalSingleStrike {
-  val index = 64
-  val type1 = Flying
-  val power = 35
-  var maxPP = 35
-  var currentPP = maxPP
+class Peck extends PhysicalMove with SingleStrike {
+  override val index = 64
+  override val type1 = Flying
+  override val power = 35
+  override val maxPP = 35
 }
 
-class WingAttack extends PhysicalSingleStrike {
-  val index = 17
-  val type1 = Flying
-  val power = 35  // increased in later generations, weak in this one
-  var maxPP = 35
-  var currentPP = maxPP
+class WingAttack extends PhysicalMove with SingleStrike {
+  override val index = 17
+  override val type1 = Flying
+  override val power = 35  // increased in later generations, weak in this one
+  override val maxPP = 35
 }
 
-class Cut extends PhysicalSingleStrike {
-  val index = 15
-  val type1 = Normal
-  val power = 50  // power and maxPP increased in later generations
-  var maxPP = 30
-  var currentPP = maxPP
+class Cut extends PhysicalMove with SingleStrike {
+  override val index = 15
+  override val type1 = Normal
+  override val power = 50  // power and maxPP increased in later generations
+  override val maxPP = 30
   override val accuracy = 0.95
 }
 
-class Earthquake extends PhysicalSingleStrike {
-  val index = 89
-  val type1 = Ground
-  val power = 100
-  var maxPP = 10
-  var currentPP = maxPP
+class Earthquake extends PhysicalMove with SingleStrike {
+  override val index = 89
+  override val type1 = Ground
+  override val power = 100
+  override val maxPP = 10
 }
 
-class DizzyPunch extends PhysicalSingleStrike {
-  val index = 146
-  val type1 = Normal
-  val power = 70
-  var maxPP = 10
-  var currentPP = maxPP
+class DizzyPunch extends PhysicalMove with SingleStrike {
+  override val index = 146
+  override val type1 = Normal
+  override val power = 70
+  override val maxPP = 10
 }
 
-class EggBomb extends PhysicalSingleStrike {
-  val index = 121
-  val type1 = Normal
-  val power = 100
-  var maxPP = 10
-  var currentPP = maxPP
+class EggBomb extends PhysicalMove with SingleStrike {
+  override val index = 121
+  override val type1 = Normal
+  override val power = 100
+  override val maxPP = 10
   override val accuracy = 0.75
 }
 
-class HornAttack extends PhysicalSingleStrike {
-  val index = 30
-  val type1 = Normal
-  val power = 65
-  var maxPP = 25
-  var currentPP = maxPP
+class HornAttack extends PhysicalMove with SingleStrike {
+  override val index = 30
+  override val type1 = Normal
+  override val power = 65
+  override val maxPP = 25
 }
 
-class MegaKick extends PhysicalSingleStrike {
-  val index = 25
-  val type1 = Normal
-  val power = 120
-  var maxPP = 5
-  var currentPP = maxPP
+class MegaKick extends PhysicalMove with SingleStrike {
+  override val index = 25
+  override val type1 = Normal
+  override val power = 120
+  override val maxPP = 5
   override val accuracy = 0.75
 }
 
-class MegaPunch extends PhysicalSingleStrike {
-  val index = 5
-  val type1 = Normal
-  val power = 80
-  var maxPP = 20
-  var currentPP = maxPP
+class MegaPunch extends PhysicalMove with SingleStrike {
+  override val index = 5
+  override val type1 = Normal
+  override val power = 80
+  override val maxPP = 20
   override val accuracy = 0.85
 }
 
-class PayDay extends PhysicalSingleStrike {
-  val index = 6
-  val type1 = Normal
-  val power = 40
-  var maxPP = 20
-  var currentPP = maxPP
+class PayDay extends PhysicalMove with SingleStrike {
+  override val index = 6
+  override val type1 = Normal
+  override val power = 40
+  override val maxPP = 20
 }
 
-class Scratch extends PhysicalSingleStrike {
-  val index = 10
-  val type1 = Normal
-  val power = 40
-  var maxPP = 35
-  var currentPP = maxPP
+class Scratch extends PhysicalMove with SingleStrike {
+  override val index = 10
+  override val type1 = Normal
+  override val power = 40
+  override val maxPP = 35
 }
 
-class Slam extends PhysicalSingleStrike {
-  val index = 21
-  val type1 = Normal
-  val power = 80
-  var maxPP = 20
-  var currentPP = maxPP
+class Slam extends PhysicalMove with SingleStrike {
+  override val index = 21
+  override val type1 = Normal
+  override val power = 80
+  override val maxPP = 20
   override val accuracy = 0.75
 }
 
-class Strength extends PhysicalSingleStrike {
-  val index = 70
-  val type1 = Normal
-  val power = 80
-  var maxPP = 15
-  var currentPP = maxPP
+class Strength extends PhysicalMove with SingleStrike {
+  override val index = 70
+  override val type1 = Normal
+  override val power = 80
+  override val maxPP = 15
 }
 
-class ViceGrip extends PhysicalSingleStrike {
-  val index = 11
-  val type1 = Normal
-  val power = 55
-  var maxPP = 30
-  var currentPP = maxPP
+class ViceGrip extends PhysicalMove with SingleStrike {
+  override val index = 11
+  override val type1 = Normal
+  override val power = 55
+  override val maxPP = 30
 }
 
-class RockSlide extends PhysicalSingleStrike {
-  val index = 157
-  val type1 = Rock
-  val power = 75
-  var maxPP = 10
-  var currentPP = maxPP
+class RockSlide extends PhysicalMove with SingleStrike {
+  override val index = 157
+  override val type1 = Rock
+  override val power = 75
+  override val maxPP = 10
   override val accuracy = 0.9
 }
 
-class RockThrow extends PhysicalSingleStrike {
-  val index = 88
-  val type1 = Rock
-  val power = 50
-  var maxPP = 15
-  var currentPP = maxPP
+class RockThrow extends PhysicalMove with SingleStrike {
+  override val index = 88
+  override val type1 = Rock
+  override val power = 50
+  override val maxPP = 15
   override val accuracy = 0.65  // much higher in later generations
 }
 
@@ -191,169 +171,153 @@ abstract class PhysicalSingleStrikeStatusChange extends PhysicalMove {
   }
 }
 
-class Bite extends PhysicalSingleStrikeStatusChange {
-  val index = 44
-  val type1 = Normal
-  val power = 60
-  var maxPP = 25
-  var currentPP = maxPP
+class Bite extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 44
+  override val type1 = Normal
+  override val power = 60
+  override val maxPP = 25
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.10
 }
 
-class BoneClub extends PhysicalSingleStrikeStatusChange {
-  val index = 125
-  val type1 = Ground
-  val power = 65
-  var maxPP = 20
-  var currentPP = maxPP
+class BoneClub extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 125
+  override val type1 = Ground
+  override val power = 65
+  override val maxPP = 20
   override val accuracy = 0.85
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.10
   // TODO: Bone Club cannot cause a target with a substitute to flinch.
 }
 
-class HyperFang extends PhysicalSingleStrikeStatusChange {
-  val index = 158
-  val type1 = Normal
-  val power = 80
-  var maxPP = 15
-  var currentPP = maxPP
+class HyperFang extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 158
+  override val type1 = Normal
+  override val power = 80
+  override val maxPP = 15
   override val accuracy = 0.9
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.10
 }
 
-class LowKick extends PhysicalSingleStrikeStatusChange {
-  val index = 67
-  val type1 = Fighting
-  val power = 50
-  var maxPP = 20
-  var currentPP = maxPP
+class LowKick extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 67
+  override val type1 = Fighting
+  override val power = 50
+  override val maxPP = 20
   override val accuracy = 0.9
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.30
 }
 
-class Headbutt extends PhysicalSingleStrikeStatusChange {
-  val index = 29
-  val type1 = Normal
-  val power = 70
-  var maxPP = 15
-  var currentPP = maxPP
+class Headbutt extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 29
+  override val type1 = Normal
+  override val power = 70
+  override val maxPP = 15
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.30
 }
 
-class Stomp extends PhysicalSingleStrikeStatusChange {
-  val index = 23
-  val type1 = Normal
-  val power = 65
-  var maxPP = 20
-  var currentPP = maxPP
+class Stomp extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 23
+  override val type1 = Normal
+  override val power = 65
+  override val maxPP = 20
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.30
   // TODO: Stomp cannot make a target with a substitute flinch.
 }
 
-class RollingKick extends PhysicalSingleStrikeStatusChange {
-  val index = 27
-  val type1 = Fighting
-  val power = 60
-  var maxPP = 15
-  var currentPP = maxPP
+class RollingKick extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 27
+  override val type1 = Fighting
+  override val power = 60
+  override val maxPP = 15
   override val accuracy = 0.85
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.30
   // TODO: Rolling Kick cannot make a target with a substitute flinch.
 }
 
-class ThunderPunch extends PhysicalSingleStrikeStatusChange {
-  val index = 9
-  val type1 = Electric
-  val power = 75
-  var maxPP = 15
-  var currentPP = maxPP
+class ThunderPunch extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 9
+  override val type1 = Electric
+  override val power = 75
+  override val maxPP = 15
   override val statusAilmentToCause = new PAR
   override val chanceOfCausingAilment = 0.10
 }
 
-class IcePunch extends PhysicalSingleStrikeStatusChange {
-  val index = 8
-  val type1 = Ice
-  val power = 75
-  var maxPP = 15
-  var currentPP = maxPP
+class IcePunch extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 8
+  override val type1 = Ice
+  override val power = 75
+  override val maxPP = 15
   override val statusAilmentToCause = new FRZ
   override val chanceOfCausingAilment = 0.10
 }
 
-class FirePunch extends PhysicalSingleStrikeStatusChange {
-  val index = 7
-  val type1 = Fire
-  val power = 75
-  var maxPP = 15
-  var currentPP = maxPP
+class FirePunch extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 7
+  override val type1 = Fire
+  override val power = 75
+  override val maxPP = 15
   override val statusAilmentToCause = new BRN
   override val chanceOfCausingAilment = 0.10
 }
 
-class Lick extends PhysicalSingleStrikeStatusChange {
-  val index = 122
-  val type1 = Ghost
-  val power = 20
-  var maxPP = 30
-  var currentPP = maxPP
+class Lick extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 122
+  override val type1 = Ghost
+  override val power = 20
+  override val maxPP = 30
   override val statusAilmentToCause = new PAR
   override val chanceOfCausingAilment = 0.3
 }
 
-class BodySlam extends PhysicalSingleStrikeStatusChange {
-  val index = 34
-  val type1 = Normal
-  val power = 85
-  var maxPP = 15
-  var currentPP = maxPP
+class BodySlam extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 34
+  override val type1 = Normal
+  override val power = 85
+  override val maxPP = 15
   override val statusAilmentToCause = new PAR
   override val chanceOfCausingAilment = 0.3
 }
 
-class PoisonSting extends PhysicalSingleStrikeStatusChange {
-  val index = 40
-  val type1 = Poison
-  val power = 15
-  var maxPP = 35
-  var currentPP = maxPP
+class PoisonSting extends PhysicalMove with SingleStrikeStatusChange {
+  override val index = 40
+  override val type1 = Poison
+  override val power = 15
+  override val maxPP = 35
   override val statusAilmentToCause = new PSN
   override val chanceOfCausingAilment = 0.3
 }
 
 
 // PHYSICAL, SINGLE-STRIKE WITH A TWIST
-class QuickAttack extends PhysicalSingleStrike {
-  val index = 98
-  val type1 = Normal
-  val power = 40
-  var maxPP = 30
-  var currentPP = maxPP
+class QuickAttack extends PhysicalMove with SingleStrike {
+  override val index = 98
+  override val type1 = Normal
+  override val power = 40
+  override val maxPP = 30
   override val priority = 1
 }
 
-class Slash extends PhysicalSingleStrike {
-  val index = 163
-  val type1 = Normal
-  val power = 70
-  var maxPP = 20
-  var currentPP = maxPP
+class Slash extends PhysicalMove with SingleStrike {
+  override val index = 163
+  override val type1 = Normal
+  override val power = 70
+  override val maxPP = 20
   override val critHitRate = HIGH
 }
 
-class Crabhammer extends PhysicalSingleStrike {
-  val index = 152
-  val type1 = Water
-  val power = 100
-  var maxPP = 10
-  var currentPP = maxPP
+class Crabhammer extends PhysicalMove with SingleStrike {
+  override val index = 152
+  override val type1 = Water
+  override val power = 100
+  override val maxPP = 10
   override val critHitRate = HIGH
   override val accuracy = 0.9
 }
@@ -376,40 +340,37 @@ abstract class PhysicalSingleStrikeRecoil extends PhysicalMove {
   }
 }
 
-class Submission extends PhysicalSingleStrikeRecoil {
-  val index = 66
-  val type1 = Fighting
-  val power = 80
-  var maxPP = 25
-  var currentPP = maxPP
+class Submission extends PhysicalMove with SingleStrikeRecoil {
+  override val index = 66
+  override val type1 = Fighting
+  override val power = 80
+  override val maxPP = 25
   override val accuracy = 0.80
   override val recoilProportion = 0.25
 }
 
-class DoubleEdge extends PhysicalSingleStrikeRecoil {
-  val index = 38
-  val type1 = Normal
-  val power = 100  // higher in later generations
-  var maxPP = 15
-  var currentPP = maxPP
+class DoubleEdge extends PhysicalMove with SingleStrikeRecoil {
+  override val index = 38
+  override val type1 = Normal
+  override val power = 100  // higher in later generations
+  override val maxPP = 15
   override val recoilProportion = 0.25
 }
 
-class TakeDown extends PhysicalSingleStrikeRecoil {
-  val index = 36
-  val type1 = Normal
-  val power = 90
-  var maxPP = 20
-  var currentPP = maxPP
+class TakeDown extends PhysicalMove with SingleStrikeRecoil {
+  override val index = 36
+  override val type1 = Normal
+  override val power = 90
+  override val maxPP = 20
   override val accuracy = 0.85
   override val recoilProportion = 0.25
 }
 
-class Struggle extends PhysicalSingleStrikeRecoil {
-  val index = 165
-  val type1 = Normal
-  val power = 50
-  var maxPP = 1
+class Struggle extends PhysicalMove with SingleStrikeRecoil {
+  override val index = 165
+  override val type1 = Normal
+  override val power = 50
+  override val maxPP = 1
   var currentPP = 1
   override val recoilProportion = 0.5   // different from others!
 
@@ -426,65 +387,58 @@ class Struggle extends PhysicalSingleStrikeRecoil {
 /* PHYSICAL: MULTI STRIKE */
 
 class PinMissile extends PhysicalMultiStrike {
-  val index = 42
-  val type1 = Bug
-  val power = 14
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 42
+  override val type1 = Bug
+  override val power = 14
+  override val maxPP = 20
   override val accuracy = 0.85
 }
 
 class Barrage extends PhysicalMultiStrike {
-  val index = 140
-  val type1 = Normal
-  val power = 15
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 140
+  override val type1 = Normal
+  override val power = 15
+  override val maxPP = 20
   override val accuracy = 0.85
 }
 
 class CometPunch extends PhysicalMultiStrike {
-  val index = 4
-  val type1 = Normal
-  val power = 18
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 4
+  override val type1 = Normal
+  override val power = 18
+  override val maxPP = 20
   override val accuracy = 0.85
 }
 
 class DoubleSlap extends PhysicalMultiStrike {
-  val index = 3
-  val type1 = Normal
-  val power = 15
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 3
+  override val type1 = Normal
+  override val power = 15
+  override val maxPP = 10
   override val accuracy = 0.85
 }
 
 class FuryAttack extends PhysicalMultiStrike {
-  val index = 31
-  val type1 = Normal
-  val power = 15
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 31
+  override val type1 = Normal
+  override val power = 15
+  override val maxPP = 20
   override val accuracy = 0.85
 }
 
 class FurySwipes extends PhysicalMultiStrike {
-  val index = 154
-  val type1 = Normal
-  val power = 18
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 154
+  override val type1 = Normal
+  override val power = 18
+  override val maxPP = 15
   override val accuracy = 0.80
 }
 
 class SpikeCannon extends PhysicalMultiStrike {
-  val index = 131
-  val type1 = Normal
-  val power = 20
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 131
+  override val type1 = Normal
+  override val power = 20
+  override val maxPP = 15
   // 100% accuracy
 }
 
@@ -507,29 +461,26 @@ abstract class PhysicalDoubleStrike extends PhysicalMove {
 }
 
 class DoubleKick extends PhysicalDoubleStrike {
-  val index = 24
-  val type1 = Fighting
-  val power = 30
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 24
+  override val type1 = Fighting
+  override val power = 30
+  override val maxPP = 30
 }
 
 class Bonemerang extends PhysicalDoubleStrike {
-  val index = 155
-  val type1 = Ground
-  val power = 50
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 155
+  override val type1 = Ground
+  override val power = 50
+  override val maxPP = 10
 }
 
 
 /* PHYSICAL, FUNCTION OF ENVIRONMENT */
 class SeismicToss extends SpecialMove {
-  val index = 69
-  val type1 = Fighting
-  val power = 0
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 69
+  override val type1 = Fighting
+  override val power = 0
+  override val maxPP = 20
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
@@ -539,11 +490,10 @@ class SeismicToss extends SpecialMove {
 }
 
 class SuperFang extends SpecialMove {
-  val index = 162
-  val type1 = Normal
-  val power = 0
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 162
+  override val type1 = Normal
+  override val power = 0
+  override val maxPP = 10
   override val accuracy = 0.90
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
@@ -560,9 +510,8 @@ abstract class PhysicalOneHitKO extends PhysicalMove {
   // TODO: MOVE will break a Substitute if it hits
   // TODO: MOVE can be countered for infinite damage on the turn it breaks a Substitute.
   override val accuracy = 0.30
-  override val power = 0
-  var maxPP = 5
-  var currentPP = maxPP
+  override override val power = 0
+  override val maxPP = 5
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
@@ -573,25 +522,25 @@ abstract class PhysicalOneHitKO extends PhysicalMove {
 }
 
 class Fissure extends PhysicalOneHitKO {
-  val index = 90
-  val type1 = Ground
+  override val index = 90
+  override val type1 = Ground
 }
 
 class Guillotine extends PhysicalOneHitKO {
-  val index = 12
-  val type1 = Normal
+  override val index = 12
+  override val type1 = Normal
 }
 
 class HornDrill extends PhysicalOneHitKO {
-  val index = 32
-  val type1 = Normal
+  override val index = 32
+  override val type1 = Normal
 }
 
 
 /* SPECIAL MOVES */
 // SPECIAL, DEAL FIXED AMOUNT OF DAMAGE
 abstract class SpecialConstantDamage extends SpecialMove {
-  override val power = 0
+  override override val power = 0
   val constantDamageAmount : Int
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
@@ -603,10 +552,9 @@ abstract class SpecialConstantDamage extends SpecialMove {
 
 
 class SonicBoom extends SpecialConstantDamage {
-  val index = 49
-  val type1 = Normal
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 49
+  override val type1 = Normal
+  override val maxPP = 20
   override val accuracy = 0.9
   override val constantDamageAmount = 20
 }
@@ -614,11 +562,10 @@ class SonicBoom extends SpecialConstantDamage {
 
 // SPECIAL, FUNCTION OF LEVEL
 class NightShade extends SpecialMove {
-  val index = 101
-  val type1 = Ghost
-  val power = 0
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 101
+  override val type1 = Ghost
+  override val power = 0
+  override val maxPP = 15
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       defender.takeDamage(attacker.level)
@@ -627,11 +574,10 @@ class NightShade extends SpecialMove {
 }
 
 class Psywave extends SpecialMove {
-  val index = 149
-  val type1 = Psychic
-  val power = 0
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 149
+  override val type1 = Psychic
+  override val power = 0
+  override val maxPP = 15
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
       val damageDealt = ((Random.nextDouble + 0.5) * attacker.level).toInt
@@ -651,55 +597,41 @@ abstract class SpecialSingleStrike extends SpecialMove {
   }
 }
 
-class Gust extends PhysicalSingleStrike {
-  // TODO: Why is this listed as a Special move, given that it's type Normal?
-  val index = 149
-  val type1 = Normal   // Flying in later gens
-  val power = 40
-  var maxPP = 35
-  var currentPP = maxPP
-}
-
 class TriAttack extends SpecialSingleStrike {
   // TODO: Why is this listed as a Special move, given that it's type Normal?
-  val index = 161
-  val type1 = Normal
-  val power = 80
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 161
+  override val type1 = Normal
+  override val power = 80
+  override val maxPP = 10
 }
 
 class HydroPump extends SpecialSingleStrike {
-  val index = 56
-  val type1 = Water
-  val power = 120   // down to 110 in Gen IV
-  var maxPP = 5
-  var currentPP = maxPP
+  override val index = 56
+  override val type1 = Water
+  override val power = 120   // down to 110 in Gen IV
+  override val maxPP = 5
   override val accuracy = 0.8
 }
 
 class Surf extends SpecialSingleStrike {
-  val index = 57
-  val type1 = Water
-  val power = 95   // down to 90 in Gen IV
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 57
+  override val type1 = Water
+  override val power = 95   // down to 90 in Gen IV
+  override val maxPP = 15
 }
 
 class WaterGun extends SpecialSingleStrike {
-  val index = 55
-  val type1 = Water
-  val power = 40
-  var maxPP = 25
-  var currentPP = maxPP
+  override val index = 55
+  override val type1 = Water
+  override val power = 40
+  override val maxPP = 25
 }
 
 class RazorLeaf extends SpecialSingleStrike {
-  val index = 75
-  val type1 = Grass
-  val power = 55
-  var maxPP = 25
-  var currentPP = maxPP
+  override val index = 75
+  override val type1 = Grass
+  override val power = 55
+  override val maxPP = 25
   override val accuracy = 0.95
   override val critHitRate = HIGH
 }
@@ -725,28 +657,25 @@ abstract class SpecialTransferHP extends SpecialMove {
 }
 
 class Absorb extends SpecialTransferHP {
-  val index = 71
-  val type1 = Grass
-  val power = 20
-  var maxPP = 20  // 25 in later gens
-  var currentPP = maxPP
+  override val index = 71
+  override val type1 = Grass
+  override val power = 20
+  override val maxPP = 20  // 25 in later gens
 }
 
 class MegaDrain extends SpecialTransferHP {
-  val index = 72
-  val type1 = Grass
-  val power = 40
-  var maxPP = 10  // 15 in later gens
-  var currentPP = maxPP
+  override val index = 72
+  override val type1 = Grass
+  override val power = 40
+  override val maxPP = 10  // 15 in later gens
 }
 
 class DreamEater extends SpecialMove {
   // TODO: If DreamEater breaks a substitute, no HP will be restored to the user.
-  val index = 138
-  val type1 = Psychic
-  val power = 40
-  var maxPP = 10  // 15 in later gens
-  var currentPP = maxPP
+  override val index = 138
+  override val type1 = Psychic
+  override val power = 40
+  override val maxPP = 10  // 15 in later gens
 
   val transferProportion = 0.5
 
@@ -808,122 +737,109 @@ abstract class StatusChangeAttackerStats extends StatusMove {
 }
 
 class Sharpen extends StatusChangeAttackerStats {
-  val index = 159
-  val type1 = Normal
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 159
+  override val type1 = Normal
+  override val maxPP = 30
   override val statToChange = ATTACK
   override val amount = 1
 }
 
 class Meditate extends StatusChangeAttackerStats {
-  val index = 96
-  val type1 = Psychic
-  var maxPP = 40
-  var currentPP = maxPP
+  override val index = 96
+  override val type1 = Psychic
+  override val maxPP = 40
   override val statToChange = ATTACK
   override val amount = 1
 }
 
 class SwordsDance extends StatusChangeAttackerStats {
-  val index = 14
-  val type1 = Normal
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 14
+  override val type1 = Normal
+  override val maxPP = 30
   override val statToChange = ATTACK
   override val amount = 2
 }
 
 
 class DefenseCurl extends StatusChangeAttackerStats {
-  val index = 111
-  val type1 = Normal
-  var maxPP = 40
-  var currentPP = maxPP
+  override val index = 111
+  override val type1 = Normal
+  override val maxPP = 40
   override val statToChange = DEFENSE
   override val amount = 1
 }
 
 class Withdraw extends StatusChangeAttackerStats {
-  val index = 110
-  val type1 = Water
-  var maxPP = 40
-  var currentPP = maxPP
+  override val index = 110
+  override val type1 = Water
+  override val maxPP = 40
   override val statToChange = DEFENSE
   override val amount = 1
 }
 
 class Harden extends StatusChangeAttackerStats {
-  val index = 106
-  val type1 = Normal
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 106
+  override val type1 = Normal
+  override val maxPP = 30
   override val statToChange = DEFENSE
   override val amount = 1
 }
 
 
 class AcidArmor extends StatusChangeAttackerStats {
-  val index = 151
-  val type1 = Poison
-  var maxPP = 40
-  var currentPP = maxPP
+  override val index = 151
+  override val type1 = Poison
+  override val maxPP = 40
   override val statToChange = DEFENSE
   override val amount = 2
 }
 
 
 class Barrier extends StatusChangeAttackerStats {
-  val index = 112
-  val type1 = Psychic
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 112
+  override val type1 = Psychic
+  override val maxPP = 30
   override val statToChange = DEFENSE
   override val amount = 2
 }
 
 
 class DoubleTeam extends StatusChangeAttackerStats {
-  val index = 104
-  val type1 = Normal
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 104
+  override val type1 = Normal
+  override val maxPP = 15
   override val statToChange = EVASION
   override val amount = 1
 }
 
 class Minimize extends StatusChangeAttackerStats {
-  val index = 107
-  val type1 = Normal
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 107
+  override val type1 = Normal
+  override val maxPP = 20
   override val statToChange = EVASION
   override val amount = 1
 }
 
 class Agility extends StatusChangeAttackerStats {
-  val index = 97
-  val type1 = Psychic
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 97
+  override val type1 = Psychic
+  override val maxPP = 30
   override val statToChange = SPEED
   override val amount = 2
 }
 
 class Growth extends StatusChangeAttackerStats {
-  val index = 74
-  val type1 = Normal
-  var maxPP = 40
-  var currentPP = maxPP
+  override val index = 74
+  override val type1 = Normal
+  override val maxPP = 40
   override val statToChange = SPECIAL
   override val amount = 1
 }
 
 class Amnesia extends StatusChangeAttackerStats {
-  val index = 133
-  val type1 = Psychic
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 133
+  override val type1 = Psychic
+  override val maxPP = 20
   override val statToChange = SPECIAL
   override val amount = 2
 }
@@ -949,85 +865,76 @@ abstract class StatusChangeDefenderStats extends StatusMove {
 }
 
 class StringShot extends StatusChangeDefenderStats {
-  val index = 81
+  override val index = 81
   override val accuracy = .95          // in [0.0, 1.0]
-  val type1 = Bug
-  var maxPP = 40
-  var currentPP = maxPP
+  override val type1 = Bug
+  override val maxPP = 40
   override val statToChange = SPEED
   override val amount = -1
 }
 
 class SandAttack extends StatusChangeDefenderStats {
-  val index = 28
-  val type1 = Normal  // changed in later Gens
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 28
+  override val type1 = Normal  // changed in later Gens
+  override val maxPP = 15
   override val statToChange = ACCURACY
   override val amount = -1
 }
 
 class Flash extends StatusChangeDefenderStats {
-  val index = 148
-  val type1 = Normal
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 148
+  override val type1 = Normal
+  override val maxPP = 20
   override val accuracy = 0.7
   override val statToChange = ACCURACY
   override val amount = -1
 }
 
 class SmokeScreen extends StatusChangeDefenderStats {
-  val index = 108
-  val type1 = Normal
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 108
+  override val type1 = Normal
+  override val maxPP = 20
   override val statToChange = ACCURACY
   override val amount = -1
 }
 
 class Kinesis extends StatusChangeDefenderStats {
-  val index = 134
-  val type1 = Psychic
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 134
+  override val type1 = Psychic
+  override val maxPP = 15
   override val accuracy = 0.8
   override val statToChange = ACCURACY
   override val amount = -1
 }
 
 class Growl extends StatusChangeDefenderStats {
-  val index = 45
-  val type1 = Normal
-  var maxPP = 40
-  var currentPP = maxPP
+  override val index = 45
+  override val type1 = Normal
+  override val maxPP = 40
   override val statToChange = ATTACK
   override val amount = -1
 }
 
 class Leer extends StatusChangeDefenderStats {
-  val index = 43
-  val type1 = Normal
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 43
+  override val type1 = Normal
+  override val maxPP = 30
   override val statToChange = DEFENSE
   override val amount = -1
 }
 
 class TailWhip extends StatusChangeDefenderStats {
-  val index = 39
-  val type1 = Normal
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 39
+  override val type1 = Normal
+  override val maxPP = 30
   override val statToChange = DEFENSE
   override val amount = -1
 }
 
 class Screech extends StatusChangeDefenderStats {
-  val index = 103
-  val type1 = Normal
-  var maxPP = 40
-  var currentPP = maxPP
+  override val index = 103
+  override val type1 = Normal
+  override val maxPP = 40
   override val accuracy = 0.85
   override val statToChange = DEFENSE
   override val amount = -2
@@ -1056,49 +963,44 @@ abstract class StatusCauseStatusAilment extends StatusMove {
 }
 
 class ThunderWave extends StatusCauseStatusAilment {
-  val index = 86
-  val type1 = Electric
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 86
+  override val type1 = Electric
+  override val maxPP = 20
   val statusAilmentToCause = new PAR
   val chanceOfCausingAilment = 1.0
 }
 
 class StunSpore extends StatusCauseStatusAilment {
-  val index = 78
-  val type1 = Grass
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 78
+  override val type1 = Grass
+  override val maxPP = 30
   val statusAilmentToCause = new PAR
   val chanceOfCausingAilment = 1.0
   override val accuracy = 0.75
 }
 
 class Glare extends StatusCauseStatusAilment {
-  val index = 137
-  val type1 = Normal
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 137
+  override val type1 = Normal
+  override val maxPP = 30
   val statusAilmentToCause = new PAR
   val chanceOfCausingAilment = 1.0
   override val accuracy = 0.75  // increased in later generations
 }
 
 class ConfuseRay extends StatusCauseStatusAilment {
-  val index = 109
-  val type1 = Ghost
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 109
+  override val type1 = Ghost
+  override val maxPP = 10
   val statusAilmentToCause = new CONFUSION
   val chanceOfCausingAilment = 1.0
   // TODO: ConfuseRay will fail if the target has a substitute
 }
 
 class Supersonic extends StatusCauseStatusAilment {
-  val index = 48
-  val type1 = Normal
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 48
+  override val type1 = Normal
+  override val maxPP = 20
   val statusAilmentToCause = new CONFUSION
   val chanceOfCausingAilment = 1.0
   override val accuracy = 0.55
@@ -1106,10 +1008,9 @@ class Supersonic extends StatusCauseStatusAilment {
 }
 
 class SleepPowder extends StatusCauseStatusAilment {
-  val index = 79
-  val type1 = Grass
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 79
+  override val type1 = Grass
+  override val maxPP = 15
   val statusAilmentToCause = new SLP
   val chanceOfCausingAilment = 1.0
   override val accuracy = 0.75
@@ -1117,30 +1018,27 @@ class SleepPowder extends StatusCauseStatusAilment {
 }
 
 class Hypnosis extends StatusCauseStatusAilment {
-  val index = 95
-  val type1 = Psychic
-  var maxPP = 15
-  var currentPP = maxPP
+  override val index = 95
+  override val type1 = Psychic
+  override val maxPP = 15
   val statusAilmentToCause = new SLP
   val chanceOfCausingAilment = 1.0
   override val accuracy = 0.60
 }
 
 class PoisonGas extends StatusCauseStatusAilment {
-  val index = 139
-  val type1 = Poison
-  var maxPP = 40
-  var currentPP = maxPP
+  override val index = 139
+  override val type1 = Poison
+  override val maxPP = 40
   val statusAilmentToCause = new PSN
   val chanceOfCausingAilment = 1.0
   override val accuracy = 0.55
 }
 
 class Toxic extends StatusMove {
-  val index = 92
-  val type1 = Poison
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 92
+  override val type1 = Poison
+  override val maxPP = 10
   val chancePSN = 1.0
   override val accuracy = 0.85
 
@@ -1153,10 +1051,9 @@ class Toxic extends StatusMove {
 
 /* SUPER WEIRD STATUS MOVES */
 class MirrorMove extends StatusMove {
-  val index = 119
-  val type1 = Flying
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 119
+  override val type1 = Flying
+  override val maxPP = 20
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // Get the last move that $defender used during his current stay in battle;
@@ -1184,10 +1081,9 @@ class MirrorMove extends StatusMove {
 }
 
 class Haze extends StatusMove {
-  val index = 114
-  val type1 = Ice
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 114
+  override val type1 = Ice
+  override val maxPP = 30
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) {
     // http://bulbapedia.bulbagarden.net/wiki/Haze_(move)
@@ -1219,10 +1115,9 @@ class Haze extends StatusMove {
 }
 
 class Mist extends StatusMove {
-  val index = 54
-  val type1 = Ice
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 54
+  override val type1 = Ice
+  override val maxPP = 30
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // http://bulbapedia.bulbagarden.net/wiki/Mist_(move)
@@ -1232,10 +1127,9 @@ class Mist extends StatusMove {
 }
 
 class Conversion extends StatusMove {
-  val index = 160
-  val type1 = Normal
-  var maxPP = 30
-  var currentPP = maxPP
+  override val index = 160
+  override val type1 = Normal
+  override val maxPP = 30
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // Conversion changes the types of the attacker to be those of the defender
@@ -1247,10 +1141,9 @@ class Conversion extends StatusMove {
 }
 
 class Metronome extends StatusMove {
-  val index = 119
-  val type1 = Flying
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 119
+  override val type1 = Flying
+  override val maxPP = 20
 
   private def getValidIndex() : Int = {
       val potentialIndex = Utils.intBetween(1, 165 + 1)
@@ -1273,10 +1166,9 @@ class Metronome extends StatusMove {
 }
 
 class Mimic extends StatusMove {
-  val index = 102
-  val type1 = Normal
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 102
+  override val type1 = Normal
+  override val maxPP = 20
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // TODO: figure out what Mimic actually does in Gen 1, then make it happen
@@ -1284,10 +1176,9 @@ class Mimic extends StatusMove {
 }
 
 class Recovery extends StatusMove {
-  val index = 105
-  val type1 = Normal
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 105
+  override val type1 = Normal
+  override val maxPP = 10
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     val currentHP = attacker.currentHP
@@ -1306,10 +1197,9 @@ class Recovery extends StatusMove {
 }
 
 class Rest extends StatusMove {
-  val index = 156
-  val type1 = Psychic
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 156
+  override val type1 = Psychic
+  override val maxPP = 10
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // http://bulbapedia.bulbagarden.net/wiki/Rest_(move)
@@ -1321,10 +1211,9 @@ class Rest extends StatusMove {
 }
 
 class SoftBoiled extends StatusMove {
-  val index = 135
-  val type1 = Psychic
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 135
+  override val type1 = Psychic
+  override val maxPP = 10
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // Same as recovery!
@@ -1344,50 +1233,45 @@ class SoftBoiled extends StatusMove {
 }
 
 class Roar extends StatusMove {
-  val index = 46
-  val type1 = Normal
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 46
+  override val type1 = Normal
+  override val maxPP = 20
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // no effect in Gen 1 against another trainer
   }
 }
 
 class Whirlwind extends StatusMove {
-  val index = 18
-  val type1 = Normal
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 18
+  override val type1 = Normal
+  override val maxPP = 20
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // no effect in Gen 1 against another trainer
   }
 }
 
 class Teleport extends StatusMove {
-  val index = 100
-  val type1 = Psychic
-  var maxPP = 20
-  var currentPP = maxPP
+  override val index = 100
+  override val type1 = Psychic
+  override val maxPP = 20
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // no effect in Gen 1 against another trainer
   }
 }
 
 class Splash extends StatusMove {
-  val index = 150
-  val type1 = Normal
-  var maxPP = 40
-  var currentPP = maxPP
+  override val index = 150
+  override val type1 = Normal
+  override val maxPP = 40
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // no effect in Gen 1 against anyone
   }
 }
 
 class Transform extends StatusMove {
-  val index = 144
-  val type1 = Normal
-  var maxPP = 10
-  var currentPP = maxPP
+  override val index = 144
+  override val type1 = Normal
+  override val maxPP = 10
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // http://bulbapedia.bulbagarden.net/wiki/Transform_(move)
     // http://www.smogon.com/rb/moves/Transform

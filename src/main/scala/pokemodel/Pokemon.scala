@@ -145,6 +145,36 @@ class Pokemon(builder : PokemonBuilder) {
     case _ => {}
   }
 
+  def isBurned: Boolean = statusAilment match {
+    case Some(_ : BRN) => true
+    case _ => false
+  }
+
+  def isFrozen: Boolean = statusAilment match {
+    case Some(_ : FRZ) => true
+    case _ => false
+  }
+
+  def isPoisoned: Boolean = statusAilment match {
+    case Some(_ : PSN) => true
+    case _ => false
+  }
+
+  def isBadlyPoisoned: Boolean = statusAilment match {
+    case Some(_ : BPSN) => true
+    case _ => false
+  }
+
+  def isParalyzed: Boolean = statusAilment match {
+    case Some(_ : PAR) => true
+    case _ => false
+  }
+
+  def isAsleep: Boolean = statusAilment match {
+    case Some(_ : SLP) => true
+    case _ => false
+  }
+
   /* NICETIES */
   private def checkConsistency {
     assert(1 <= index && index <= 165)

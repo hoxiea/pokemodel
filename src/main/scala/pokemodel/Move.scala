@@ -198,7 +198,7 @@ trait ConstantDamage extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    println("Calling ConstantDamage's moveSpecificStuff")
+    // println("Calling ConstantDamage's moveSpecificStuff")
     /*
      * A ConstantDamage attack can do the following things:
      * - Deal Damage
@@ -230,14 +230,16 @@ trait Recoil extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    println("Calling Recoil's moveSpecificStuff")
+    // println("Calling Recoil's moveSpecificStuff")
     /*
      * A Recoil just hurts the user itself, so we have to worry about
      * - selfKO
      */
     if (mrb.damageDealt == 0)
-      println("Recoil lacks damage in moveSpecificStuff - attack missed, or Recoil mixed in wrong")
-    val damageToTake = (mrb.damageDealt * recoilProportion).toInt
+      println("""|Recoil lacks damage in moveSpecificStuff - attack missed,
+                 |unaffective movetype, or Recoil mixed in wrong""".stripMargin)
+    val damageToTake =
+      (mrb.damageDealt * recoilProportion).toInt min attacker.currentHP
     attacker.takeDamage(damageToTake)
     mrb.selfKO(!attacker.isAlive)
     super.moveSpecificStuff(attacker, defender, pb, mrb)
@@ -275,24 +277,22 @@ class KarateChop extends PhysicalMove with SingleStrike {
   override val critHitRate = HIGH
 }
 
-class DragonRage extends PhysicalMove with ConstantDamage {
-  // TODO: change to SpecialMove
+class DragonRage extends SpecialMove with ConstantDamage {
   override val index = 82
   override val type1 = Dragon
   override val maxPP = 10
   override def damageAmount = 40
 }
 
-class Thunder extends SpecialMove with SingleStrike {
-//  TODO: add StatusChange
+class Thunder extends SpecialMove with SingleStrike with StatusChange {
   override val index = 87
   override val type1 = Electric
   override val power = 110
   override val maxPP = 10
   override val accuracy = 0.7
 
-//  override def statusAilmentToCause = new PAR
-//  override def chanceOfCausingAilment = 0.1
+  override def statusAilmentToCause = new PAR
+  override def chanceOfCausingAilment = 0.1
 }
 
 class Struggle extends PhysicalMove with Recoil with SingleStrike {
@@ -309,36 +309,72 @@ class Struggle extends PhysicalMove with Recoil with SingleStrike {
 }
 
 
-// trait StatusChange extends Move {
-//   // Cause some kind of StatusAilment to the opponent, non-volatile or volatile,
-//   // with a probability that depends on the move
-//   def statusAilmentToCause   : StatusAilment
-//   def chanceOfCausingAilment : Double
+trait StatusChange extends Move {
+  // Cause some kind of StatusAilment to the opponent, non-volatile or
+  // volatile, with a probability that depends on the move
+  def statusAilmentToCause   : StatusAilment
+  def chanceOfCausingAilment : Double
+  def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
 
-//   def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    if (statusAilmentCaused) {
+      statusAilmentToCause match {
+        case (_ : NonVolatileStatusAilment) => {
+          if (pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
+            mrb.statusChange(statusAilmentToCause)
+          }
+        }
+        case (_ : CONFUSION) => {
+          if (pb.statusManager.tryToCauseConfusion(defender)) {
+            mrb.statusChange(statusAilmentToCause)
+          }
+        }
+        case (_ : FLINCH) => {
+          if (pb.statusManager.causeToFlinch(defender)) {
+            mrb.statusChange(statusAilmentToCause)
+          }
+        }
+        case (_ : PARTIALLYTRAPPED) => {
+          if (pb.statusManager.tryToPartiallyTrap(defender)) {
+            mrb.statusChange(statusAilmentToCause)
+          }
+        }
+        case (_ : SEEDED) => {
+          if (pb.statusManager.tryToSeed(defender)) {
+            mrb.statusChange(statusAilmentToCause)
+          }
+        }
+      }
+    }
+    super.moveSpecificStuff(attacker, defender, pb, mrb)
+  }
+}
 
-//   abstract override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-//     super.moveSpecificStuff(attacker, defender, pb, mrb)
-//     if (statusAilmentCaused) {
-//       statusAilmentToCause match {
-//         case (_ : NonVolatileStatusAilment) => {
-//           val changeWorked = pb.statusManager.tryToChangeStatusAilment(defender, statusAilmentToCause)
-//           if (changeWorked) new MoveResultBuilder().statusChange(statusAilmentToCause).toMoveResult
-//           else new MoveResultBuilder().toMoveResult
-//         }
-//         case (_ : CONFUSION) => {
-//           val changeWorked = pb.statusManager.tryToCauseConfusion(defender)
-//           if (changeWorked) new MoveResultBuilder().statusChange(new CONFUSION).toMoveResult
-//           else new MoveResultBuilder().toMoveResult
-//         }
-//         case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender); false
-//         case (_ : PARTIALLYTRAPPED) => pb.statusManager.tryToPartiallyTrap(defender); false
-//         case (_ : SEEDED) => pb.statusManager.tryToSeed(defender); false
-//         case _ => false
-//       }
-//     } else false
-//   }
-// }
+class TestBurner extends SpecialMove with StatusChange {
+  override val index = 999
+  override val type1 = Fire  // shouldn't be used
+  override val power = 40    // shouldn't be used
+  override val maxPP = 10
+  override val accuracy = 1.0
+
+  override def statusAilmentToCause = new BRN
+  override def chanceOfCausingAilment = 1.0
+}
+
+class TestAsleep extends SpecialMove with StatusChange {
+  override val index = 999
+  override val type1 = Normal  // shouldn't be used
+  override val power = 40      // shouldn't be used
+  override val maxPP = 10
+  override val accuracy = 1.0  // always hit, for test purposes
+
+  override def statusAilmentToCause = new SLP
+  override def chanceOfCausingAilment = 1.0  // always cause, for test purposes
+}
 
 //class TestPhysicalMultiStrike extends PhysicalMove with MultiStrike with Normal {
 //  override val index = 999

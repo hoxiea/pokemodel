@@ -244,4 +244,51 @@ class MoveSuite extends FunSuite {
     assert(geodude.currentHP == geodude.maxHP - result2.damageDealt)
     assert(dragonite.maxHP - dragonite.currentHP == result2.damageDealt / 2)
   }
+
+  test("Test StatusChange - BRN") {
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, new TestBurner)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+    val result = charizard.useMove(1, venusaur, battle)
+    assert(venusaur.isBurned)
+  }
+
+  test("Test StatusChange - SLP") {
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, new TestAsleep)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+    val result = charizard.useMove(1, venusaur, battle)
+    assert(venusaur.isAsleep)
+  }
+
+  test("New statusAilments don't displace older statusAilments") {
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
+                                 .move(1, new TestBurner)
+                                 .move(2, new TestAsleep)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+    charizard.useMove(1, venusaur, battle)
+    assert(venusaur.isBurned)
+    charizard.useMove(2, venusaur, battle)
+    assert(venusaur.isBurned)  // still burned, not asleep
+  }
+
 }
