@@ -1,25 +1,36 @@
 PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
-- Single-strike
+    - Single-strike + recoil
+    = Struggle: do damage, 50% recoil. Can get crithits. Normal type rules apply
+    = Submission: do damage, receive 25% of damage done to target yourself
+    = Double Edge: do damage, receive 25% of damage done to target yourself
+    = Take Down: do damage, receive 25% of damage done to target yourself
+
+    - Single-strike
     = Pound: damage
-= Drill Peck: damage
-= Peck: damage
-= Wing Attack: damage
-= Vine Whip: damage
-= Cut: damage
-= Earthquake: damage
-= Dizzy Punch: damage
-= Egg Bomb: damage
-= Horn Attack: damage
-= Mega Kick: damage
-= Mega Punch: damage
-= Pay Day: damage
-= Scratch: damage
-= Slam: damage
-= Strength: damage
-= Tackle: damage
-= Vice Grip: damage
-= Rock Slide: damage
-= Rock Throw: damage
+    = Tackle: damage
+    = Drill Peck: damage
+    = Peck: damage
+    = Wing Attack: damage
+    = Cut: damage
+    = Earthquake: damage
+    = Dizzy Punch: damage
+    = Egg Bomb: damage
+    = Horn Attack: damage
+    = Mega Kick: damage
+    = Mega Punch: damage
+    = Pay Day: damage
+    = Scratch: damage
+    = Slam: damage
+    = Strength: damage
+    = Vice Grip: damage
+    = Rock Slide: damage
+    = Rock Throw: damage
+
+    - Single-strike, special
+    = Karate Chop: damage, high crit hit rate
+    = Quick Attack: damage, higher PRIORITY
+    = Slash: damage, high crit hit rate
+    = Crabhammer: damage, high crit hit rate
 
 - Single-strike + potential status change
 = Bite: damage and 10% chance of causing a flinch
@@ -35,18 +46,6 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Body Slam: damage and 30% chance of PAR
 = Fire Punch: damage and 10% chance of BRN
 = Poison Sting: damage and 30% chance of PSN
-
-- Single-strike, special
-    = Karate Chop: damage, high crit hit rate
-= Quick Attack: damage, higher PRIORITY
-= Slash: damage, high crit hit rate
-= Crabhammer: damage, high crit hit rate
-
-- Single-strike + recoil
-= Struggle: do damage, 50% recoil damage. Can get crithits. Normal element rules apply
-= Submission: do damage, receive 25% of damage done to target yourself
-= Double Edge: do damage, receive 25% of damage done to target yourself
-= Take Down: do damage, receive 25% of damage done to target yourself
 
 - Multi-strike
 = Pin Missile: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
@@ -84,6 +83,7 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 = Hydro Pump: damage
 = Surf: damage
 = Water Gun: damage
+= Vine Whip: damage
 = Razor Leaf: damage, high crit hit rate
 
 - Transfer HP
