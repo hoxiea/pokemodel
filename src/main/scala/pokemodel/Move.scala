@@ -461,3 +461,51 @@ class TestIncreaseSelfDefenseStat extends StatusMove with SelfStatChange {
   def amountToChangeBy = 3
 }
 
+
+trait EnemyStatChange extends Move {
+  // Change your opponent's battle stats
+  def statToChange: BattleStat
+  def amountToChangeBy: Int
+  def chanceOfStatChange: Double
+
+  def statChangeHits: Boolean = Random.nextDouble < chanceOfStatChange
+
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    if (statChangeHits &&
+        pb.statManager.canChangeDefenderStats(attacker, defender, pb)) {
+      println("EnemyStatChange is processing")
+      statToChange match {
+        case ATTACK   => pb.statManager.changeAttackStage(defender, amountToChangeBy)
+        case DEFENSE  => pb.statManager.changeDefenseStage(defender, amountToChangeBy)
+        case SPEED    => pb.statManager.changeSpeedStage(defender, amountToChangeBy)
+        case SPECIAL  => pb.statManager.changeSpecialStage(defender, amountToChangeBy)
+        case ACCURACY => pb.statManager.changeAccuracyStage(defender, amountToChangeBy)
+        case EVASION  => pb.statManager.changeEvasionStage(defender, amountToChangeBy)
+      }
+    }
+  super.moveSpecificStuff(attacker, defender, pb, mrb)
+  }
+}
+
+class TestDecreaseEnemyDefense extends StatusMove with EnemyStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = DEFENSE
+  def amountToChangeBy = -3
+  def chanceOfStatChange = 1.0
+}
+
+
+class TestDecreaseEnemyAttack extends StatusMove with EnemyStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = ATTACK
+  def amountToChangeBy = -3
+  def chanceOfStatChange = 1.0
+}
+

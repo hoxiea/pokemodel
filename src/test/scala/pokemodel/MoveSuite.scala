@@ -442,6 +442,7 @@ class MoveSuite extends FunSuite {
      * I changed things to mutate. I should have known that changing the input
      * parameters was bad practice, though.
      */
+
     // println("-------------------")
     val m = new TestPhysicalSingleStrike with Power40 with AlwaysCritHit
     val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m)
@@ -480,10 +481,54 @@ class MoveSuite extends FunSuite {
     val trainer1 = new UseFirstAvailableMove(team1)
     val trainer2 = new UseFirstAvailableMove(team2)
     val battle = new Battle(trainer1, trainer2)
-    println(battle)
 
     val result1 = charizard.useMove(1, venusaur, battle)  // hit
     val result2 = venusaur.useMove(1, charizard, battle)  // defensestage +3
+    val result3 = charizard.useMove(1, venusaur, battle)  // hit again
+    assert(result1.damageDealt > result3.damageDealt)
+  }
+
+  test("EnemyStatChange: deal more damage by decreasing enemy's defense") {
+    // Critical Hits ignore stat mods, so let's turn them off
+    val m1 = new TestPhysicalSingleStrike with NeverCritHit
+    val m2 = new TestDecreaseEnemyDefense
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m1).move(2, m2)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    val result1 = charizard.useMove(1, venusaur, battle)  // hit
+    assert(battle.statManager.getEffectiveDefense(venusaur) == venusaur.defense, "first def")
+    val result2 = charizard.useMove(2, venusaur, battle)  // lower defense
+    assert(battle.statManager.getEffectiveDefense(venusaur) < venusaur.defense, "second def")
+    val result3 = charizard.useMove(1, venusaur, battle)  // hit again
+    assert(result1.damageDealt < result3.damageDealt, "damage off")
+  }
+
+  test("EnemyStatChange: take less damage by decreasing enemy's attack") {
+    // Critical Hits ignore stat mods, so let's turn them off
+    val m1 = new TestPhysicalSingleStrike with NeverCritHit
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m1)
+    val charizard = new Pokemon(pb1)
+
+    val m2 = new TestDecreaseEnemyAttack
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut().move(1, m2)
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    val result1 = charizard.useMove(1, venusaur, battle)  // hit
+    assert(battle.statManager.getEffectiveAttack(charizard) == charizard.attack)
+    val result2 = venusaur.useMove(1, charizard, battle)  // lower attack
+    assert(battle.statManager.getEffectiveAttack(charizard) < charizard.attack)
     val result3 = charizard.useMove(1, venusaur, battle)  // hit again
     assert(result1.damageDealt > result3.damageDealt)
   }

@@ -68,7 +68,7 @@ class Pokemon(builder : PokemonBuilder) {
     statusAilment = None
   }
 
-  def gainHP(amount : Int) { currentHP = intWrapper(maxHP).min(currentHP + amount) }
+  def gainHP(amount : Int) { currentHP = maxHP min (currentHP + amount) }
 
   def getMove(index: Int): Option[Move] = {
     require(1 <= index && index <= 4, s"illegal index $index passed to getMove - $name($level)")

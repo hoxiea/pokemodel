@@ -4,6 +4,7 @@ import Type._
 import MoveType._
 import BattleStat._
 import CritHitType._
+import scala.util.Random
 
 /*
  * This is where the actual game Moves live - Move.scala was getting pretty
@@ -271,6 +272,37 @@ class SpikeCannon extends PhysicalMove with MultiStrike {
   // 100% accuracy
 }
 
+/* PHYSICAL, TRANSFER HP */
+class LeechLife extends PhysicalMove {
+  override val index = 141
+  override val type1 = Bug
+  override val power = 20
+  override val maxPP = 15
+  // 100% accuracy
+
+  // TODO: if LL breaks a substitute, no HP is restored
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+      val result = pb.dc.calc(attacker, defender, this, pb)
+      defender.takeDamage(result.damageDealt)
+      val hpToGain = result.damageDealt match {
+        case 1 => 1
+        case _ => result.damageDealt / 2
+      }
+      attacker.gainHP(hpToGain)
+      result.hpGained(hpToGain)
+      super.moveSpecificStuff(attacker, defender, pb, result)
+    } else {
+      super.moveSpecificStuff(attacker, defender, pb, mrb)
+    }
+  }
+}
 
 /******** SPECIAL MOVES ********/
 class DragonRage extends SpecialMove with ConstantDamage {
