@@ -2,6 +2,8 @@ package pokemodel
 
 import org.scalatest.FunSuite
 
+import Type._
+
 class MoveSuite extends FunSuite {
 
   test("Using a move should cause PP to decrease by 1") {
@@ -39,6 +41,7 @@ class MoveSuite extends FunSuite {
       assert (57 <= result.damageDealt, s"crithit damage ${result.damageDealt} too low")
       assert (result.damageDealt <= 68, s"crithit damage ${result.damageDealt} too high")
     }
+    assert (result.numTimesHit == 1, "numTimesHit")
     assert (result.STAB == false, "stab")
     assert (result.typeMult == 1.0, "typeMult")
     assert (result.statusChange.isEmpty, "statusChange")
@@ -48,7 +51,7 @@ class MoveSuite extends FunSuite {
   }
 
   test("Trying TestPhysicalSingleStrike, Power80") {
-    val m = new TestPhysicalSingleStrike with Power80 with CritHit
+    val m = new TestPhysicalSingleStrike with Power80 with HighCritHit
     val pb1 = new PokemonBuilder("Charizard", 100)
                   .move(1, m)
                   .maxOut()
@@ -64,11 +67,11 @@ class MoveSuite extends FunSuite {
 
     // used calculator for these values
     if (!result.critHit) {
-      assert (58 <= result.damageDealt, "reg damage too low")
-      assert (result.damageDealt <= 69, "reg damage too high")
+      assert (58 <= result.damageDealt, s"reg damage ${result.damageDealt} too low (58 min)")
+      assert (result.damageDealt <= 69, s"reg damage ${result.damageDealt} too high (69 max)")
     } else {
-      assert (114 <= result.damageDealt, "crithit damage too low")
-      assert (result.damageDealt <= 134, "crithit damage too high")
+      assert (114 <= result.damageDealt, s"crithit damage ${result.damageDealt} too low (114 min)")
+      assert (result.damageDealt <= 134, s"crithit damage ${result.damageDealt} too high (134 max)")
     }
     assert (result.STAB == false, "stab")
     assert (result.typeMult == 1.0, "typeMult")
@@ -201,8 +204,10 @@ class MoveSuite extends FunSuite {
     val battle = new Battle(trainer1, trainer2)
 
     val result = dragonite.useMove(1, p2, battle)
-    assert(!p2.isAlive, "opponent")
-    assert(dragonite.maxHP - dragonite.currentHP == opponentHP / 2, "self")
+    if (result.damageDealt > 0) {
+      assert(!p2.isAlive, "opponent")
+      assert(dragonite.maxHP - dragonite.currentHP == opponentHP / 2, "self")
+    }
   }
 
   test("Struggle: no PP is deducted when it's used as Move5") {
@@ -291,4 +296,201 @@ class MoveSuite extends FunSuite {
     assert(venusaur.isBurned)  // still burned, not asleep
   }
 
+  test("Basic Multistrike attack, defender doesn't die") {
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
+                                 .move(1, new TestMultiStrike)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+    val result = charizard.useMove(1, venusaur, battle)
+    assert(venusaur.maxHP - venusaur.currentHP == result.numTimesHit * result.damageDealt)
+  }
+
+  test("Basic Multistrike attack, defender dies on first strike") {
+    val defenderHP = 10
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
+                                 .move(1, new TestMultiStrike)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut().currentHP(defenderHP)
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+    val result = charizard.useMove(1, venusaur, battle)
+    assert(result.numTimesHit == 1)
+    assert(result.damageDealt == defenderHP)
+    assert(!venusaur.isAlive)
+  }
+
+  test("Multistrike attack with STAB and type effectiveness") {
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
+                                 .move(1, new TestMultiStrike with Fire)  //
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+    val result = charizard.useMove(1, venusaur, battle)
+    assert(result.STAB)
+    assert(result.moveType == Fire)
+    assert(result.typeMult == 2.0)
+  }
+
+
+  test("SelfStatChange: increase damage done by Physical Attack via Attack stat increase") {
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
+                                 .move(1, new TestIncreaseSelfAttackStat)
+                                 .move(2, new TestPhysicalSingleStrike)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    val result1 = charizard.useMove(2, venusaur, battle)  // hit
+    val result2 = charizard.useMove(1, venusaur, battle)  // attackstage +3
+    val result3 = charizard.useMove(2, venusaur, battle)  // hit again
+    assert(result1.damageDealt < result3.damageDealt)
+  }
+
+  test("CritHit Traits: AlwaysCritHit should always land a crithit") {
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
+                                 .move(1, new TestPhysicalSingleStrike with AlwaysCritHit)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    val result = charizard.useMove(1, venusaur, battle)
+    assert(result.critHit)
+  }
+
+  test("CritHit Traits: NeverCritHit should never land a crithit") {
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
+                                 .move(1, new TestPhysicalSingleStrike with NeverCritHit)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    val result = charizard.useMove(1, venusaur, battle)
+    assert(!result.critHit)
+  }
+
+  test("Using an attack twice should usually cause different damage values") {
+    /*
+     * This test revealed something very interesting.
+     * I was seeing two cases:
+     * 1. The first attack randomly does more damage than the second.
+     * The output looked like:
+     * critHit damage = 66   // print statement in DamageCalc.calcCriticalHitDamage
+     * critHit damage = 61
+     * These shouldn't be the same...
+     * damageDealt = 66
+     * ... other result1 stuff...
+     * damageDealt = 66     // WRONG
+     * ... other result2 stuff
+     * The second value always equaled the first one.
+     * But Venusaur had the correct amount of health! maxHP - (66 + 61)
+     *
+     * 2. The first attack randomly does less damage than the second.
+     * The output looked like:
+     * critHit damage = 62   // print statement in DamageCalc.calcCriticalHitDamage
+     * critHit damage = 66
+     * These shouldn't be the same...
+     * damageDealt = 62
+     * ... other result1 stuff...
+     * damageDealt = 66   // truncated, KO occurs
+     * KO = true
+     * ... other result2 stuff
+     * This seems correct. Venusaur also has the correct amount of health
+     *
+     * Long story short, when you merge two MoveResultBuilders, it takes the
+     * larger damageDealt as the new value, since the default is 0. The only
+     * way that the first larger value could displace the second smaller value
+     * is if the values are persisting somehow.
+     *
+     * And that suggested that I was getting burned by the old "mutating a
+     * parameter with a default value, and the mutations persist" issue that
+     * gets mentioned in Python literature sometimes. I hypothesized that
+     * SingleStrike does mrb.merge(result) and not result.merge(mrb)... and
+     * sure enough, it did. Not anymore.
+     *
+     * It's funny too, because I initially wrote mrb.merge to leave both MRBs
+     * alone and produce a new MRB from scratch instead of mutating. But then
+     * I changed things to mutate. I should have known that changing the input
+     * parameters was bad practice, though.
+     */
+    // println("-------------------")
+    val m = new TestPhysicalSingleStrike with Power40 with AlwaysCritHit
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    val result1 = charizard.useMove(1, venusaur, battle)  // hit
+    // println(venusaur)
+    val result2 = charizard.useMove(1, venusaur, battle)  // hit again
+    // println(venusaur)
+    // println("These shouldn't be the same...")
+    // println(result1)
+    // println(result2)
+
+    // I left the print statements in place so that my big comment above makes
+    // more sense. But if smaller values are failing to overwrite larger ones,
+    // we won't always have...
+    assert(result1.damageDealt + result2.damageDealt == venusaur.maxHP - venusaur.currentHP)
+  }
+
+
+  // test("SelfStatChange: decrease damage taken by Physical Attack via Defense stat increase") {
+  //   // Critical Hits ignore stat mods, so let's turn them off
+  //   val m = new TestPhysicalSingleStrike with NeverCritHit
+  //   val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m)
+  //   val charizard = new Pokemon(pb1)
+  //   val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+  //                                .move(1, new TestIncreaseSelfDefenseStat)
+  //   val venusaur = new Pokemon(pb2)
+  //   val team1 = new PokemonTeam(charizard)
+  //   val team2 = new PokemonTeam(venusaur)
+  //   val trainer1 = new UseFirstAvailableMove(team1)
+  //   val trainer2 = new UseFirstAvailableMove(team2)
+  //   val battle = new Battle(trainer1, trainer2)
+  //   println(battle)
+
+  //   val result1 = charizard.useMove(1, venusaur, battle)  // hit
+  //   val result2 = venusaur.useMove(1, charizard, battle)  // defensestage +3
+  //   val result3 = charizard.useMove(1, venusaur, battle)  // hit again
+  //   println("These shouldn't be the same...")
+  //   println(result1)
+  //   println(result3)
+  //   assert(!result1.critHit && !result3.critHit)
+  //   assert(result1.damageDealt > result3.damageDealt)
+  // }
 }
