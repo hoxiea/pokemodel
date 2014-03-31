@@ -36,7 +36,8 @@ abstract class Move {
   val accuracy = 1.0      // in [0.0, 1.0], true for ~60% of moves, others can override
   val mrb = new MoveResultBuilder()
 
-  // Even moves with 100% accuracy might miss because of accuracy/evasion adjustments in battle
+  // Even moves with 100% accuracy might miss because of accuracy/evasion
+  // adjustments in battle
   def chanceHit(attacker : Pokemon, defender : Pokemon, pb : Battle): Double = {
     val attackerAccuracy = pb.statManager.getEffectiveAccuracy(attacker).toDouble
     val defenderEvasion = pb.statManager.getEffectiveEvasion(defender)
@@ -163,7 +164,9 @@ trait Power80 extends Move  { override val power = 80 }
 trait Power120 extends Move { override val power = 120 }
 
 // Quick way to get more critical hits, for testing purposes
-trait CritHit extends Move  { override val critHitRate = HIGH }
+trait NeverCritHit extends Move  { override val critHitRate = NEVER }
+trait HighCritHit extends Move   { override val critHitRate = HIGH }
+trait AlwaysCritHit extends Move { override val critHitRate = ALWAYS }
 
 // High priority, for testing purposes
 trait HighPriority extends Move  { override val priority = 1 }
@@ -182,13 +185,23 @@ trait SingleStrike extends Move {
       val result = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(result.damageDealt)
       result.KO(!defender.isAlive)
-      mrb.merge(result)
+      result.numTimesHit(1)  // singleStrike
+      result.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, result)
+    } else {
+      // Missed, so nothing in MRB changes... pass along what you got
+      super.moveSpecificStuff(attacker, defender, pb, mrb)
     }
-
-    // Pass these changes along to the next moveSpecificStuff
-    super.moveSpecificStuff(attacker, defender, pb, mrb)
   }
 }
+
+class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
+  override val index = 999
+  override val type1 = Normal
+  override val power = 40
+  override val maxPP = 20
+}
+
 
 trait ConstantDamage extends Move {
   def damageAmount: Int
@@ -206,22 +219,33 @@ trait ConstantDamage extends Move {
      * - selfKO?
      */
 
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) && pb.statusManager.canBeHit(defender)) {
-      // Bypass DamageCalculator, so we have to do this stuff ourselves
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
       val damageToDeal = damageAmount min defender.currentHP
       defender.takeDamage(damageToDeal)
-      mrb.damageDealt(damageToDeal)
-      mrb.KO(!defender.isAlive)
-      mrb.selfKO(!attacker.isAlive)
+
+      // Bypass DamageCalculator, so we have to do this stuff ourselves.
+      // Don't mutate mrb!
+      val result = new MoveResultBuilder()
+      result.damageDealt(damageToDeal)
+      result.numTimesHit(1)
+      // no crithits, STAB, moveType, typeMult, or statusChange for
+      // ConstantDamage moves
+      result.KO(!defender.isAlive)
+      result.selfKO(!attacker.isAlive)
+      super.moveSpecificStuff(attacker, defender, pb, result)
+    } else {
+      super.moveSpecificStuff(attacker, defender, pb, mrb)
     }
-    super.moveSpecificStuff(attacker, defender, pb, mrb)
   }
 }
 
+
 trait Recoil extends Move {
-  // Take damage equal to some proportion of the damage dealt to the opponent, usually 25%
-  // Because of the fact that the damage must be dealt first, Recoil should only be mixed
-  // in TO THE LEFT of SingleStrike. I check for this below
+  // Take damage equal to some proportion of the damage dealt to the opponent,
+  // usually 25%. Because of the fact that the damage must be dealt before
+  // recoil can figure out how much damage to deal, Recoil should only be mixed
+  // in TO THE LEFT of SingleStrike
   def recoilProportion: Double
 
   abstract override def moveSpecificStuff(
@@ -235,25 +259,18 @@ trait Recoil extends Move {
      * A Recoil just hurts the user itself, so we have to worry about
      * - selfKO
      */
-    if (mrb.damageDealt == 0)
-      println("""|Recoil lacks damage in moveSpecificStuff - attack missed,
-                 |unaffective movetype, or Recoil mixed in wrong""".stripMargin)
+    // if (mrb.damageDealt == 0)
+    //   println("""|Recoil lacks damage in moveSpecificStuff - attack missed,
+    //              |unaffective movetype, or Recoil mixed in wrong""".stripMargin)
     val damageToTake =
       (mrb.damageDealt * recoilProportion).toInt min attacker.currentHP
     attacker.takeDamage(damageToTake)
-    mrb.selfKO(!attacker.isAlive)
-    super.moveSpecificStuff(attacker, defender, pb, mrb)
+    val result = new MoveResultBuilder()
+    result.selfKO(!attacker.isAlive)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
   }
 }
-
-
-class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
-  override val index = 999
-  override val type1 = Normal
-  override val power = 40
-  override val maxPP = 20
-}
-
 
 
 trait StatusChange extends Move {
@@ -268,36 +285,38 @@ trait StatusChange extends Move {
       defender: Pokemon,
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    val result = new MoveResultBuilder
     if (statusAilmentCaused) {
       statusAilmentToCause match {
         case (_ : NonVolatileStatusAilment) => {
           if (pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
-            mrb.statusChange(statusAilmentToCause)
+            result.statusChange(statusAilmentToCause)
           }
         }
         case (_ : CONFUSION) => {
           if (pb.statusManager.tryToCauseConfusion(defender)) {
-            mrb.statusChange(statusAilmentToCause)
+            result.statusChange(statusAilmentToCause)
           }
         }
         case (_ : FLINCH) => {
           if (pb.statusManager.causeToFlinch(defender)) {
-            mrb.statusChange(statusAilmentToCause)
+            result.statusChange(statusAilmentToCause)
           }
         }
         case (_ : PARTIALLYTRAPPED) => {
           if (pb.statusManager.tryToPartiallyTrap(defender)) {
-            mrb.statusChange(statusAilmentToCause)
+            result.statusChange(statusAilmentToCause)
           }
         }
         case (_ : SEEDED) => {
           if (pb.statusManager.tryToSeed(defender)) {
-            mrb.statusChange(statusAilmentToCause)
+            result.statusChange(statusAilmentToCause)
           }
         }
       }
     }
-    super.moveSpecificStuff(attacker, defender, pb, mrb)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
   }
 }
 
@@ -323,38 +342,122 @@ class TestAsleep extends SpecialMove with StatusChange {
   override def chanceOfCausingAilment = 1.0  // always cause, for test purposes
 }
 
-//class TestPhysicalMultiStrike extends PhysicalMove with MultiStrike with Normal {
-//  override val index = 999
-//  override val power = 25
-//  override val maxPP = 20
-//}
 
-//trait MultiStrike extends Move {
-//  // Hit the opponent 2, 3, 4, or 5 times with the Gen 1 probabilities (0.375, 0.375, 0.125, 0.125)
-//  // TODO: Ends if substitute breaks
-//  // TODO: Make sure that Bide and Counter only acknowledge the last attack in this sequence
-//  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle, mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-//    super.moveSpecificStuff(attacker, defender, pb, mrb)
-//    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
-//      val r = Random.nextDouble
-//      val numStrikes = if (r < 0.375) 2
-//                       else if (r < (0.375 + 0.375)) 3
-//                       else if (r < (0.375 + 0.375 + 0.125)) 4
-//                       else 5
-//
-//      // In later generations, each hit was considered separately and could be critical/not
-//      // In Gen 1, damage was calculated once and then used for each blow
-//      val result = pb.dc.calc(attacker, defender, this, pb)
-//
-//      // There's no harm in doing damage once the enemy is dead, since takeDamage stops at 0 HP
-//      for (_ <- 1 to numStrikes) {
-//        defender.takeDamage(result.damageDealt)
-//      }
-//
-//      if (VERBOSE) println(s"$this hit ${defender.name} $numStrikes times!")
-//      result.KO(defender.isAlive)
-//      result.toMoveResult
-//    } else false
-//  }
-//}
+
+trait MultiStrike extends Move {
+  // Hit the opponent 2, 3, 4, or 5 times with the Gen 1 probabilities (0.375,
+  // 0.375, 0.125, 0.125)
+  // TODO: Ends if substitute breaks
+  // TODO: Ensure that Bide & Counter only see the last attack in this sequence
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+      val r = Random.nextDouble
+      val numStrikes = if (r < 0.375) 2
+                       else if (r < (0.375 + 0.375)) 3
+                       else if (r < (0.375 + 0.375 + 0.125)) 4
+                       else 5
+
+      /*
+       * In later generations, each hit was considered separately and could be
+       * critical/not. In Gen 1, damage was calculated once and then used for
+       * each blow
+       */
+      val result = pb.dc.calc(attacker, defender, this, pb)
+
+      /*
+       * At this point, we have everything we need to figure out how many times
+       * to strike and how much damage to deal on each strike. You might think
+       * that this would be numStrikes and result.damageDealt, but you'd be wrong.
+       * Not only does Pokemon.takeDamage NOT absorb excess damage anymore, but
+       * moves like Bide and Counter only use the last strike in the sequence,
+       * so we actually have to figure out the damage sequence that either deals
+       * result.damageDealt damage all the way through, or stops short upon
+       * killing opponent, breaking substitute, etc. Then we'll update result,
+       * merge it into mrb, and be on our way.
+       */
+
+      def damageSeqCalc(
+        numStrikesLeft: Int,
+        defenderHPLeft: Int,
+        soFar: List[Int]): List[Int] = {
+        if (numStrikesLeft == 0 || defenderHPLeft <= 0) soFar.reverse
+        else {
+          val damageToDeal = result.damageDealt min defenderHPLeft
+          damageSeqCalc(numStrikesLeft - 1,
+                        defenderHPLeft - damageToDeal,
+                        damageToDeal :: soFar)
+        }
+      }
+
+      val damageSeq = damageSeqCalc(numStrikes, defender.currentHP, List[Int]())
+      assert(damageSeq.last > 0, "damageSeqCalc fail")
+
+      // Actually deal the damage in damageSeq
+      damageSeq.map(n => defender.takeDamage(n))
+
+      // Update result
+      result.numTimesHit(damageSeq.length)
+      result.damageDealt(damageSeq.last)
+      result.KO(!defender.isAlive)
+      result.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, result)
+    } else {
+      // Attack missed, so just pass along what you received
+      super.moveSpecificStuff(attacker, defender, pb, mrb)
+    }
+  }
+}
+
+class TestMultiStrike extends PhysicalMove with MultiStrike {
+  override val index = 999
+  override val power = 40
+  override val maxPP = 20
+  override val accuracy = 1.0
+}
+
+
+trait SelfStatChange extends Move {
+  // Change one of your own Battle Stats
+  def statToChange: BattleStat
+  def amountToChangeBy: Int
+
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    if (pb.statManager.canChangeOwnStats(attacker, pb)) {
+      statToChange match {
+        case ATTACK   => pb.statManager.changeAttackStage(attacker, amountToChangeBy)
+        case DEFENSE  => pb.statManager.changeDefenseStage(attacker, amountToChangeBy)
+        case SPEED    => pb.statManager.changeSpeedStage(attacker, amountToChangeBy)
+        case SPECIAL  => pb.statManager.changeSpecialStage(attacker, amountToChangeBy)
+        case ACCURACY => pb.statManager.changeAccuracyStage(attacker, amountToChangeBy)
+        case EVASION  => pb.statManager.changeEvasionStage(attacker, amountToChangeBy)
+      }
+    }
+  super.moveSpecificStuff(attacker, defender, pb, mrb)
+  }
+}
+
+class TestIncreaseSelfAttackStat extends StatusMove with SelfStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = ATTACK
+  def amountToChangeBy = 3
+}
+
+
+class TestIncreaseSelfDefenseStat extends StatusMove with SelfStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = DEFENSE
+  def amountToChangeBy = 3
+}
 
