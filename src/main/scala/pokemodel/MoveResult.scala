@@ -18,7 +18,8 @@ import Type._
 
 class MoveResult (
   val numTimesHit: Int,  // how many times did the move hit? usually 1
-  val damageDealt: Int,  // how much damage was dealt (on the last hit)
+  val damageDealt: Int,  // how much damage was dealt (on the last hit)?
+  val hpGained: Int,  // how much HP did the user gain?
   val critHit: Boolean,  // did you get a critical hit?
   val STAB: Boolean,     // was there a STAB in play?
   val moveType: Type,        // what Type was the move? (Normal, Flying, etc.)
@@ -31,6 +32,7 @@ class MoveResult (
     val repr = new StringBuilder()
     repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
+    repr.append(s"hpGained = $hpGained\n")
     repr.append(s"critHit = $critHit\n")
     repr.append(s"STAB = $STAB\n")
     repr.append(s"moveType = $moveType\n")
@@ -46,6 +48,7 @@ class MoveResultBuilder {
   // default values
   var damageDealt = 0
   var numTimesHit = 0
+  var hpGained = 0
   var critHit = false
   var STAB = false
   var moveType = Normal
@@ -58,23 +61,29 @@ class MoveResultBuilder {
 
   def damageDealt(x: Int): MoveResultBuilder = { damageDealt = x ; this}
   def numTimesHit(x: Int): MoveResultBuilder = { numTimesHit = x ; this}
+  def hpGained(x: Int): MoveResultBuilder = { hpGained = x ; this}
   def critHit(c: Boolean): MoveResultBuilder = { critHit = c ; this}
   def STAB(s: Boolean): MoveResultBuilder = { STAB = s ; this}
 
   def moveType(t: Type): MoveResultBuilder = { moveType = t ; this}
   def typeMult(t: Double): MoveResultBuilder = {
-    require(validTypeMults contains t, "MoveResultBuilder.typeMult was given an invalid value")
+    require(validTypeMults contains t,
+      "MoveResultBuilder.typeMult was given an invalid value")
     typeMult = t
     this
   }
 
-  def statusChange(sa: StatusAilment): MoveResultBuilder = { statusChange = Some(sa) ; this}
+  def statusChange(sa: StatusAilment): MoveResultBuilder = {
+    statusChange = Some(sa)
+    this
+  }
   def resetStatusChange: MoveResultBuilder = { statusChange = None ; this}
   def KO(k: Boolean): MoveResultBuilder = { KO = k ; this }
   def selfKO(k: Boolean): MoveResultBuilder = { selfKO = k ; this }
 
   def toMoveResult: MoveResult = {
-    new MoveResult(numTimesHit, damageDealt, critHit, STAB, moveType, typeMult, statusChange, KO, selfKO)
+    new MoveResult(numTimesHit, damageDealt, hpGained, critHit, STAB, moveType,
+      typeMult, statusChange, KO, selfKO)
   }
 
   /* merge is a crucial method here.
@@ -106,6 +115,7 @@ class MoveResultBuilder {
   def merge(other: MoveResultBuilder) {
     damageDealt(damageDealt max other.damageDealt)
     numTimesHit(numTimesHit max other.numTimesHit)
+    hpGained(hpGained max other.hpGained)
     critHit(critHit || other.critHit)
     STAB(STAB || other.STAB)
     KO(KO || other.KO)

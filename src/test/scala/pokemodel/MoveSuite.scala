@@ -455,9 +455,7 @@ class MoveSuite extends FunSuite {
     val battle = new Battle(trainer1, trainer2)
 
     val result1 = charizard.useMove(1, venusaur, battle)  // hit
-    // println(venusaur)
     val result2 = charizard.useMove(1, venusaur, battle)  // hit again
-    // println(venusaur)
     // println("These shouldn't be the same...")
     // println(result1)
     // println(result2)
@@ -469,28 +467,24 @@ class MoveSuite extends FunSuite {
   }
 
 
-  // test("SelfStatChange: decrease damage taken by Physical Attack via Defense stat increase") {
-  //   // Critical Hits ignore stat mods, so let's turn them off
-  //   val m = new TestPhysicalSingleStrike with NeverCritHit
-  //   val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m)
-  //   val charizard = new Pokemon(pb1)
-  //   val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
-  //                                .move(1, new TestIncreaseSelfDefenseStat)
-  //   val venusaur = new Pokemon(pb2)
-  //   val team1 = new PokemonTeam(charizard)
-  //   val team2 = new PokemonTeam(venusaur)
-  //   val trainer1 = new UseFirstAvailableMove(team1)
-  //   val trainer2 = new UseFirstAvailableMove(team2)
-  //   val battle = new Battle(trainer1, trainer2)
-  //   println(battle)
+  test("SelfStatChange: decrease damage taken by Physical Attack via Defense stat increase") {
+    // Critical Hits ignore stat mods, so let's turn them off
+    val m = new TestPhysicalSingleStrike with NeverCritHit
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+                                 .move(1, new TestIncreaseSelfDefenseStat)
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+    println(battle)
 
-  //   val result1 = charizard.useMove(1, venusaur, battle)  // hit
-  //   val result2 = venusaur.useMove(1, charizard, battle)  // defensestage +3
-  //   val result3 = charizard.useMove(1, venusaur, battle)  // hit again
-  //   println("These shouldn't be the same...")
-  //   println(result1)
-  //   println(result3)
-  //   assert(!result1.critHit && !result3.critHit)
-  //   assert(result1.damageDealt > result3.damageDealt)
-  // }
+    val result1 = charizard.useMove(1, venusaur, battle)  // hit
+    val result2 = venusaur.useMove(1, charizard, battle)  // defensestage +3
+    val result3 = charizard.useMove(1, venusaur, battle)  // hit again
+    assert(result1.damageDealt > result3.damageDealt)
+  }
 }
