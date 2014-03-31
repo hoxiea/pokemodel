@@ -6,17 +6,16 @@ import BattleStat._
 import CritHitType._
 
 /*
- * This is where the actual game Moves live - Move.scala was getting pretty crowded
- * with the traits piling up and the test Moves
+ * This is where the actual game Moves live - Move.scala was getting pretty
+ * crowded with the traits piling up and the test Moves
  */
 
 /******** PHYSICAL MOVES ********/
 /* PHYSICAL, WITH RECOIL */
-// TODO: see if Submission, DoubleEdge, TakeDown also have special substitute considerations
+// TODO: see if Submission, DoubleEdge, TakeDown also have substitute stuff
 class Struggle extends PhysicalMove with Recoil with SingleStrike {
   // TODO: weird stuff with substitute, etc.
   override val index = 165
-  override val type1 = Normal
   override val power = 50
   override val maxPP = 999
   override val recoilProportion = 0.5   // different from others!
@@ -38,7 +37,6 @@ class Submission extends PhysicalMove with Recoil with SingleStrike {
 
 class DoubleEdge extends PhysicalMove with Recoil with SingleStrike {
   override val index = 38
-  override val type1 = Normal
   override val power = 100  // higher in later generations
   override val maxPP = 15
   override val recoilProportion = 0.25
@@ -46,7 +44,6 @@ class DoubleEdge extends PhysicalMove with Recoil with SingleStrike {
 
 class TakeDown extends PhysicalMove with Recoil with SingleStrike {
   override val index = 36
-  override val type1 = Normal
   override val power = 90
   override val maxPP = 20
   override val accuracy = 0.85
@@ -57,14 +54,12 @@ class TakeDown extends PhysicalMove with Recoil with SingleStrike {
 /* PHYSICAL, VANILLA SINGLESTRIKE */
 class Pound extends PhysicalMove with SingleStrike {
   override val index = 1
-  override val type1 = Normal
   override val power = 40
   override val maxPP = 35
 }
 
 class Tackle extends PhysicalMove with SingleStrike {
   override val index = 33
-  override val type1 = Normal
   override val power = 50
   override val maxPP = 35
 }
@@ -92,7 +87,6 @@ class WingAttack extends PhysicalMove with SingleStrike {
 
 class Cut extends PhysicalMove with SingleStrike {
   override val index = 15
-  override val type1 = Normal
   override val power = 50  // power and maxPP increased in later generations
   override val maxPP = 30
   override val accuracy = 0.95
@@ -107,14 +101,12 @@ class Earthquake extends PhysicalMove with SingleStrike {
 
 class DizzyPunch extends PhysicalMove with SingleStrike {
   override val index = 146
-  override val type1 = Normal
   override val power = 70
   override val maxPP = 10
 }
 
 class EggBomb extends PhysicalMove with SingleStrike {
   override val index = 121
-  override val type1 = Normal
   override val power = 100
   override val maxPP = 10
   override val accuracy = 0.75
@@ -122,14 +114,12 @@ class EggBomb extends PhysicalMove with SingleStrike {
 
 class HornAttack extends PhysicalMove with SingleStrike {
   override val index = 30
-  override val type1 = Normal
   override val power = 65
   override val maxPP = 25
 }
 
 class MegaKick extends PhysicalMove with SingleStrike {
   override val index = 25
-  override val type1 = Normal
   override val power = 120
   override val maxPP = 5
   override val accuracy = 0.75
@@ -137,7 +127,6 @@ class MegaKick extends PhysicalMove with SingleStrike {
 
 class MegaPunch extends PhysicalMove with SingleStrike {
   override val index = 5
-  override val type1 = Normal
   override val power = 80
   override val maxPP = 20
   override val accuracy = 0.85
@@ -145,21 +134,18 @@ class MegaPunch extends PhysicalMove with SingleStrike {
 
 class PayDay extends PhysicalMove with SingleStrike {
   override val index = 6
-  override val type1 = Normal
   override val power = 40
   override val maxPP = 20
 }
 
 class Scratch extends PhysicalMove with SingleStrike {
   override val index = 10
-  override val type1 = Normal
   override val power = 40
   override val maxPP = 35
 }
 
 class Slam extends PhysicalMove with SingleStrike {
   override val index = 21
-  override val type1 = Normal
   override val power = 80
   override val maxPP = 20
   override val accuracy = 0.75
@@ -167,14 +153,12 @@ class Slam extends PhysicalMove with SingleStrike {
 
 class Strength extends PhysicalMove with SingleStrike {
   override val index = 70
-  override val type1 = Normal
   override val power = 80
   override val maxPP = 15
 }
 
 class ViceGrip extends PhysicalMove with SingleStrike {
   override val index = 11
-  override val type1 = Normal
   override val power = 55
   override val maxPP = 30
 }
@@ -199,7 +183,7 @@ class RockThrow extends PhysicalMove with SingleStrike {
 /* PHYSICAL, SINGLESTRIKE, WEIRD */
 class KarateChop extends PhysicalMove with SingleStrike {
   override val index = 2
-  override val type1 = Normal    // Fighting in later generations
+  // Fighting in later generations, but it was Normal in Gen1
   override val power = 50
   override val maxPP = 25
   override val critHitRate = HIGH
@@ -207,7 +191,6 @@ class KarateChop extends PhysicalMove with SingleStrike {
 
 class QuickAttack extends PhysicalMove with SingleStrike {
   override val index = 98
-  override val type1 = Normal
   override val power = 40
   override val maxPP = 30
   override val priority = 1
@@ -215,7 +198,6 @@ class QuickAttack extends PhysicalMove with SingleStrike {
 
 class Slash extends PhysicalMove with SingleStrike {
   override val index = 163
-  override val type1 = Normal
   override val power = 70
   override val maxPP = 20
   override val critHitRate = HIGH
@@ -230,6 +212,64 @@ class Crabhammer extends PhysicalMove with SingleStrike {
   override val accuracy = 0.9
 }
 
+class Counter extends PhysicalMove {
+  override val index = 68
+  override val type1 = Fighting
+  override val maxPP = 10
+  override val priority = -1
+}
+
+
+/* PHYSICAL, MULTISTRIKE */
+class PinMissile extends PhysicalMove with MultiStrike {
+  override val index = 42
+  override val type1 = Bug
+  override val power = 14
+  override val maxPP = 20
+  override val accuracy = 0.85
+}
+
+class Barrage extends PhysicalMove with MultiStrike {
+  override val index = 140
+  override val power = 15
+  override val maxPP = 20
+  override val accuracy = 0.85
+}
+
+class CometPunch extends PhysicalMove with MultiStrike {
+  override val index = 4
+  override val power = 18
+  override val maxPP = 20
+  override val accuracy = 0.85
+}
+
+class DoubleSlap extends PhysicalMove with MultiStrike {
+  override val index = 3
+  override val power = 15
+  override val maxPP = 10
+  override val accuracy = 0.85
+}
+
+class FuryAttack extends PhysicalMove with MultiStrike {
+  override val index = 31
+  override val power = 15
+  override val maxPP = 20
+  override val accuracy = 0.85
+}
+
+class FurySwipes extends PhysicalMove with MultiStrike {
+  override val index = 154
+  override val power = 18
+  override val maxPP = 15
+  override val accuracy = 0.80
+}
+
+class SpikeCannon extends PhysicalMove with MultiStrike {
+  override val index = 131
+  override val power = 20
+  override val maxPP = 15
+  // 100% accuracy
+}
 
 
 /******** SPECIAL MOVES ********/
@@ -250,3 +290,106 @@ class Thunder extends SpecialMove with SingleStrike with StatusChange {
   override def statusAilmentToCause = new PAR
   override def chanceOfCausingAilment = 0.1
 }
+
+
+
+/******** STATUS MOVES ********/
+/* STATUS: IMPROVE YOUR OWN BATTLE STATS */
+class Sharpen extends StatusMove with SelfStatChange {
+  override val index = 159
+  override val maxPP = 30
+  override val statToChange = ATTACK
+  override val amountToChangeBy = 1
+}
+
+class Meditate extends StatusMove with SelfStatChange {
+  override val index = 96
+  override val type1 = Psychic
+  override val maxPP = 40
+  override val statToChange = ATTACK
+  override val amountToChangeBy = 1
+}
+
+class SwordsDance extends StatusMove with SelfStatChange {
+  override val index = 14
+  override val maxPP = 30
+  override val statToChange = ATTACK
+  override val amountToChangeBy = 2
+}
+
+class DefenseCurl extends StatusMove with SelfStatChange {
+  override val index = 111
+  override val maxPP = 40
+  override val statToChange = DEFENSE
+  override val amountToChangeBy = 1
+}
+
+class Withdraw extends StatusMove with SelfStatChange {
+  override val index = 110
+  override val type1 = Water
+  override val maxPP = 40
+  override val statToChange = DEFENSE
+  override val amountToChangeBy = 1
+}
+
+class Harden extends StatusMove with SelfStatChange {
+  override val index = 106
+  override val maxPP = 30
+  override val statToChange = DEFENSE
+  override val amountToChangeBy = 1
+}
+
+class AcidArmor extends StatusMove with SelfStatChange {
+  override val index = 151
+  override val type1 = Poison
+  override val maxPP = 40
+  override val statToChange = DEFENSE
+  override val amountToChangeBy = 2
+}
+
+class Barrier extends StatusMove with SelfStatChange {
+  override val index = 112
+  override val type1 = Psychic
+  override val maxPP = 30
+  override val statToChange = DEFENSE
+  override val amountToChangeBy = 2
+}
+
+class DoubleTeam extends StatusMove with SelfStatChange {
+  override val index = 104
+  override val maxPP = 15
+  override val statToChange = EVASION
+  override val amountToChangeBy = 1
+}
+
+class Minimize extends StatusMove with SelfStatChange {
+  override val index = 107
+  override val maxPP = 20
+  override val statToChange = EVASION
+  override val amountToChangeBy = 1
+}
+
+class Agility extends StatusMove with SelfStatChange {
+  override val index = 97
+  override val type1 = Psychic
+  override val maxPP = 30
+  override val statToChange = SPEED
+  override val amountToChangeBy = 2
+}
+
+class Growth extends StatusMove with SelfStatChange {
+  override val index = 74
+  override val maxPP = 40
+  override val statToChange = SPECIAL
+  override val amountToChangeBy = 1
+}
+
+class Amnesia extends StatusMove with SelfStatChange {
+  override val index = 133
+  override val type1 = Psychic
+  override val maxPP = 20
+  override val statToChange = SPECIAL
+  override val amountToChangeBy = 2
+}
+
+/* STATUS: WEAKEN YOUR OPPONENT'S BATTLE STATS */
