@@ -30,7 +30,6 @@ class DamageCalculator {
     val criticalChance = calcCriticalChance(attacker, defender, move, battle)
     if (Random.nextDouble < criticalChance) {
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
-      println(s"chd = $chd")
       val damageToDeal = chd min defender.currentHP
       new MoveResultBuilder()
           .damageDealt(damageToDeal)
@@ -39,7 +38,6 @@ class DamageCalculator {
           .typeMult(calculateTypeMultiplier(move.type1, defender))
     } else {
       val rhd = calcRegularHitDamage(attacker, defender, move, battle)
-      println(s"rhd = $rhd")
       val damageToDeal = rhd min defender.currentHP
       new MoveResultBuilder()
           .damageDealt(damageToDeal)

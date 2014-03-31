@@ -168,7 +168,7 @@ class MoveSuite extends FunSuite {
     assert (result.KO == true, "KO")
   }
 
-  test("Struggle: test HP reduction") {
+  test("Struggle: test attack damage dealt and recoil received") {
     val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new Struggle)
     val dragonite = new Pokemon(pb1)
     val pb2 = PokemonBuilder.generateRandomPokemonBuilder(100)
@@ -184,8 +184,29 @@ class MoveSuite extends FunSuite {
     assert(dragonite.maxHP - dragonite.currentHP == result.damageDealt / 2)
   }
 
+  test("Struggle: only receive 50% of damage DEALT, not damage calculated") {
+    // DamageCalculator will tell us that a level 100 Dragonite should deal a
+    // lot more than 10 damage using Struggle, but the recoil on Struggle is
+    // 50% of the damage actually dealt, not the potential damage. So give the
+    // opponent 11 HP and make sure we only lose 5 using Struggle (checks round-down)
+    val opponentHP = 11
+    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new Struggle)
+    val dragonite = new Pokemon(pb1)
+    val pb2 = PokemonBuilder.generateRandomPokemonBuilder(100).currentHP(opponentHP)
+    val p2 = new Pokemon(pb2)
+    val team1 = new PokemonTeam(dragonite)
+    val team2 = new PokemonTeam(p2)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    val result = dragonite.useMove(1, p2, battle)
+    assert(!p2.isAlive, "opponent")
+    assert(dragonite.maxHP - dragonite.currentHP == opponentHP / 2, "self")
+  }
+
   test("Struggle: no PP is deducted when it's used as Move5") {
-    val pb1 = new PokemonBuilder("Dragonite", 100)
+    val pb1 = new PokemonBuilder("Dragonite", 100) // no Moves, will use Move5 Struggle
     val dragonite = new Pokemon(pb1)
     val pb2 = PokemonBuilder.generateRandomPokemonBuilder(100)
     val p2 = new Pokemon(pb2)
@@ -195,8 +216,9 @@ class MoveSuite extends FunSuite {
     val trainer2 = new UseFirstAvailableMove(team2)
     val battle = new Battle(trainer1, trainer2)
 
+    val ppBefore = dragonite.pp5.get
     battle.takeNextTurn()
-    assert(dragonite.pp5.get == 1)
+    assert(dragonite.pp5.get == ppBefore)
   }
 
   test("Struggle: Normal-type damage, so Rock takes half and Ghost takes none") {
