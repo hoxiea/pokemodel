@@ -1,5 +1,7 @@
 package pokemodel
 
+import Type._
+
 /*
  * After implementing Moves that mutated Battles/Pokemon but didn't return any
  * values, it became apparent that knowing how much damage was done, whether
@@ -14,19 +16,24 @@ package pokemodel
  * -
  */
 
-class MoveResult (val damageDealt: Int,  // how much damage was dealt?
-                  val critHit: Boolean,  // did you get a critical hit?
-                  val STAB: Boolean,     // was there a STAB in play?
-                  val typeMult: Double,  // what was your move's type effectiveness against defender?
-                  val statusChange : Option[StatusAilment],  // did you cause a status change? if so, which one?
-                  val KO: Boolean,       // did you knock the active Pokemon on the other team out?
-                  val selfKO: Boolean) { // did you knock yourself out using this move?
+class MoveResult (
+  val numTimesHit: Int,  // how many times did the move hit? usually 1
+  val damageDealt: Int,  // how much damage was dealt (on the last hit)
+  val critHit: Boolean,  // did you get a critical hit?
+  val STAB: Boolean,     // was there a STAB in play?
+  val moveType: Type,        // what Type was the move? (Normal, Flying, etc.)
+  val typeMult: Double,  // what was your move's type effectiveness against defender?
+  val statusChange : Option[StatusAilment],  // cause status change? if so, which?
+  val KO: Boolean,       // did you knock the active Pokemon on the other team out?
+  val selfKO: Boolean) { // did you knock yourself out using this move?
 
   override def toString: String = {
     val repr = new StringBuilder()
+    repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
     repr.append(s"critHit = $critHit\n")
     repr.append(s"STAB = $STAB\n")
+    repr.append(s"moveType = $moveType\n")
     repr.append(s"typeMult = $typeMult\n")
     repr.append(s"statusChange = $statusChange\n")
     repr.append(s"KO = $KO\n")
@@ -38,8 +45,10 @@ class MoveResult (val damageDealt: Int,  // how much damage was dealt?
 class MoveResultBuilder {
   // default values
   var damageDealt = 0
+  var numTimesHit = 0
   var critHit = false
   var STAB = false
+  var moveType = Normal
   var typeMult = 1.0
   var statusChange: Option[StatusAilment] = None
   var KO = false
@@ -48,9 +57,11 @@ class MoveResultBuilder {
   val validTypeMults: Set[Double] = Set(0.0, 0.25, 0.5, 1.0, 2.0, 4.0)
 
   def damageDealt(x: Int): MoveResultBuilder = { damageDealt = x ; this}
+  def numTimesHit(x: Int): MoveResultBuilder = { numTimesHit = x ; this}
   def critHit(c: Boolean): MoveResultBuilder = { critHit = c ; this}
   def STAB(s: Boolean): MoveResultBuilder = { STAB = s ; this}
 
+  def moveType(t: Type): MoveResultBuilder = { moveType = t ; this}
   def typeMult(t: Double): MoveResultBuilder = {
     require(validTypeMults contains t, "MoveResultBuilder.typeMult was given an invalid value")
     typeMult = t
@@ -62,7 +73,11 @@ class MoveResultBuilder {
   def KO(k: Boolean): MoveResultBuilder = { KO = k ; this }
   def selfKO(k: Boolean): MoveResultBuilder = { selfKO = k ; this }
 
-  /* This is a crucial method here.
+  def toMoveResult: MoveResult = {
+    new MoveResult(numTimesHit, damageDealt, critHit, STAB, moveType, typeMult, statusChange, KO, selfKO)
+  }
+
+  /* merge is a crucial method here.
    * Chained traits are passed a MoveResultBuilder as a parameter, and they
    * also typically get another MRB from DamageCalculator.calc. We'd like to
    * combine the contents of the two MRBs by merging the other's informatio
@@ -90,10 +105,16 @@ class MoveResultBuilder {
    */
   def merge(other: MoveResultBuilder) {
     damageDealt(damageDealt max other.damageDealt)
+    numTimesHit(numTimesHit max other.numTimesHit)
     critHit(critHit || other.critHit)
     STAB(STAB || other.STAB)
     KO(KO || other.KO)
     selfKO(selfKO || other.selfKO)
+
+    val newMoveType =
+      if (moveType != Normal) moveType
+      else other.moveType
+    moveType(newMoveType)
 
     // The typeMult is interesting. The default value is 1.0, and
     // DamageCalculator spits out the correct value. No move should
@@ -114,10 +135,6 @@ class MoveResultBuilder {
       else None
     if (newStatusChangeOption.isDefined)
       statusChange(newStatusChangeOption.get)
-  }
-
-  def toMoveResult: MoveResult = {
-    new MoveResult(damageDealt, critHit, STAB, typeMult, statusChange, KO, selfKO)
   }
 
   override def toString: String = {
