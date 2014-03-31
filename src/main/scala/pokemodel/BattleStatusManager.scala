@@ -63,16 +63,21 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
 
   /*
    * Structures for tracking yes/no stuff
-   * A Pokemon appearing in one of these means that that status ailment is in effect
+   * A Pokemon appearing in one of these means that that status ailment is in
+   * effect
    */
   // Status Ailments
   private val flinchSet = mutable.Set[Pokemon]()
   private val seededSet = mutable.Set[Pokemon]()
 
-  // Moves
-  private val mistSet = mutable.Set[Pokemon]()
-  private val digSet  = mutable.Set[Pokemon]()
+  // Attacking moves
+  private val skyAttackSet  = mutable.Set[Pokemon]()
+  private val skullBashSet  = mutable.Set[Pokemon]()
   private val flySet  = mutable.Set[Pokemon]()
+  private val digSet  = mutable.Set[Pokemon]()
+
+  // Modifying moves
+  private val mistSet        = mutable.Set[Pokemon]()
   private val focusEnergySet = mutable.Set[Pokemon]()
   private val lightScreenSet = mutable.Set[Pokemon]()
   private val reflectSet     = mutable.Set[Pokemon]()
@@ -83,9 +88,12 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
       if (VERBOSE) println(s"Confusion (status) had no effect of {p.name}")
       false
     } else {
-      val confusionDuration = Utils.intBetween(BattleStatusManager.minTurnsConfusion, BattleStatusManager.maxTurnsConfusion + 1)
+      val confusionDuration =
+        Utils.intBetween(BattleStatusManager.minTurnsConfusion,
+          BattleStatusManager.maxTurnsConfusion + 1)
       confusionMap(p) = confusionDuration
-      if (VERBOSE) println(s"{p.name} will be confused for $confusionDuration turns")  // TODO: don't actually print the number
+      if (VERBOSE)
+          println(s"{p.name} will be confused for $confusionDuration turns")  // TODO: don't actually print the number
       true
     }
   }
