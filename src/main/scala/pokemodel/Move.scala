@@ -254,59 +254,6 @@ class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
   override val maxPP = 20
 }
 
-/* Using just these few pieces, we can implement a surprising number of moves */
-class Pound extends PhysicalMove with SingleStrike {
-  override val index = 1
-  override val type1 = Normal
-  override val power = 40
-  override val maxPP = 35
-}
-
-class Tackle extends PhysicalMove with SingleStrike {
-  override val index = 33
-  override val type1 = Normal
-  override val power = 50
-  override val maxPP = 35
-}
-
-class KarateChop extends PhysicalMove with SingleStrike {
-  override val index = 2
-  override val type1 = Normal    // Fighting in later generations
-  override val power = 50
-  override val maxPP = 25
-  override val critHitRate = HIGH
-}
-
-class DragonRage extends SpecialMove with ConstantDamage {
-  override val index = 82
-  override val type1 = Dragon
-  override val maxPP = 10
-  override def damageAmount = 40
-}
-
-class Thunder extends SpecialMove with SingleStrike with StatusChange {
-  override val index = 87
-  override val type1 = Electric
-  override val power = 110
-  override val maxPP = 10
-  override val accuracy = 0.7
-
-  override def statusAilmentToCause = new PAR
-  override def chanceOfCausingAilment = 0.1
-}
-
-class Struggle extends PhysicalMove with Recoil with SingleStrike {
-  override val index = 165
-  override val type1 = Normal
-  override val power = 50
-  override val maxPP = 999
-  override val recoilProportion = 0.5   // different from others!
-
-  override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // Don't deduct a PP! Just log it
-    pb.moveManager.updateLastMoveIndex(attacker, index)
-  }
-}
 
 
 trait StatusChange extends Move {
