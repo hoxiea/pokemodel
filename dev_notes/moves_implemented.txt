@@ -1,4 +1,18 @@
 PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
+- DoubleStrike
+= Double Kick: 2x damage
+= Bonemerang: 2x damage
+
+    - Deal damage that's some function of the environment
+    = Seismic Toss: inflict damage equal to the user's level; no STAB bonus
+    = Super Fang: inflict damage equal to 50% of target's current HP, unaffected by Types
+
+    - One-hit KOs
+    = Fissure: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
+    = Guillotine: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
+    = Horn Drill: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
+
+
     - Single-strike + recoil
     = Struggle: do damage, 50% recoil. Can get crithits. Normal type rules apply
     = Submission: do damage, receive 25% of damage done to target yourself
@@ -32,41 +46,29 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
     = Slash: damage, high crit hit rate
     = Crabhammer: damage, high crit hit rate
 
-- Single-strike + potential status change
-= Bite: damage and 10% chance of causing a flinch
-= Bone Club: damage and 10% chance of causing a flinch
-= Hyper Fang: damage and 10% chance of causing a flinch
-= Low Kick: damage and 30% chance of causing a flinch
-= Headbutt: damage and 30% chance of causing a flinch
-= Stomp: damage and 30% chance of causing a flinch
-= Rolling Kick: damage and 30% chance of causing a flinch
-= Thunder Punch: damage and 10% chance of PAR
-= Ice Punch: damage and 10% chance of FRZ
-= Lick: damage and 30% chance of PAR
-= Body Slam: damage and 30% chance of PAR
-= Fire Punch: damage and 10% chance of BRN
-= Poison Sting: damage and 30% chance of PSN
+    - Single-strike + potential status change
+    = Bite: damage and 10% chance of causing a flinch
+    = Bone Club: damage and 10% chance of causing a flinch
+    = Hyper Fang: damage and 10% chance of causing a flinch
+    = Low Kick: damage and 30% chance of causing a flinch
+    = Headbutt: damage and 30% chance of causing a flinch
+    = Stomp: damage and 30% chance of causing a flinch
+    = Rolling Kick: damage and 30% chance of causing a flinch
+    = Thunder Punch: damage and 10% chance of PAR
+    = Ice Punch: damage and 10% chance of FRZ
+    = Lick: damage and 30% chance of PAR
+    = Body Slam: damage and 30% chance of PAR
+    = Fire Punch: damage and 10% chance of BRN
+    = Poison Sting: damage and 30% chance of PSN
 
-- Multi-strike
-= Pin Missile: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
-= Barrage: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
-= Comet Punch: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
-= Double Slap: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
-= Fury Attack: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
-= Fury Swipes: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
-= Spike Cannon: hit 2, 3, 4, 5 times w.p. (.375, .375, .125, .125).  Same as PinMissile
-= Double Kick: 2x damage
-= Bonemerang: 2x damage
-
-- Deal damage that's some function of the environment
-= Seismic Toss: inflict damage equal to the user's level; no STAB bonus
-= Super Fang: inflict damage equal to 50% of target's current HP, unaffected by Types
-
-- One-hit KOs
-= Fissure: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
-= Guillotine: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
-= Horn Drill: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
-
+    - Multi-strike
+    = Pin Missile: hit 2/3/4/5 times w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  Ends if opponent faints or substitute breaks
+    = Barrage: Same as PinMissile
+    = Comet Punch: Same as PinMissile
+    = Double Slap: Same as PinMissile
+    = Fury Attack: Same as PinMissile
+    = Fury Swipes: Same as PinMissile
+    = Spike Cannon:Same as PinMissile
 
 
 

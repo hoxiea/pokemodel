@@ -1,9 +1,6 @@
 There are 3 categories of moves: Physical, Special, and Status
 
 PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
-- Transfer HP from opponent to self
-= Leech Life (Bug)
-
 - Single-strike + potential stat change
 = Constrict: damage and 10% chance of lowering target's Speed stat by one level
 

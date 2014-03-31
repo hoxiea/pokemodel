@@ -478,7 +478,6 @@ trait EnemyStatChange extends Move {
 
     if (statChangeHits &&
         pb.statManager.canChangeDefenderStats(attacker, defender, pb)) {
-      println("EnemyStatChange is processing")
       statToChange match {
         case ATTACK   => pb.statManager.changeAttackStage(defender, amountToChangeBy)
         case DEFENSE  => pb.statManager.changeDefenseStage(defender, amountToChangeBy)
@@ -507,5 +506,36 @@ class TestDecreaseEnemyAttack extends StatusMove with EnemyStatChange {
   def statToChange = ATTACK
   def amountToChangeBy = -3
   def chanceOfStatChange = 1.0
+}
+
+
+trait OneHitKO extends Move {
+  // TODO: If there's a substitute and you hit, break the substitute
+  abstract override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder()
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+      val damageToDeal = defender.currentHP
+      defender.takeDamage(damageToDeal)
+
+      result.damageDealt(damageToDeal)
+      result.KO(!defender.isAlive)
+      result.moveType(type1)
+      result.numTimesHit(1)
+      result.merge(mrb)
+    }
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+class TestOneHitKO extends PhysicalMove with OneHitKO {
+  override val index = 999
+  override val maxPP = 5
+  override val accuracy = 1.0
 }
 

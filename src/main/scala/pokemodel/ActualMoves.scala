@@ -297,6 +297,212 @@ class LeechLife extends PhysicalMove {
       }
       attacker.gainHP(hpToGain)
       result.hpGained(hpToGain)
+      result.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, result)
+    } else {
+      super.moveSpecificStuff(attacker, defender, pb, mrb)
+    }
+  }
+}
+
+/* PHYSICAL, SINGLE STRIKE + POTENTIAL STATUS CHANGE */
+class Bite extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 44
+  override val power = 60
+  override val maxPP = 25
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.10
+}
+
+class BoneClub extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 125
+  override val type1 = Ground
+  override val power = 65
+  override val maxPP = 20
+  override val accuracy = 0.85
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.10
+  // TODO: Bone Club cannot cause a target with a substitute to flinch.
+}
+
+class HyperFang extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 158
+  override val power = 80
+  override val maxPP = 15
+  override val accuracy = 0.9
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.10
+}
+
+class LowKick extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 67
+  override val type1 = Fighting
+  override val power = 50
+  override val maxPP = 20
+  override val accuracy = 0.9
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.30
+}
+
+class Headbutt extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 29
+  override val power = 70
+  override val maxPP = 15
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.30
+}
+
+class Stomp extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 23
+  override val power = 65
+  override val maxPP = 20
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.30
+  // TODO: Stomp cannot make a target with a substitute flinch.
+}
+
+class RollingKick extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 27
+  override val type1 = Fighting
+  override val power = 60
+  override val maxPP = 15
+  override val accuracy = 0.85
+  override val statusAilmentToCause = new FLINCH
+  override val chanceOfCausingAilment = 0.30
+  // TODO: Rolling Kick cannot make a target with a substitute flinch.
+}
+
+class ThunderPunch extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 9
+  override val type1 = Electric
+  override val power = 75
+  override val maxPP = 15
+  override val statusAilmentToCause = new PAR
+  override val chanceOfCausingAilment = 0.10
+}
+
+class IcePunch extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 8
+  override val type1 = Ice
+  override val power = 75
+  override val maxPP = 15
+  override val statusAilmentToCause = new FRZ
+  override val chanceOfCausingAilment = 0.10
+}
+
+class FirePunch extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 7
+  override val type1 = Fire
+  override val power = 75
+  override val maxPP = 15
+  override val statusAilmentToCause = new BRN
+  override val chanceOfCausingAilment = 0.10
+}
+
+class Lick extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 122
+  override val type1 = Ghost
+  override val power = 20
+  override val maxPP = 30
+  override val statusAilmentToCause = new PAR
+  override val chanceOfCausingAilment = 0.3
+}
+
+class BodySlam extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 34
+  override val power = 85
+  override val maxPP = 15
+  override val statusAilmentToCause = new PAR
+  override val chanceOfCausingAilment = 0.3
+}
+
+class PoisonSting extends PhysicalMove with SingleStrike with StatusChange {
+  override val index = 40
+  override val type1 = Poison
+  override val power = 15
+  override val maxPP = 35
+  override val statusAilmentToCause = new PSN
+  override val chanceOfCausingAilment = 0.3
+}
+
+/* PHYSICAL, ONE HIT KO */
+class Fissure extends PhysicalMove with OneHitKO {
+  override val index = 90
+  override val type1 = Ground
+  override val maxPP = 5
+}
+
+class Guillotine extends PhysicalMove with OneHitKO {
+  override val index = 12
+  override val maxPP = 5
+}
+
+class HornDrill extends PhysicalMove with OneHitKO {
+  override val index = 32
+  override val maxPP = 5
+}
+
+
+/* PHYSICAL, FUNCTION OF ENVIRONMENT */
+class SeismicToss extends PhysicalMove {
+  override val index = 69
+  override val type1 = Fighting
+  override val maxPP = 20
+
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder()
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+      // The damage is not altered by weakness, resistance, or immunity.
+      // Seismic Toss doesn't receive STAB.
+      val damageToDeal = attacker.level min defender.currentHP
+      defender.takeDamage(damageToDeal)
+
+      // Build an MRB from scratch
+      result.damageDealt(damageToDeal)
+      result.numTimesHit(1)
+      result.moveType(type1)
+      result.KO(!defender.isAlive)
+      result.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, result)
+    } else {
+      super.moveSpecificStuff(attacker, defender, pb, mrb)
+    }
+  }
+}
+
+class SuperFang extends PhysicalMove {
+  // Very similar code to SeismicToss
+  // TODO: MOVE will break a Substitute if it hits
+  // TODO: MOVE can be countered for infinite damage on the turn it breaks a Substitute.
+  override val maxPP = 10
+  override val accuracy = 0.90
+
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder()
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+      // The damage is not altered by weakness, resistance, or immunity.
+      // Doesn't receive STAB.
+      val damageToDeal = (defender.currentHP / 2) max 1
+      defender.takeDamage(damageToDeal)
+
+      // Build an MRB from scratch, since we skipped damage calculator
+      result.damageDealt(damageToDeal)
+      result.numTimesHit(1)
+      result.moveType(type1)
+      result.KO(!defender.isAlive)
+      result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
       super.moveSpecificStuff(attacker, defender, pb, mrb)
@@ -310,6 +516,13 @@ class DragonRage extends SpecialMove with ConstantDamage {
   override val type1 = Dragon
   override val maxPP = 10
   override def damageAmount = 40
+}
+
+class SonicBoom extends SpecialMove with ConstantDamage {
+  override val index = 49
+  override val maxPP = 20
+  override val accuracy = 0.9
+  override def damageAmount = 20
 }
 
 class Thunder extends SpecialMove with SingleStrike with StatusChange {
