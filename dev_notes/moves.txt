@@ -1,92 +1,146 @@
-There are 3 categories of moves: Physical, Special, and Status
-
 PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
+- CUSTOM
+= Bide: wait for 2-3 turns, then deal twice the damage you received during that waiting period. No STAB. Unaffected by accuracy, can hit Fly/Dug opponents, can hit Ghosts
+= Rage: deals damage, user can't do anything except Rage until faint or battle ends. Every time user is damaged by Attack or targeted by Disable, Attack stat increases one stage (multiple times for multi-strike attacks). Stops increasing Attack stage at +6, and doesn't boost Attack stat past 999
+
+- Deal damage for a while, then confusion
+= Thrash: deal damage for 3-4 turns, user can't do anything else, then become confused
+
 - Multi-turn moves
 = Sky Attack: do nothing on turn it's used, then deal damage on next turn
-= Skull Bash: do nothing on turn it's used, then deal damage on next turn
+= Skull Bash: like Sky Attack
+= Solar Beam: like SkyAttack but SpecialMove
+= Razor Wind: like SkyAttack but SpecialMove
+
 = Fly: disappear for a turn (affected by Bide, Swift, and Transform), then deal damage
-= Dig: disappear for a turn (affected by Bide, Swift, and Transform), then deal damage
-= Thrash: deal damage for 3-4 turns, user can't do anything else, then become confused
+= Dig: like Fly
 
 - Partially Trapping moves
 = Bind: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
-= Wrap: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
-= Clamp: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
+= Wrap: see Bind
+= Clamp: see Bind
+= Fire Spin: see Bind, but SpecialMove
 
-- Other weird stuff
-= Counter: wait until opponent attacks (low priority), then return twice damage dealt from certain types, WSSC
+- SingleStrike with Miss Penalty
 = Hi Jump Kick: damage with base power of 85; if you miss, lose 1 HP.  If you miss and then faint, the target doesn't attack and isn't subjected to recurrent damage during that round
 = Jump Kick: damage; if you miss, lose 1 HP.  If you miss and then faint, the target doesn't attack and isn't subjected to recurrent damage during that round
-= Bide: wait for 2-3 turns, then deal twice the damage you received during that waiting period. No STAB. Unaffected by accuracy, can hit Fly/Dug opponents, can hit Ghosts
+
+- Kill Yourself, Deal Damage
 = Explosion: deal damage, kill the user, halve the opponent's defenses, etc.
 = Self-Destruct: deal damage, kill the user, halve the opponent's defenses, etc.
-= Rage: deals damage, user can't do anything except Rage until faint or battle ends. Every time user is damaged by Attack or targeted by Disable, Attack stat increases one stage (multiple times for multi-strike attacks). Stops increasing Attack stage at +6, and doesn't boost Attack stat past 999
+
 
 
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
+- CUSTOM
 = Swift: damage, unaffected by mods to accuracy and evasion; can hit Fly and Dug Pokemon
+= Psywave: deal between 0.5x and 1.5x the user's level of typeless damage
+= Hyper Beam: deal damage, then idle for a turn
 
-- Damage + Potential Status Change
-= Thunder: damage, 10% chance PAR
-= Thunderbolt: damage, 10% chance PAR
-= Thunder Shock: damage, 10% chance PAR
-= Ember: damage, 10% chance BRN
-= Waterfall: damage
-= Fire Blast: damage, 30% chance BRN
-= Sludge: damage, 30% chance PSN
-= Smog: damage, 40% chance PSN
-= Flamethrower: damage, 10% chance BRN
-= Blizzard: damage, 10% chance FRZ
-= Ice Beam: damage, 10% chance FRZ
-= Confusion: damage, 10% chance CONFUSE
-= Psybeam: damage, 10% chance CONFUSE
-
-- Weird Multi-Turn Moves
-= Fire Spin: 2-5 turns of damage, and traps the opponent
+- SIMILAR TO OTHER MOVES
+= Night Shade: deal damage equal to user's level (like SeismicToss)
 = Petal Dance: inflict damage for 3-4 turns; unable to use another move or switch Pokemon while it's going. Then confused (like Thrash)
 
-- Weird 2-Turn Moves
-Solar Beam: nothing on Move 1, then deal damage
-Razor Wind: nothing on Move 1, then deal damage
-Hyper Beam: deal damage, then idle for a turn
 
-- Damage + Potential Stat Change
-Aurora Beam: damage, 10% chance opponent's Attack -1 stage
-Acid: damage, 10% chance opponent's Defense -1 stage
-Psychic: damage, 30% chance opponent's Special -1 stage
-Bubble: damage, 10% chance opponent's Speed -1 stage
-Bubble Beam: damage, 10% chance opponent's Speed -1 stage
+THINGS THAT JUST NEED TO BE FILLED IN
+    - Damage + Potential Stat Change (SingleStrike + EnemyStatChange)
+    = AuroraBeam: damage, 10% chance opponent's Attack -1 stage
+    = Acid: damage, 10% chance opponent's Defense -1 stage
+    = Psychic: damage, 30% chance opponent's Special -1 stage
+    = Bubble: damage, 10% chance opponent's Speed -1 stage
+    = BubbleBeam: damage, 10% chance opponent's Speed -1 stage
+
+    - Single-Strike (like all SingleStrike moves)
+    = Hydro Pump: damage
+    = Surf: damage
+    = Water Gun: damage
+    = Vine Whip: damage
+    = Razor Leaf: damage, high crit hit rate
+
+    - Transfer HP (like LeechLife, but Special)
+    = Absorb: damage, and up to 50% of damage dealt is restored to the user
+    = Mega Drain: damage, and up to 50% of damage dealt is restored to the user
+    = Dream Eater: if target asleep, inflict damage and restore 50% of that damage to the user; else, nothing
+
+    - SingleStrike + StatusChange (Like Thunder)
+    = Thunderbolt: damage, 10% chance PAR
+    = Thunder Shock: damage, 10% chance PAR
+    = Ember: damage, 10% chance BRN
+    = Waterfall: damage
+    = Fire Blast: damage, 30% chance BRN
+    = Sludge: damage, 30% chance PSN
+    = Smog: damage, 40% chance PSN
+    = Flamethrower: damage, 10% chance BRN
+    = Blizzard: damage, 10% chance FRZ
+    = Ice Beam: damage, 10% chance FRZ
+    = Confusion: damage, 10% chance CONFUSE
+    = Psybeam: damage, 10% chance CONFUSE
 
 
 STATUS MOVES (any type, don't deal damage directly):
-- Do damage in a roundabout way:
+- CUSTOM
 = Leech Seed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
-
-- Change your stats in a weird way
 = Focus Energy: multiply the user's Crit Hit ratio by 4 (except it was buggy in Gen 1 and divided by 4 instead)
 = Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC
 = Light Screen: double the user's Special when the opponent damages the user with a special move, WSSC
-
-- Change opponent's status
-= Thunder Wave: paralyze
-= Stun Spore: paralyze
-= Glare: paralyze
-= Confuse Ray: confusion, WSSC
-= Supersonic: confusion, WSSC
-= Sleep Powder: sleep
-= Spore: sleep
-= Lovely Kiss: sleep
-= Sing: sleep
-= Hypnosis: sleep, WSSC
-= Poison Gas: poison
-= PoisonPowder: poison
-= Toxic: badly poison, WSSC
-
-- Other weird effect (pretty much all have various special conditions)
 = Haze: seems to just reset all stat changes, and status changes, and other stuff
 = Mist: protect user from future stat mods until he's switched out or faints
 = Disable: disable one randomly selected move of the opponent's with PP > 0 for 0-6 attempts to execute an attack
 = Metronome: randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
 = Mimic: copy a randomly selected move of the opponent's
 = Substitute: use 25% of maxHP to create a substitute with 1 HP more than the amount of HP lost by the user.  Duplicate the user's current stat modifiers, allow self-modification of stats, but disallow any stat-modifying attacks and side effects of opponent's moves.  Other weird stuff too
-= Transform: change the user's type, stats, stat mods, current moves, species, and cry to that of the target, WSSC
+= Transform: change the user's type, stats, stat mods, current moves, and species to that of the target, WSSC
+= Mirror Move: use the last move used by the target, WSSC
+= Rest: restore max HP, fall asleep and awaken two turns after it's used, WSSC
+= Conversion: change the user's current types(s) to the target's current types(s) (Porygon unique move)
+
+- Restore up to 50% of User's HP (see old code)
+= Recover: restore up to 50% of user's maxHP, WSSC
+= Soft-boiled: restore up to 50% of user's maxHP, WSSC
+
+THINGS THAT JUST NEED TO BE FILLED IN
+    - Change your stats:
+    = Sharpen: Attack +1 stage
+    = Meditate: Attack +1 stage
+    = Swords Dance: Attack +2 stages
+    = Defense Curl: Defense +1 stage
+    = Withdraw: Defense +1 stage
+    = Harden: Defense +1 stage
+    = Acid Armor: Defense +2 stages
+    = Barrier: Defense +2 stages
+    = Double Team: Evasion +1 stage
+    = Minimize: Evasion +1 stage
+    = Agility: Speed +2 stages
+    = Growth: Special +1 stage
+    = Amnesia: Special +2 stages
+
+    - Change opponent's stats
+    = String Shot: Speed stat -1 stage
+    = Sand Attack: Accuracy stat -1 stage
+    = Flash: Accuracy stat -1 stage
+    = Smoke Screen: Accuracy stat -1 stage
+    = Kinesis: Accuracy stat -1 stage
+    = Growl: Attack stat -1 stage
+    = Leer: Defense stat -1 stage
+    = Tail Whip: Defense stat -1 stage
+    = Screech: Defense stat -2 stages
+
+    - Change opponent's status (StatusChange)
+    = Thunder Wave: paralyze
+    = Stun Spore: paralyze
+    = Glare: paralyze
+    = Confuse Ray: confusion, WSSC
+    = Supersonic: confusion, WSSC
+    = Sleep Powder: sleep
+    = Spore: sleep
+    = Lovely Kiss: sleep
+    = Sing: sleep
+    = Hypnosis: sleep, WSSC
+    = Poison Gas: poison
+    = PoisonPowder: poison
+    = Toxic: badly poison, WSSC
+
+    = Roar: no effect whatsoever in link battles (causes battle to end in wild encounters)
+    = Whirlwind: no effect whatsoever in link battles (causes battle to end in wild encounters)
+    = Teleport: no effect whatsoever in link battles (causes escape in wild encounters)
+    = Splash: no effect whatsoever anywhere
