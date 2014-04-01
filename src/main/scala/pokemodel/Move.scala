@@ -16,7 +16,6 @@ import Battle.{verbose=>VERBOSE}
  */
 
 // TODO: Any move that can cause a stat change to opponent needs to make sure that the opponent's stats can change via the battle's statManager
-// TODO: moveSpecificStuff could return true/false if it succeeds/fails. This would let you, for example, print "It succeeded!" or "It failed!"
 // TODO: Build some integrated way to figure out if a move hits that takes RNG, accuracy, attacker accuracy, evasion, statuses, Fly/Dig/Haze/etc. into account
 
 /*
@@ -174,6 +173,9 @@ trait HighPriority extends Move  { override val priority = 1 }
 
 /* Next, capture common behaviors of Moves - damage, stats, status, etc. */
 trait SingleStrike extends Move {
+  // A basic damage-dealing experience
+  // Any move that strikes once and uses DamageCalculator to figure out the
+  // appropriate damage will extend SingleStrike
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
@@ -184,9 +186,15 @@ trait SingleStrike extends Move {
         pb.statusManager.canBeHit(defender)) {
       val result = pb.dc.calc(attacker, defender, this, pb)
       defender.takeDamage(result.damageDealt)
-      result.KO(!defender.isAlive)
-      result.numTimesHit(1)  // singleStrike
+
+      // Update result values
+      // numTimesHit == 1, no hpGained, no statusAilments, no stat changes
+      result.KO(defender)
+
+      // Combine anything passed in from traits further to the right
       result.merge(mrb)
+
+      // Pass at all along to the next trait/class
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
       // Pass along what you got + moveIndex
@@ -579,5 +587,49 @@ class TestOneHitKO extends PhysicalMove with OneHitKO {
   override val index = 999
   override val maxPP = 5
   override val accuracy = 1.0
+}
+
+
+trait SingleStrikeLoseHPOnMiss extends Move {
+  def hpToLoseOnMiss: Int
+  def typesMissAgainst: Set[Type]
+
+  // TODO: If there's a substitute and you hit, break the substitute
+  abstract override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    // This logic was too ugly for an "if" clause
+    def moveHits: Boolean = {
+      if (typesMissAgainst.contains(defender.type1)) false
+      else if (typesMissAgainst.contains(defender.type2)) false
+      else if (!pb.statusManager.canBeHit(defender)) false
+      else Random.nextDouble < chanceHit(attacker, defender, pb)
+    }
+
+    if (moveHits) {
+      val result = pb.dc.calc(attacker, defender, this, pb)
+      defender.takeDamage(result.damageDealt min defender.currentHP)
+
+      result.numTimesHit(1)
+      // moveIndex, damageDealt, critHit, STAB, moveType, typeMult from calc
+      result.KO(!defender.isAlive)
+      result.moveType(type1)
+      result.merge(mrb)
+      // hpGained, statusChange, selfKO irrelevant
+      super.moveSpecificStuff(attacker, defender, pb, result)
+
+    } else {
+      // deal yourself damage, then record the result
+      attacker.takeDamage(hpToLoseOnMiss min attacker.currentHP)
+      val missResult = new MoveResultBuilder().moveIndex(index)
+      // all defaults are correct, except you need to check for selfKO
+      missResult.selfKO(!attacker.isAlive)
+      missResult.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, missResult)
+    }
+  }
 }
 

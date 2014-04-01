@@ -51,23 +51,23 @@ THINGS THAT JUST NEED TO BE FILLED IN
     = BubbleBeam: damage, 10% chance opponent's Speed -1 stage
 
     - Single-Strike (like all SingleStrike moves)
-    = Hydro Pump: damage
+    = HydroPump: damage
     = Surf: damage
-    = Water Gun: damage
-    = Vine Whip: damage
-    = Razor Leaf: damage, high crit hit rate
+    = WaterGun: damage
+    = VineWhip: damage
+    = RazorLeaf: damage, high crit hit rate
 
     - Transfer HP (like LeechLife, but Special)
     = Absorb: damage, and up to 50% of damage dealt is restored to the user
-    = Mega Drain: damage, and up to 50% of damage dealt is restored to the user
-    = Dream Eater: if target asleep, inflict damage and restore 50% of that damage to the user; else, nothing
+    = MegaDrain: damage, and up to 50% of damage dealt is restored to the user
+    = DreamEater: if target asleep, inflict damage and restore 50% of that damage to the user; else, nothing
 
     - SingleStrike + StatusChange (Like Thunder)
     = Thunderbolt: damage, 10% chance PAR
-    = Thunder Shock: damage, 10% chance PAR
+    = ThunderShock: damage, 10% chance PAR
     = Ember: damage, 10% chance BRN
     = Waterfall: damage
-    = Fire Blast: damage, 30% chance BRN
+    = FireBlast: damage, 30% chance BRN
     = Sludge: damage, 30% chance PSN
     = Smog: damage, 40% chance PSN
     = Flamethrower: damage, 10% chance BRN
@@ -79,10 +79,10 @@ THINGS THAT JUST NEED TO BE FILLED IN
 
 STATUS MOVES (any type, don't deal damage directly):
 - CUSTOM
-= Leech Seed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
+= LeechSeed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
 = Focus Energy: multiply the user's Crit Hit ratio by 4 (except it was buggy in Gen 1 and divided by 4 instead)
 = Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC
-= Light Screen: double the user's Special when the opponent damages the user with a special move, WSSC
+= LightScreen: double the user's Special when the opponent damages the user with a special move, WSSC
 = Haze: seems to just reset all stat changes, and status changes, and other stuff
 = Mist: protect user from future stat mods until he's switched out or faints
 = Disable: disable one randomly selected move of the opponent's with PP > 0 for 0-6 attempts to execute an attack
@@ -90,25 +90,25 @@ STATUS MOVES (any type, don't deal damage directly):
 = Mimic: copy a randomly selected move of the opponent's
 = Substitute: use 25% of maxHP to create a substitute with 1 HP more than the amount of HP lost by the user.  Duplicate the user's current stat modifiers, allow self-modification of stats, but disallow any stat-modifying attacks and side effects of opponent's moves.  Other weird stuff too
 = Transform: change the user's type, stats, stat mods, current moves, and species to that of the target, WSSC
-= Mirror Move: use the last move used by the target, WSSC
+= MirrorMove: use the last move used by the target, WSSC
 = Rest: restore max HP, fall asleep and awaken two turns after it's used, WSSC
 = Conversion: change the user's current types(s) to the target's current types(s) (Porygon unique move)
 
 - Restore up to 50% of User's HP (see old code)
 = Recover: restore up to 50% of user's maxHP, WSSC
-= Soft-boiled: restore up to 50% of user's maxHP, WSSC
+= Softboiled: restore up to 50% of user's maxHP, WSSC
 
 THINGS THAT JUST NEED TO BE FILLED IN
     - Change your stats:
     = Sharpen: Attack +1 stage
     = Meditate: Attack +1 stage
-    = Swords Dance: Attack +2 stages
-    = Defense Curl: Defense +1 stage
+    = SwordsDance: Attack +2 stages
+    = DefenseCurl: Defense +1 stage
     = Withdraw: Defense +1 stage
     = Harden: Defense +1 stage
-    = Acid Armor: Defense +2 stages
+    = AcidArmor: Defense +2 stages
     = Barrier: Defense +2 stages
-    = Double Team: Evasion +1 stage
+    = DoubleTeam: Evasion +1 stage
     = Minimize: Evasion +1 stage
     = Agility: Speed +2 stages
     = Growth: Special +1 stage
@@ -116,9 +116,9 @@ THINGS THAT JUST NEED TO BE FILLED IN
 
     - Change opponent's stats
     = String Shot: Speed stat -1 stage
-    = Sand Attack: Accuracy stat -1 stage
+    = SandAttack: Accuracy stat -1 stage
     = Flash: Accuracy stat -1 stage
-    = Smoke Screen: Accuracy stat -1 stage
+    = SmokeScreen: Accuracy stat -1 stage
     = Kinesis: Accuracy stat -1 stage
     = Growl: Attack stat -1 stage
     = Leer: Defense stat -1 stage

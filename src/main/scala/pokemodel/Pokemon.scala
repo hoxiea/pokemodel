@@ -56,7 +56,7 @@ class Pokemon(builder : PokemonBuilder) {
   def isAlive: Boolean = currentHP > 0
 
   def takeDamage(damage : Int) {
-    require(0 <= damage && damage <= currentHP, 
+    require(0 <= damage && damage <= currentHP,
         "Don't expect Pokemon.takeDamage to truncate for you!")
     val newHP = currentHP - damage
     assert(newHP >= 0)

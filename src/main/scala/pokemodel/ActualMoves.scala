@@ -528,12 +528,12 @@ class Twineedle extends PhysicalMove {
 
       // We now diverge from MultiStrike and start stealing from StatusChange
       // For each of the either 1 or 2 elements in damageSeq, deal that damage
-      // and try to cause PSN each time.
+      // and try to cause PSN each time
       for (damage <- damageSeq) {
         defender.takeDamage(damage)
         if (statusAilmentCaused &&
             pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
-          result.statusChange(statusAilmentToCause)
+          result.nvsa(statusAilmentToCause)  // PSN is nvsa, can specialize here
         }
       }
 
@@ -657,6 +657,27 @@ class SuperFang extends PhysicalMove {
     }
   }
 }
+
+
+/* PHYSICAL, SINGLE STRIKE WITH PENALTY OF MISSING */
+class HiJumpKick extends PhysicalMove with SingleStrikeLoseHPOnMiss {
+  override val index = 136
+  override val maxPP = 10
+  override val power = 85
+  override val accuracy = 0.9
+  override def hpToLoseOnMiss = 1
+  override def typesMissAgainst = Set(Ghost)
+}
+
+class JumpKick extends PhysicalMove with SingleStrikeLoseHPOnMiss {
+  override val index = 26
+  override val maxPP = 10
+  override val power = 100
+  override val accuracy = 0.95
+  override def hpToLoseOnMiss = 1
+  override def typesMissAgainst = Set(Ghost)
+}
+
 
 /******** SPECIAL MOVES ********/
 class DragonRage extends SpecialMove with ConstantDamage {

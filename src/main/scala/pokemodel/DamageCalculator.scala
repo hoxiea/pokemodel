@@ -7,13 +7,13 @@ import Battle.{verbose=>VERBOSE}
 
 class DamageCalculator {
   /*
-   * The damage that a move does is always captured by the logic in damageFormula
-   * However, depending on whether or not the move lands a critical hit,
-   * inputs to damageFormula change. The key method here, calc, figures out if a crithit
-   * occurred, comes up with the appropriate stat values either way, and computes damage
-   */
-
-  /* In both branches of calc, the full damage calculation is done, but then
+   * The damage that a move does is always captured by the logic in
+   * damageFormula However, depending on whether or not the move lands a
+   * critical hit, inputs to damageFormula change. The key method here, calc,
+   * figures out if a crithit occurred, comes up with the appropriate stat
+   * values either way, and computes damage
+   *
+   * In both branches of calc, the full damage calculation is done, but then
    * the result is truncated so that it doesn't exceed the defender's
    * currentHP. This is the correct behavior: MoveResult.damageDealt value
    * should reflect how much damage is actually done to the Pokemon, rather
@@ -24,32 +24,45 @@ class DamageCalculator {
    * the attacker should take 1 damage instead of 15 damage. So having a
    * correct value for damageDealt is the way to go
    */
+
   def calc(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): MoveResultBuilder = {
     // The key method, through which all damages are calculated
     // Returns a partially-completed MoveResultBuilder
 
     val criticalChance = calcCriticalChance(attacker, defender, move, battle)
 
+    val result = new MoveResultBuilder()
+                    .moveIndex(move.index)
+                    .numTimesHit(1)  // misses and multistrikes can mutate this
+                    .STAB(stabBonus(attacker, move) == 1.5)
+                    .moveType(move.type1)
+                    .typeMult(calculateTypeMultiplier(move.type1, defender))
+
     if (Random.nextDouble < criticalChance) {
+      // Calculate how much the critical hit could do - MRB.damageCalc
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
+      result.damageCalc(chd)
+
+      // Calculate how much damage the Pokemon should actually deal - MRB.damageDealt
       val damageToDeal = chd min defender.currentHP
-      new MoveResultBuilder()
-          .moveIndex(move.index)
-          .damageDealt(damageToDeal)
-          .critHit(true)
-          .STAB(stabBonus(attacker, move) == 1.5)
-          .moveType(move.type1)
-          .typeMult(calculateTypeMultiplier(move.type1, defender))
+      result.damageDealt(damageToDeal)
+
+      // Will dealing damageToDeal KO the opponent?
+      result.KO(defender.currentHP <= damageToDeal)
+      result
+
     } else {
+      // Calculate how much the regular hit could do - MRB.damageCalc
       val rhd = calcRegularHitDamage(attacker, defender, move, battle)
+      result.damageCalc(rhd)
+
+      // Calculate how much damage the Pokemon should actually deal - MRB.damageDealt
       val damageToDeal = rhd min defender.currentHP
-      new MoveResultBuilder()
-          .moveIndex(move.index)
-          .damageDealt(damageToDeal)
-          .critHit(false)
-          .STAB(stabBonus(attacker, move) == 1.5)
-          .moveType(move.type1)
-          .typeMult(calculateTypeMultiplier(move.type1, defender))
+      result.damageDealt(damageToDeal)
+
+      // Will dealing damageToDeal KO the opponent?
+      result.KO(defender.currentHP <= damageToDeal)
+      result
     }
   }
 
@@ -69,28 +82,37 @@ class DamageCalculator {
   }
 
   /*
-   * There doesn't seem to be a clear consensus on what the damage formula for Gen 1 actually is...
+   * There doesn't seem to be a clear consensus on what the damage formula for
+   * Gen 1 actually is...
    *
    * From http://wiki.pokemon-online.eu/view/Damage_formula
-   * ((((Level * 0.4 * C) + 2) * Attack * movePower / 50 / Defense) + 2) * STAB*TypeModifier * random[217,255] / 255
+   * ((((Level * 0.4 * C) + 2) * Attack * movePower / 50 / Defense) + 2) *
+   *   STAB*TypeModifier * random[217,255] / 255
    * C = 2 if criticalHit else 1
-   * But crithits in Gen 1 seem to double the effective level of the attacker, and NOT just double the damage
+   * But crithits in Gen 1 seem to double the effective level of the attacker,
+   * and NOT just double the damage
    *
    * From http://www.math.miami.edu/~jam/azure/compendium/battdam.htm:
-   * ((0.4 * level + 2)*Attack*movePower)/Defense)/50)+2)*STAB)*TypeModifier/10)*random[217,255])/255
-   * This isn't even close to having balanced parentheses, but at least it seems to use the right stuff
+   * ((0.4 * level + 2)*Attack*movePower)/Defense)/50)+2)*
+   *     STAB)*TypeModifier/10)*random[217,255])/255
+   * This isn't even close to having balanced parentheses, but at least it
+   * seems to use the right stuff
    *
    * From http://www.serebii.net/games/damage.shtml:
-   * ((((2 * Level / 5 + 2) * AttackStat * AttackPower / DefenseStat) / 50) + 2) * STAB * Weakness/Resistance * Random[85,100] / 100
-   * This third one parses, and uses the correct stuff, and seems legit, so that's what I'll do
+   * ((((2 * Level / 5 + 2) * AttackStat * AttackPower / DefenseStat) / 50) + 2) *
+   *     STAB * Weakness/Resistance * Random[85,100] / 100
+   * This third one parses, and uses the correct stuff, and seems legit, so
+   * that's what I'll do
    *
-   * Note: In this formula, attack and defense are the EFFECTIVE attack and defense, which depend on things
-   * like battle stat mods, statuses (BRN halves attack, for example), and whether the move is Physical or
-   * Special. Rather than worrying about all that here, we'll capture the formula here and make sure that
-   * everything is accounted for elsewhere.
+   * Also, according to the math.miami source, you have to truncate to an Int
+   * every step of the way.  I ended up looking at the Javascript code of the
+   * math.miami calculator and sort of implemented it here
    *
-   * Also, according to the math.miami source, you have to truncate to an Int every step of the way.
-   * I ended up looking at the Javascript code of the math.miami calculator and sort of implementing it here
+   * Note: In this formula, attack and defense are the EFFECTIVE attack and
+   * defense, which depend on things like battle stat mods, statuses (BRN
+   * halves attack, for example), and whether the move is Physical or Special.
+   * Rather than worrying about all that here, we'll capture the formula here
+   * and make sure that everything is accounted for elsewhere.
    */
   def damageFormula(level: Int,
                     effectiveAttack: Int,
@@ -161,7 +183,10 @@ class DamageCalculator {
   }
 
 
-  private def calcCriticalChance(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): Double = {
+  private def calcCriticalChance(attacker: Pokemon,
+      defender: Pokemon,
+      move: Move,
+      battle: Battle): Double = {
     val criticalChance = move.critHitRate match {
       case NEVER  => 0.0   // for testing purposes
       case LOW    => PokeData.getBaseSpeed(attacker.index).toDouble / 512

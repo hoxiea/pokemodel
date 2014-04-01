@@ -1,6 +1,7 @@
 package pokemodel
 
 import Type._
+import BattleStat._
 
 /*
  * After implementing Moves that mutated Battles/Pokemon but didn't return any
@@ -8,30 +9,65 @@ import Type._
  * you hit or not, KO, etc. could be useful. This class just captures all that
  * good stuff.
  *
- * These are actually built up in the following way:
- * - DamageCalculator determines whether or not a critHit happened, and how
- * much damage is dealt (Physical and Special only)
- * - Since it integrates STAB and typeMult into the formula, it has those.
- * - It could figure out if there was a KO, but it doesn't. That's done instead in...
- * -
+ * There are two ways to get your hands on a MoveResultBuilder, which each move
+ * is responsible for returning and completing. The first is to call
+ * DamageCalculator.calc, which fills in as much information as it can using
+ * everything that it has.  The second is to make one from scratch, hope that
+ * most of the default values apply to you, and then change the ones that
+ * don't.
+ *
+ * The following values are provided by DamageCalculator:
+ * - moveIndex
+ * - damageCalc
+ * - numTimesHit = 1
+ * - damageDealt
+ * - critHit
+ * - STAB
+ * - moveType
+ * - typeMult
+ *
+ * That means a move/trait should modify any of the following as needed:
+ * - numTimesHit if it's != 1
+ * - hpGained
+ * - nvsa / vsa
+ * - selfStat + selfStatAmount
+ * - enemyStat + enemyStatAmount
+ * - KO
+ * - subKO
+ * - selfKO
+
+ * Another crucial operation on MoveResultBuilders is the ability to combine
+ * them.  For example, a move like Thunder is implemented as something that's
+ * both SingleStrike and StatusChange. So whatever happens with the
+ * StatusChange (nvsa or vsa) should get passed to the SingleStrike trait,
+ * which can then do a damage calculation and merge in the results of the
+ * StatusChange.
  */
 
 class MoveResult (
   val moveIndex: Int,    // which move was used?
+  val damageCalc: Int,   // what's the max damage this move could deal, from DamageCalc?
   val numTimesHit: Int,  // how many times did the move hit? usually 1
-  val damageDealt: Int,  // how much damage was dealt (on the last hit)?
+  val damageDealt: Int,  // how much damage was actually dealt (on the last hit)?
   val hpGained: Int,     // how much HP did the user gain?
   val critHit: Boolean,  // did you get a critical hit?
   val STAB: Boolean,     // was there a STAB in play?
-  val moveType: Type,        // what Type was the move? (Normal, Flying, etc.)
+  val moveType: Type,    // what Type was the move? (Normal, Flying, etc.)
   val typeMult: Double,  // what was your move's type effectiveness against defender?
-  val statusChange : Option[StatusAilment],  // cause status change? if so, which?
+  val nvsa: Option[NonVolatileStatusAilment], // cause status change? which?
+  val vsa: Option[VolatileStatusAilment],     // cause status change? which?
+  val selfStat: Option[BattleStat],     // change your own stat? which?
+  val selfStatAmount: Option[Int],      // how much change your own stat?
+  val enemyStat: Option[BattleStat],     // change enemy's stat? which?
+  val enemyStatAmount: Option[Int],      // how much change enemy stat?
   val KO: Boolean,       // did you knock the active Pokemon on the other team out?
+  val subKO: Boolean,    // did you break an opponent's substitute?
   val selfKO: Boolean) { // did you knock yourself out using this move?
 
   override def toString: String = {
     val repr = new StringBuilder()
     repr.append(s"moveIndex = $moveIndex\n")
+    repr.append(s"damageCalc = $damageCalc\n")
     repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
     repr.append(s"hpGained = $hpGained\n")
@@ -39,37 +75,73 @@ class MoveResult (
     repr.append(s"STAB = $STAB\n")
     repr.append(s"moveType = $moveType\n")
     repr.append(s"typeMult = $typeMult\n")
-    repr.append(s"statusChange = $statusChange\n")
+    repr.append(s"nvsa = $nvsa\n")
+    repr.append(s"vsa = $vsa\n")
+    repr.append(s"selfStat = $selfStat\n")
+    repr.append(s"selfStatAmount = $selfStatAmount\n")
+    repr.append(s"enemyStat = $enemyStat\n")
+    repr.append(s"enemyStatAmount = $enemyStatAmount\n")
     repr.append(s"KO = $KO\n")
+    repr.append(s"subKO = $subKO\n")
     repr.append(s"selfKO = $selfKO\n")
     repr.toString()
   }
 }
 
 class MoveResultBuilder {
-  // default values
+  // defaults: a Normal move with an invalid index and no effect on the world
   var moveIndex = -1
-  var damageDealt = 0
+  var damageCalc = 0
   var numTimesHit = 0
+  var damageDealt = 0
   var hpGained = 0
   var critHit = false
   var STAB = false
   var moveType = Normal
   var typeMult = 1.0
-  var statusChange: Option[StatusAilment] = None
+  var nvsa: Option[NonVolatileStatusAilment] = None
+  var vsa: Option[VolatileStatusAilment] = None
+  var selfStat: Option[BattleStat] = None
+  var selfStatAmount: Option[Int] = None
+  var enemyStat: Option[BattleStat] = None
+  var enemyStatAmount: Option[Int] = None
   var KO = false
+  var subKO = false
   var selfKO = false
 
-  val validTypeMults: Set[Double] = Set(0.0, 0.25, 0.5, 1.0, 2.0, 4.0)
+  private val validTypeMults: Set[Double] = Set(0.0, 0.25, 0.5, 1.0, 2.0, 4.0)
 
-  def moveIndex(x: Int): MoveResultBuilder = { moveIndex = x ; this}
-  def damageDealt(x: Int): MoveResultBuilder = { damageDealt = x ; this}
-  def numTimesHit(x: Int): MoveResultBuilder = { numTimesHit = x ; this}
-  def hpGained(x: Int): MoveResultBuilder = { hpGained = x ; this}
+  // Methods to mutate things
+  def moveIndex(x: Int): MoveResultBuilder = {
+    require(1 <= x && x <= 165)
+    moveIndex = x
+    this
+  }
+  def damageCalc(x: Int): MoveResultBuilder = {
+    require(x >= 0)
+    damageDealt = x
+    this
+  }
+  def numTimesHit(x: Int): MoveResultBuilder = {
+    require(x >= 0)
+    numTimesHit = x
+    this
+  }
+  def damageDealt(x: Int): MoveResultBuilder = {
+    require(x >= 0)
+    damageDealt = x
+    this
+  }
+  def hpGained(x: Int): MoveResultBuilder = {
+    require(x >= 0)
+    hpGained = x
+    this
+  }
+
   def critHit(c: Boolean): MoveResultBuilder = { critHit = c ; this}
   def STAB(s: Boolean): MoveResultBuilder = { STAB = s ; this}
-
   def moveType(t: Type): MoveResultBuilder = { moveType = t ; this}
+
   def typeMult(t: Double): MoveResultBuilder = {
     require(validTypeMults contains t,
       "MoveResultBuilder.typeMult was given an invalid value")
@@ -77,65 +149,85 @@ class MoveResultBuilder {
     this
   }
 
-  def statusChange(sa: StatusAilment): MoveResultBuilder = {
-    statusChange = Some(sa)
+  def nvsa(sa: NonVolatileStatusAilment): MoveResultBuilder = {
+    nvsa = Some(sa)
     this
   }
-  def resetStatusChange: MoveResultBuilder = { statusChange = None ; this}
-  def KO(k: Boolean): MoveResultBuilder = { KO = k ; this }
-  def selfKO(k: Boolean): MoveResultBuilder = { selfKO = k ; this }
-
-  def toMoveResult: MoveResult = {
-    new MoveResult(moveIndex, numTimesHit, damageDealt, hpGained, critHit, STAB, moveType,
-      typeMult, statusChange, KO, selfKO)
+  def vsa(sa: VolatileStatusAilment): MoveResultBuilder = {
+    vsa = Some(sa)
+    this
   }
 
-  /* merge is a crucial method here.
-   * Chained traits are passed a MoveResultBuilder as a parameter, and they
-   * also typically get another MRB from DamageCalculator.calc. We'd like to
-   * combine the contents of the two MRBs by merging the other's informatio
-   * into the caller.
-   *
-   * I originally wrote this to create a new MRB and return it, immutable style,
-   * but since you only get a result if the move hits, I was left without a way
-   * to handle both cases in just one call. For example,
-   * trait SingleStrike extends Move {
-   *   abstract override def moveSpecificStuff(..., mrb: MoveResultBuilder) = {
-   *     if (moveHits) {
-   *       val result = pb.dc.calc(attacker, defender, this, pb)
-   *       defender.takeDamage(result.damageDealt)
-   *       val combined = mrb.merge(result)
-   *       super.moveSpecificStuff(attacker, defender, pb, combined)
-   *     } else {
-   *       super.moveSpecificStuff(attacker, defender, pb, mrb)
-   *     }
-   *   }
-   * }
-   *
-   * I guess two calls isn't so bad, but I saw that after I changed merge to
-   * mutate the caller, so we'll keep it like that for now. Mutation is a big
-   * part of the MRB experience, for better or worse
-   */
+  // You'll never have one without the other, so combine these two
+  def addSelfStat(stat: BattleStat, amount: Int): MoveResultBuilder = {
+    require (-3 <= amount && amount <= 3)
+    selfStat = Some(stat)
+    selfStatAmount = Some(amount)
+    this
+  }
+  def addEnemyStat(stat: BattleStat, amount: Int): MoveResultBuilder = {
+    require (-3 <= amount && amount <= 3)
+    enemyStat = Some(stat)
+    enemyStatAmount = Some(amount)
+    this
+  }
+
+  def KO(k: Boolean): MoveResultBuilder = { KO = k ; this }
+  def KO(p: Pokemon): MoveResultBuilder = { KO = !p.isAlive ; this }
+
+  def subKO(k: Boolean): MoveResultBuilder = { subKO = k ; this }
+
+  def selfKO(k: Boolean): MoveResultBuilder = { selfKO = k ; this }
+  def selfKO(p: Pokemon): MoveResultBuilder = { selfKO = !p.isAlive ; this }
+
+  def checkConsistency {
+    // TODO: make sure the numbers all make sense
+  }
+
+
+  def toMoveResult: MoveResult = {
+    new MoveResult(
+      moveIndex,
+      damageCalc,
+      numTimesHit,
+      damageDealt,
+      hpGained,
+      critHit,
+      STAB,
+      moveType,
+      typeMult,
+      nvsa,
+      vsa,
+      selfStat,
+      selfStatAmount,
+      enemyStat,
+      enemyStatAmount,
+      KO,
+      subKO,
+      selfKO
+    )
+  }
+
+  /* merge is a crucial method here, as described in the top comment */
   def merge(other: MoveResultBuilder) {
-    moveIndex(moveIndex max other.moveIndex)
-    damageDealt(damageDealt max other.damageDealt)
+    moveIndex(moveIndex     max other.moveIndex)
+    damageCalc(damageCalc   max other.damageCalc)
     numTimesHit(numTimesHit max other.numTimesHit)
-    hpGained(hpGained max other.hpGained)
+    damageDealt(damageDealt max other.damageDealt)
+    hpGained(hpGained       max other.hpGained)
+
     critHit(critHit || other.critHit)
-    STAB(STAB || other.STAB)
-    KO(KO || other.KO)
-    selfKO(selfKO || other.selfKO)
+    STAB(STAB       || other.STAB)
 
     val newMoveType =
       if (moveType != Normal) moveType
       else other.moveType
     moveType(newMoveType)
 
-    // The typeMult is interesting. The default value is 1.0, and
-    // DamageCalculator spits out the correct value. No move should
-    // ever deal multiple kinds of damage simultaneously, so we
-    // should check to see if $other has a more interesting value (not 1.0)
-    // than we do and update if so
+    // The default typeMult value is 1.0, and DamageCalculator spits out the
+    // correct value. No move should ever deal multiple kinds of damage
+    // simultaneously, so we should check to see if $other has a more
+    // interesting value (not 1.0) than we do and update if so
     val newTypeMult =
       if (other.typeMult != 1.0) other.typeMult
       else typeMult  // other is 1.0, so we're at least as interesting
@@ -144,12 +236,48 @@ class MoveResultBuilder {
     // No move in the game should be constructed by stacking multiple
     // status-changes, so this probably won't ever be an issue, but he's a
     // reasonable way to handle it
-    val newStatusChangeOption =
-      if (statusChange.isDefined) statusChange
-      else if (other.statusChange.isDefined) other.statusChange
+    val newNvsaOption =
+      if (nvsa.isDefined) nvsa  // already have one
+      else if (other.nvsa.isDefined) other.nvsa // adding one
       else None
-    if (newStatusChangeOption.isDefined)
-      statusChange(newStatusChangeOption.get)
+    if (newNvsaOption.isDefined) nvsa(newNvsaOption.get)
+
+    val newVsaOption =
+      if (vsa.isDefined) vsa  // already have one
+      else if (other.vsa.isDefined) other.vsa // adding one
+      else None
+    if (newVsaOption.isDefined) vsa(newVsaOption.get)
+
+    // I don't think we ever stack stat changes either, but let's merge them
+    val newSelfStat =
+      if (selfStat.isDefined) selfStat
+      else if (other.selfStat.isDefined) other.selfStat
+      else None
+    val newSelfStatAmount =
+      if (selfStatAmount.isDefined) selfStatAmount
+      else if (other.selfStatAmount.isDefined) other.selfStatAmount
+      else None
+    if (newSelfStat.isDefined && newSelfStatAmount.isDefined)
+      addSelfStat(newSelfStat.get, newSelfStatAmount.get)
+
+    val newEnemyStat =
+      if (enemyStat.isDefined) enemyStat
+      else if (other.enemyStat.isDefined) other.enemyStat
+      else None
+    val newEnemyStatAmount =
+      if (enemyStatAmount.isDefined) enemyStatAmount
+      else if (other.enemyStatAmount.isDefined) other.enemyStatAmount
+      else None
+    if (newEnemyStat.isDefined && newEnemyStatAmount.isDefined)
+      addEnemyStat(newEnemyStat.get, newEnemyStatAmount.get)
+
+    // Finish things off
+    KO(KO         || other.KO)
+    subKO(subKO   || other.subKO)
+    selfKO(selfKO || other.selfKO)
+
+
+
   }
 
   override def toString: String = {
@@ -161,7 +289,6 @@ class MoveResultBuilder {
     repr.append(s"critHit = $critHit\n")
     repr.append(s"STAB = $STAB\n")
     repr.append(s"typeMult = $typeMult\n")
-    repr.append(s"statusChange = $statusChange\n")
     repr.append(s"KO = $KO\n")
     repr.append(s"selfKO = $selfKO\n")
     repr.toString()

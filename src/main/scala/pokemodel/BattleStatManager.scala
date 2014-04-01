@@ -71,9 +71,11 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
 
   /* Ways for the Battle to interact with the stats */
   def getEffectiveAttack(p: Pokemon) : Int = {
-    require(attackStages contains p, s"${p.name} doesn't have an Attack stage in this battle")
+    require(attackStages contains p,
+            s"${p.name} doesn't have an Attack stage in this battle")
     val effectiveAttack = (attackStageToFraction(attackStages(p)) * p.attack).toInt
-    if (p.statusAilment == Some(BRN) && attackStages(p) == 0) {  // BRN, no Attack Stat mods in place
+    if (p.statusAilment == Some(BRN) && attackStages(p) == 0) {
+      // BRN, no Attack Stat mods in place
       (effectiveAttack / 2) min 999
     } else {
       effectiveAttack min 999
@@ -81,19 +83,23 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   def getEffectiveDefense(p: Pokemon) : Int = {
-    require(defenseStages.contains(p), s"${p.name} doesn't have a Defense stage in this battle")
+    require(defenseStages.contains(p),
+            s"${p.name} doesn't have a Defense stage in this battle")
     (defenseStageToFraction(defenseStages(p)) * p.defense).toInt min 999
   }
 
   def getEffectiveSpecial(p: Pokemon) : Int = {
-    require(specialStages.contains(p), s"${p.name} doesn't have a Special stage in this battle")
+    require(specialStages.contains(p),
+            s"${p.name} doesn't have a Special stage in this battle")
     (specialStageToFraction(specialStages(p)) * p.special).toInt min 999
   }
 
   def getEffectiveSpeed(p: Pokemon) : Int = {
-    require(speedStages.contains(p), s"${p.name} doesn't have a Speed stage in this battle")
+    require(speedStages.contains(p),
+            s"${p.name} doesn't have a Speed stage in this battle")
     val effectiveSpeed = (speedStageToFraction(speedStages(p)) * p.speed).toInt
-    if (p.statusAilment == Some(PAR) && speedStages(p) == 0) {  // PAR, no Speed Stat mods in place
+    if (p.statusAilment == Some(PAR) && speedStages(p) == 0) {
+      // PAR, no Speed Stat mods in place
       (effectiveSpeed / 4) min 999
     } else {
       effectiveSpeed min 999
@@ -101,18 +107,20 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   def getEffectiveAccuracy(p: Pokemon) : Int = {
-    require(accuracyStages.contains(p), s"${p.name} doesn't have an Accuracy stage in this battle")
+    require(accuracyStages.contains(p),
+            s"${p.name} doesn't have an Accuracy stage in this battle")
     accuracyStageToFraction(accuracyStages(p)).toInt min 999
   }
 
   def getEffectiveEvasion(p: Pokemon) : Int = {
-    require(evasionStages.contains(p), s"${p.name} doesn't have an Evasion stage in this battle")
+    require(evasionStages.contains(p),
+            s"${p.name} doesn't have an Evasion stage in this battle")
     evasionStageToFraction(evasionStages(p)).toInt min 999
   }
 
   /* Ways to increase/decrease stages for Pokemon
-   * For example, to increase a Pokemon's attack by 1, use changeAttackStage(p, 1)
-   * To decrease an opponent's defense by 2, use changeDefenseStat(opponent, -2)
+   * Eg: to increase a Pokemon's attack by 1, use changeAttackStage(p, 1)
+   * Eg: to decrease an enemy's defense by 2, use changeDefenseStat(enemy, -2)
    * */
   private def curbNewTotal(newTotal : Int) : Int = {
     // Valid stages are between -6 and 6... moves that push a stat past that
@@ -159,12 +167,12 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   // Ways to set the stats to an absolute value - useful in a few rare settings
-  def setAttackStage(p: Pokemon, newValue: Int) : Unit   = { attackStages(p)   = newValue }
-  def setDefenseStage(p: Pokemon, newValue: Int) : Unit  = { defenseStages(p)  = newValue }
-  def setSpecialStage(p: Pokemon, newValue: Int) : Unit  = { specialStages(p)  = newValue }
-  def setSpeedStage(p: Pokemon, newValue: Int) : Unit    = { speedStages(p)    = newValue }
-  def setAccuracyStage(p: Pokemon, newValue: Int) : Unit = { accuracyStages(p) = newValue }
-  def setEvasionStage(p: Pokemon, newValue: Int) : Unit  = { evasionStages(p)  = newValue }
+  def setAttackStage(p: Pokemon, newStage: Int)   {attackStages(p)   = newStage}
+  def setDefenseStage(p: Pokemon, newStage: Int)  {defenseStages(p)  = newStage}
+  def setSpecialStage(p: Pokemon, newStage: Int)  {specialStages(p)  = newStage}
+  def setSpeedStage(p: Pokemon, newStage: Int)    {speedStages(p)    = newStage}
+  def setAccuracyStage(p: Pokemon, newStage: Int) {accuracyStages(p) = newStage}
+  def setEvasionStage(p: Pokemon, newStage: Int)  {evasionStages(p)  = newStage}
 
   // Set everything back to 0; useful for Haze, and maybe other times too
   def resetAll(p: Pokemon) : Unit = {
@@ -177,8 +185,9 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   /*
-   * Most of the time, the battle stats of a Pokemon can be changed by both active Pokemon.
-   * However, there are certain instances in which they can't, and these function captures that logic.
+   * Most of the time, the battle stats of a Pokemon can be changed by both
+   * active Pokemon.  However, there are certain instances in which they can't,
+   * and these function captures that logic.
    */
 
   // Can Pokemon p change its own battle stats in Battle pb?
@@ -189,9 +198,8 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   // Can attacker change the battle stats of defender in Battle pb?
-  def canChangeDefenderStats(attacker: Pokemon, defender: Pokemon, pb: Battle) : Boolean = {
+  def canChangeDefenderStats(attacker: Pokemon, defender: Pokemon, pb: Battle): Boolean = {
     // TODO: when is a Pokemon immune to stat-changing moves? Mist
-    // !pb.statusManager.hasMist(defender)
-    true
+    !pb.statusManager.hasMist(defender)
   }
 }
