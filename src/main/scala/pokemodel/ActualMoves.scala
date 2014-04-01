@@ -218,6 +218,43 @@ class Counter extends PhysicalMove {
   override val type1 = Fighting
   override val maxPP = 10
   override val priority = -1
+
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index)
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+
+      // Get the last MoveResult from the battle
+      val mr: MoveResult = pb.moveHistory.mostRecent
+      if (mr.moveType == Normal || mr.moveType == Fighting) {
+        val damageToDeal = mr.damageDealt * 2  // here comes the pain
+        defender.takeDamage(damageToDeal)
+
+        // update result
+        result.damageDealt(damageToDeal)
+        result.numTimesHit(1)
+        // hpGained, critHit, STAB, typeMult are irrelevant
+        result.moveType(type1)
+        // Even if it was a Normal move that causes status change, Counter just does damage
+        result.KO(!defender.isAlive)
+        result.merge(mrb)
+        super.moveSpecificStuff(attacker, defender, pb, result)
+      } else {
+        // attack type was wrong, so just pass along what you received, keeping moveIndex
+        result.merge(mrb)
+        super.moveSpecificStuff(attacker, defender, pb, result)
+      }
+    } else {
+      // attack missed, so just pass along what you received, keeping moveIndex
+      result.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, result)
+    }
+  }
 }
 
 
@@ -272,6 +309,23 @@ class SpikeCannon extends PhysicalMove with MultiStrike {
   // 100% accuracy
 }
 
+
+/* PHYSICAL, DOUBLE STRIKE */
+class DoubleKick extends PhysicalMove with DoubleStrike {
+  override val index = 24
+  override val type1 = Fighting
+  override val power = 30
+  override val maxPP = 30
+}
+
+class Bonemerang extends PhysicalMove with DoubleStrike {
+  override val index = 155
+  override val type1 = Ground
+  override val power = 50
+  override val maxPP = 10
+}
+
+
 /* PHYSICAL, TRANSFER HP */
 class LeechLife extends PhysicalMove {
   override val index = 141
@@ -300,7 +354,9 @@ class LeechLife extends PhysicalMove {
       result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
-      super.moveSpecificStuff(attacker, defender, pb, mrb)
+      val missResult = new MoveResultBuilder().moveIndex(index)
+      missResult.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
   }
 }
@@ -425,6 +481,66 @@ class PoisonSting extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.3
 }
 
+class Twineedle extends PhysicalMove {
+  // This is superweird... it's DoubleStrike and StatusChange, but it needs to
+  // attempt the StatusChange on both attempts. I programmed this one from
+  // scratch rather that trying something like "with StatusChange with
+  // StatusChange" or something equally unlikely to work.
+  // TODO: Twineedle will stop after 1 if the first strike breaks a substitute.
+  override val index = 41
+  override val type1 = Bug
+  override val power = 25
+  override val maxPP = 20
+  val statusAilmentToCause = new PSN
+  val chanceOfCausingAilment = 0.2
+  def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
+
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+      val numStrikes = 2
+
+      // In Gen 1, damage was calculated once and then used for each blow
+      val result = pb.dc.calc(attacker, defender, this, pb)
+      val damageEachStrike = result.damageDealt
+      val damageSeq = Utils.damageSeqCalc(numStrikes, damageEachStrike, defender.currentHP)
+      assert(damageSeq.last > 0, "damageSeqCalc fail")
+
+      // We now diverge from MultiStrike and start stealing from StatusChange
+      // For each of the either 1 or 2 elements in damageSeq, deal that damage
+      // and try to cause PSN each time.
+      for (damage <- damageSeq) {
+        defender.takeDamage(damage)
+        if (statusAilmentCaused &&
+            pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
+          result.statusChange(statusAilmentToCause)
+        }
+      }
+
+      // Update result
+      result.numTimesHit(damageSeq.length)
+      result.damageDealt(damageSeq.last)
+      // hpGained is irrelevant
+      // dc.calc takes care of moveType, STAB, critHit, typeMult
+      // statusChange handled above
+      result.KO(!defender.isAlive)
+      result.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, result)
+    } else {
+      // Attack missed, so just pass along what you received + move index
+      val missResult = new MoveResultBuilder().moveIndex(index)
+      missResult.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, missResult)
+    }
+  }
+}
+
+
 /* PHYSICAL, ONE HIT KO */
 class Fissure extends PhysicalMove with OneHitKO {
   override val index = 90
@@ -443,6 +559,18 @@ class HornDrill extends PhysicalMove with OneHitKO {
 }
 
 
+/* PHYSICAL, POTENTIAL STAT CHANGE */
+class Constrict extends PhysicalMove with EnemyStatChange {
+  override val index = 132
+  override val maxPP = 35
+  // Normal, 100% accurary
+
+  def statToChange = SPEED
+  def amountToChangeBy = -1
+  def chanceOfStatChange = 0.1
+}
+
+
 /* PHYSICAL, FUNCTION OF ENVIRONMENT */
 class SeismicToss extends PhysicalMove {
   override val index = 69
@@ -455,7 +583,7 @@ class SeismicToss extends PhysicalMove {
     pb: Battle,
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val result = new MoveResultBuilder()
+    val result = new MoveResultBuilder().moveIndex(index)
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
       // The damage is not altered by weakness, resistance, or immunity.
@@ -471,7 +599,9 @@ class SeismicToss extends PhysicalMove {
       result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
-      super.moveSpecificStuff(attacker, defender, pb, mrb)
+      val missResult = new MoveResultBuilder().moveIndex(index)
+      missResult.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
   }
 }
@@ -501,11 +631,14 @@ class SuperFang extends PhysicalMove {
       result.damageDealt(damageToDeal)
       result.numTimesHit(1)
       result.moveType(type1)
+      result.moveIndex(index)
       result.KO(!defender.isAlive)
       result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
-      super.moveSpecificStuff(attacker, defender, pb, mrb)
+      val missResult = new MoveResultBuilder().moveIndex(index)
+      missResult.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
   }
 }

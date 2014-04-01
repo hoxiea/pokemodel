@@ -189,8 +189,10 @@ trait SingleStrike extends Move {
       result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
-      // Missed, so nothing in MRB changes... pass along what you got
-      super.moveSpecificStuff(attacker, defender, pb, mrb)
+      // Pass along what you got + moveIndex
+      val missResult = new MoveResultBuilder().moveIndex(index)
+      missResult.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
   }
 }
@@ -227,6 +229,7 @@ trait ConstantDamage extends Move {
       // Bypass DamageCalculator, so we have to do this stuff ourselves.
       // Don't mutate mrb!
       val result = new MoveResultBuilder()
+      result.moveIndex(index)
       result.damageDealt(damageToDeal)
       result.numTimesHit(1)
       // no crithits, STAB, moveType, typeMult, or statusChange for
@@ -235,7 +238,10 @@ trait ConstantDamage extends Move {
       result.selfKO(!attacker.isAlive)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
-      super.moveSpecificStuff(attacker, defender, pb, mrb)
+      // Pass along what you got + moveIndex
+      val missResult = new MoveResultBuilder().moveIndex(index)
+      missResult.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
   }
 }
@@ -285,7 +291,7 @@ trait StatusChange extends Move {
       defender: Pokemon,
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-    val result = new MoveResultBuilder
+    val result = new MoveResultBuilder().moveIndex(index)
     if (statusAilmentCaused) {
       statusAilmentToCause match {
         case (_ : NonVolatileStatusAilment) => {
@@ -355,7 +361,8 @@ trait MultiStrike extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)) {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
       val r = Random.nextDouble
       val numStrikes = if (r < 0.375) 2
                        else if (r < (0.375 + 0.375)) 3
@@ -368,47 +375,26 @@ trait MultiStrike extends Move {
        * each blow
        */
       val result = pb.dc.calc(attacker, defender, this, pb)
+      val damageEachStrike = result.damageDealt
 
-      /*
-       * At this point, we have everything we need to figure out how many times
-       * to strike and how much damage to deal on each strike. You might think
-       * that this would be numStrikes and result.damageDealt, but you'd be wrong.
-       * Not only does Pokemon.takeDamage NOT absorb excess damage anymore, but
-       * moves like Bide and Counter only use the last strike in the sequence,
-       * so we actually have to figure out the damage sequence that either deals
-       * result.damageDealt damage all the way through, or stops short upon
-       * killing opponent, breaking substitute, etc. Then we'll update result,
-       * merge it into mrb, and be on our way.
-       */
-
-      def damageSeqCalc(
-        numStrikesLeft: Int,
-        defenderHPLeft: Int,
-        soFar: List[Int]): List[Int] = {
-        if (numStrikesLeft == 0 || defenderHPLeft <= 0) soFar.reverse
-        else {
-          val damageToDeal = result.damageDealt min defenderHPLeft
-          damageSeqCalc(numStrikesLeft - 1,
-                        defenderHPLeft - damageToDeal,
-                        damageToDeal :: soFar)
-        }
-      }
-
-      val damageSeq = damageSeqCalc(numStrikes, defender.currentHP, List[Int]())
+      // Figure out what sequence of damages we should actually deal
+      val damageSeq = Utils.damageSeqCalc(numStrikes, damageEachStrike, defender.currentHP)
       assert(damageSeq.last > 0, "damageSeqCalc fail")
 
       // Actually deal the damage in damageSeq
       damageSeq.map(n => defender.takeDamage(n))
 
-      // Update result
+      // Update result - index filled in by calc
       result.numTimesHit(damageSeq.length)
       result.damageDealt(damageSeq.last)
       result.KO(!defender.isAlive)
       result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
-      // Attack missed, so just pass along what you received
-      super.moveSpecificStuff(attacker, defender, pb, mrb)
+      // Pass along what you got + moveIndex
+      val missResult = new MoveResultBuilder().moveIndex(index)
+      missResult.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
   }
 }
@@ -418,6 +404,54 @@ class TestMultiStrike extends PhysicalMove with MultiStrike {
   override val power = 40
   override val maxPP = 20
   override val accuracy = 1.0
+}
+
+
+trait DoubleStrike extends Move {
+  // Very similar to MultiStrike, except it always hits exactly twice
+  // TODO: Ends if substitute breaks
+  // TODO: Ensure that Bide & Counter only see the last attack in this sequence
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+      val numStrikes = 2
+
+      /*
+       * In later generations, each hit was considered separately and could be
+       * critical/not. In Gen 1, damage was calculated once and then used for
+       * each blow
+       */
+      val result = pb.dc.calc(attacker, defender, this, pb)
+      val damageEachStrike = result.damageDealt
+
+      /*
+       * Same deal as MultiStrike - at this point, we should figure out how much
+       * damage we're going to deal on each hit, taking fainting into account
+       */
+      val damageSeq = Utils.damageSeqCalc(numStrikes, damageEachStrike, defender.currentHP)
+      assert(damageSeq.last > 0, "damageSeqCalc fail")
+
+      // Actually deal the damage in damageSeq
+      damageSeq.map(n => defender.takeDamage(n))
+
+      // Update result - moveIndex from calc
+      result.numTimesHit(2)
+      result.damageDealt(damageSeq.last)
+      result.KO(!defender.isAlive)
+      result.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, result)
+    } else {
+      // Pass along what you got + moveIndex
+      val missResult = new MoveResultBuilder().moveIndex(index)
+      missResult.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, missResult)
+    }
+  }
 }
 
 
@@ -442,7 +476,11 @@ trait SelfStatChange extends Move {
         case EVASION  => pb.statManager.changeEvasionStage(attacker, amountToChangeBy)
       }
     }
-  super.moveSpecificStuff(attacker, defender, pb, mrb)
+
+    // Pass along what you got + moveIndex
+    val result = new MoveResultBuilder().moveIndex(index)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
   }
 }
 
@@ -487,7 +525,11 @@ trait EnemyStatChange extends Move {
         case EVASION  => pb.statManager.changeEvasionStage(defender, amountToChangeBy)
       }
     }
-  super.moveSpecificStuff(attacker, defender, pb, mrb)
+
+    // Pass along what you got + moveIndex
+    val result = new MoveResultBuilder().moveIndex(index)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
   }
 }
 
@@ -517,7 +559,7 @@ trait OneHitKO extends Move {
     pb: Battle,
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val result = new MoveResultBuilder()
+    val result = new MoveResultBuilder().moveIndex(index)
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
       val damageToDeal = defender.currentHP

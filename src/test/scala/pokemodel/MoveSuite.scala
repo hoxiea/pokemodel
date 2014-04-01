@@ -551,4 +551,11 @@ class MoveSuite extends FunSuite {
     assert(result.KO)
     assert(!result.selfKO)
   }
+
+  // TODO: Test DoubleStrike trait
+  // TODO: Test LeechLife, especially with a substitute in place
+  // TODO: Test Twineedle, especially with a substitute in place
+  // TODO: Test SeismicToss
+  // TODO: Test SuperFang
+  // TODO: Test Counter: fast Pokemon goes second, Normal/Fighting attack, non-Normal/Fighting attack, substitute, etc.
 }
