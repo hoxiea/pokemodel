@@ -34,6 +34,7 @@ class DamageCalculator {
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
       val damageToDeal = chd min defender.currentHP
       new MoveResultBuilder()
+          .moveIndex(move.index)
           .damageDealt(damageToDeal)
           .critHit(true)
           .STAB(stabBonus(attacker, move) == 1.5)
@@ -43,6 +44,7 @@ class DamageCalculator {
       val rhd = calcRegularHitDamage(attacker, defender, move, battle)
       val damageToDeal = rhd min defender.currentHP
       new MoveResultBuilder()
+          .moveIndex(move.index)
           .damageDealt(damageToDeal)
           .critHit(false)
           .STAB(stabBonus(attacker, move) == 1.5)

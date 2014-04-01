@@ -17,9 +17,10 @@ import Type._
  */
 
 class MoveResult (
+  val moveIndex: Int,    // which move was used?
   val numTimesHit: Int,  // how many times did the move hit? usually 1
   val damageDealt: Int,  // how much damage was dealt (on the last hit)?
-  val hpGained: Int,  // how much HP did the user gain?
+  val hpGained: Int,     // how much HP did the user gain?
   val critHit: Boolean,  // did you get a critical hit?
   val STAB: Boolean,     // was there a STAB in play?
   val moveType: Type,        // what Type was the move? (Normal, Flying, etc.)
@@ -30,6 +31,7 @@ class MoveResult (
 
   override def toString: String = {
     val repr = new StringBuilder()
+    repr.append(s"moveIndex = $moveIndex\n")
     repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
     repr.append(s"hpGained = $hpGained\n")
@@ -46,6 +48,7 @@ class MoveResult (
 
 class MoveResultBuilder {
   // default values
+  var moveIndex = -1
   var damageDealt = 0
   var numTimesHit = 0
   var hpGained = 0
@@ -59,6 +62,7 @@ class MoveResultBuilder {
 
   val validTypeMults: Set[Double] = Set(0.0, 0.25, 0.5, 1.0, 2.0, 4.0)
 
+  def moveIndex(x: Int): MoveResultBuilder = { moveIndex = x ; this}
   def damageDealt(x: Int): MoveResultBuilder = { damageDealt = x ; this}
   def numTimesHit(x: Int): MoveResultBuilder = { numTimesHit = x ; this}
   def hpGained(x: Int): MoveResultBuilder = { hpGained = x ; this}
@@ -82,7 +86,7 @@ class MoveResultBuilder {
   def selfKO(k: Boolean): MoveResultBuilder = { selfKO = k ; this }
 
   def toMoveResult: MoveResult = {
-    new MoveResult(numTimesHit, damageDealt, hpGained, critHit, STAB, moveType,
+    new MoveResult(moveIndex, numTimesHit, damageDealt, hpGained, critHit, STAB, moveType,
       typeMult, statusChange, KO, selfKO)
   }
 
@@ -113,6 +117,7 @@ class MoveResultBuilder {
    * part of the MRB experience, for better or worse
    */
   def merge(other: MoveResultBuilder) {
+    moveIndex(moveIndex max other.moveIndex)
     damageDealt(damageDealt max other.damageDealt)
     numTimesHit(numTimesHit max other.numTimesHit)
     hpGained(hpGained max other.hpGained)
@@ -149,7 +154,10 @@ class MoveResultBuilder {
 
   override def toString: String = {
     val repr = new StringBuilder()
+    repr.append(s"moveIndex = $moveIndex\n")
     repr.append(s"damageDealt = $damageDealt\n")
+    repr.append(s"numTimesHit = $numTimesHit\n")
+    repr.append(s"hpGained = $hpGained\n")
     repr.append(s"critHit = $critHit\n")
     repr.append(s"STAB = $STAB\n")
     repr.append(s"typeMult = $typeMult\n")
