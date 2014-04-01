@@ -1,21 +1,17 @@
 There are 3 categories of moves: Physical, Special, and Status
 
 PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
-- Single-strike + potential stat change
-= Constrict: damage and 10% chance of lowering target's Speed stat by one level
-
-- Multi-strike + potentially cause status change
-= Twineedle: 2x attack, each 20% change of PSN
-
 - Multi-turn moves
 = Sky Attack: do nothing on turn it's used, then deal damage on next turn
 = Skull Bash: do nothing on turn it's used, then deal damage on next turn
 = Fly: disappear for a turn (affected by Bide, Swift, and Transform), then deal damage
 = Dig: disappear for a turn (affected by Bide, Swift, and Transform), then deal damage
+= Thrash: deal damage for 3-4 turns, user can't do anything else, then become confused
+
+- Partially Trapping moves
 = Bind: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
 = Wrap: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
 = Clamp: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
-= Thrash: deal damage for 3-4 turns, user can't do anything else, then become confused
 
 - Other weird stuff
 = Counter: wait until opponent attacks (low priority), then return twice damage dealt from certain types, WSSC
@@ -25,7 +21,6 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Explosion: deal damage, kill the user, halve the opponent's defenses, etc.
 = Self-Destruct: deal damage, kill the user, halve the opponent's defenses, etc.
 = Rage: deals damage, user can't do anything except Rage until faint or battle ends. Every time user is damaged by Attack or targeted by Disable, Attack stat increases one stage (multiple times for multi-strike attacks). Stops increasing Attack stage at +6, and doesn't boost Attack stat past 999
-    = Struggle: every Pokemon can use this if none of their other moves are usable, usually due to lack of PP. Struggle deals damage and user receives recoil damage equal to 1/2 damage dealt. Can get crit hits. Normal element, so Rock gets half damage and Ghost are unaffected, etc.
 
 
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
@@ -48,7 +43,7 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 
 - Weird Multi-Turn Moves
 = Fire Spin: 2-5 turns of damage, and traps the opponent
-= Petal Dance: inflict damage for 3-4 turns; unable to use another move or switch Pokemon while it's going. Then confused
+= Petal Dance: inflict damage for 3-4 turns; unable to use another move or switch Pokemon while it's going. Then confused (like Thrash)
 
 - Weird 2-Turn Moves
 Solar Beam: nothing on Move 1, then deal damage
@@ -73,17 +68,17 @@ STATUS MOVES (any type, don't deal damage directly):
 = Light Screen: double the user's Special when the opponent damages the user with a special move, WSSC
 
 - Change opponent's status
-    = Thunder Wave: paralyze
-    = Stun Spore: paralyze
-    = Glare: paralyze
-    = Confuse Ray: confusion, WSSC
-    = Supersonic: confusion, WSSC
-    = Sleep Powder: sleep
+= Thunder Wave: paralyze
+= Stun Spore: paralyze
+= Glare: paralyze
+= Confuse Ray: confusion, WSSC
+= Supersonic: confusion, WSSC
+= Sleep Powder: sleep
 = Spore: sleep
 = Lovely Kiss: sleep
 = Sing: sleep
-    = Hypnosis: sleep, WSSC
-    = Poison Gas: poison
+= Hypnosis: sleep, WSSC
+= Poison Gas: poison
 = PoisonPowder: poison
 = Toxic: badly poison, WSSC
 
