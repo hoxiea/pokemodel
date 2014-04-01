@@ -180,6 +180,21 @@ class RockThrow extends PhysicalMove with SingleStrike {
   override val accuracy = 0.65  // much higher in later generations
 }
 
+class Gust extends PhysicalMove with SingleStrike {
+  override val index = 16
+  override val power = 40
+  override val maxPP = 35
+  // (type1 == Flying) => SpecialMove in later generations
+  // accurary of 1.0
+}
+
+class TriAttack extends PhysicalMove with SingleStrike {
+  override val index = 161
+  override val power = 80
+  override val maxPP = 10
+  // Normal, accurary of 1.0
+}
+
 
 /* PHYSICAL, SINGLESTRIKE, WEIRD */
 class KarateChop extends PhysicalMove with SingleStrike {
