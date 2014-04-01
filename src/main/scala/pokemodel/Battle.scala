@@ -11,6 +11,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   val statManager = new BattleStatManager(team1, team2)
   val moveManager = new BattleMoveManager(team1, team2)
   val statusManager = new BattleStatusManager(team1, team2)
+  val moveHistory = new MoveHistory()
   val dc = new DamageCalculator()
 
   var time: Int = 0
