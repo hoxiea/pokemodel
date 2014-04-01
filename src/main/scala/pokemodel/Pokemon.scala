@@ -3,6 +3,15 @@ package pokemodel
 import scala.Array.canBuildFrom
 import scala.io.Source
 import Type._
+import TakeDamageResult._
+
+/*
+ * TODO: Overview of the Pokemon class.
+ *
+ * The only complicated thing about a Pokemon is that, by using the move
+ * Substitute, it can create a substitute, a sort of punching bag that absorbs
+ * damage until it "breaks."
+ */
 
 class Pokemon(builder : PokemonBuilder) {
   private val attackIV  = builder.attackIV
@@ -48,27 +57,46 @@ class Pokemon(builder : PokemonBuilder) {
   val special = builder.special
   val maxHP   = builder.maxHP
 
-  var currentHP = builder.currentHP
+  private var currHP = builder.currentHP
   var statusAilment : Option[StatusAilment] = builder.statusAilment
 
+  // Now we add substitute stuff
+  private var subHP: Option[Int] = None
+  def hasSub : Boolean = subHP.isDefined
+  private def resetSub() = { subHP = None }
 
   /* METHODS */
   def isAlive: Boolean = currentHP > 0
+  def currentHP(bypassSub: Boolean = false): Int = subHP match {
+    case Some(hp) => hp
+    case None => currHP
+  }
 
-  def takeDamage(damage : Int) {
+  def takeDamage(damage: Int, bypassSub: Boolean = false): TakeDamageResult = {
+    // If you have a substitute, it should absorb damage
     require(0 <= damage && damage <= currentHP,
         "Don't expect Pokemon.takeDamage to truncate for you!")
-    val newHP = currentHP - damage
-    assert(newHP >= 0)
-    currentHP = newHP
+    subHP match {
+      case Some(sHP) => {
+        if (sHP > damage) {
+          // CASE 1: SUB HAS ENOUGH HEALTH TO SURVIVE ATTACK; ABSORB HIT
+          subHP = Some(sHP - damage)
+          ALIVE
+        } else {
+          // CASE 2: SUB BREAKS
+          resetSub()
+          SUBKO
+        }
+      }
+      case None => {
+        // CASE 3: No substitute, just take the hit
+        currHP = currHP - damage
+        if (currHP > 0) ALIVE else KO
+      }
+    }
   }
 
-  def heal() {
-    currentHP = maxHP
-    statusAilment = None
-  }
-
-  def gainHP(amount : Int) { currentHP = maxHP min (currentHP + amount) }
+  def gainHP(amount : Int) { currHP = maxHP min (currHP + amount) }
 
   def getMove(index: Int): Option[Move] = {
     require(1 <= index && index <= 4, s"illegal index $index passed to getMove - $name($level)")

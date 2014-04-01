@@ -35,7 +35,9 @@ import BattleStat._
  * - KO
  * - subKO
  * - selfKO
-
+ *
+ * Or, if starting from scratch, provide all relevant quantities.
+ *
  * Another crucial operation on MoveResultBuilders is the ability to combine
  * them.  For example, a move like Thunder is implemented as something that's
  * both SingleStrike and StatusChange. So whatever happens with the

@@ -5,6 +5,7 @@ import Type._
 import MoveType._
 import BattleStat._
 import CritHitType._
+import TakeDamageResult._
 import scala.util.Random
 import Battle.{verbose=>VERBOSE}
 
@@ -185,17 +186,22 @@ trait SingleStrike extends Move {
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
       val result = pb.dc.calc(attacker, defender, this, pb)
-      defender.takeDamage(result.damageDealt)
+      val damageResult = defender.takeDamage(result.damageDealt)
 
       // Update result values
       // numTimesHit == 1, no hpGained, no statusAilments, no stat changes
-      result.KO(defender)
+      damageResult match {
+        case KO => { result.KO(true); assert(!(defender.isAlive)) }
+        case SUBKO => result.subKO(true)
+        case ALIVE => {}
+      }
 
       // Combine anything passed in from traits further to the right
       result.merge(mrb)
 
       // Pass at all along to the next trait/class
       super.moveSpecificStuff(attacker, defender, pb, result)
+
     } else {
       // Pass along what you got + moveIndex
       val missResult = new MoveResultBuilder().moveIndex(index)
@@ -214,52 +220,56 @@ class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
 
 
 trait ConstantDamage extends Move {
+  // Deal a given amount of damage, ignoring type effectiveness, STAB, etc.
   def damageAmount: Int
+
   abstract override def moveSpecificStuff(
       attacker: Pokemon,
       defender: Pokemon,
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    // println("Calling ConstantDamage's moveSpecificStuff")
-    /*
-     * A ConstantDamage attack can do the following things:
-     * - Deal Damage
-     * - KO
-     * - selfKO?
-     */
+    // In this case, we skip DamageCalculator, so we build a MRB from scratch
+    val result = new MoveResultBuilder().moveIndex(index)
 
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
       val damageToDeal = damageAmount min defender.currentHP
-      defender.takeDamage(damageToDeal)
+      val hitResult = defender.takeDamage(damageToDeal)
 
-      // Bypass DamageCalculator, so we have to do this stuff ourselves.
-      // Don't mutate mrb!
-      val result = new MoveResultBuilder()
-      result.moveIndex(index)
-      result.damageDealt(damageToDeal)
+      result.damageCalc(damageAmount)
       result.numTimesHit(1)
+      result.damageDealt(damageToDeal)
+
       // no crithits, STAB, moveType, typeMult, or statusChange for
       // ConstantDamage moves
-      result.KO(!defender.isAlive)
-      result.selfKO(!attacker.isAlive)
+      damageResult match {
+        case KO => { result.KO(true); assert(!(defender.isAlive)) }
+        case SUBKO => result.subKO(true)
+        case ALIVE => {}
+      }
+      result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
       // Pass along what you got + moveIndex
-      val missResult = new MoveResultBuilder().moveIndex(index)
-      missResult.merge(mrb)
-      super.moveSpecificStuff(attacker, defender, pb, missResult)
+      result.merge(mrb)
+      super.moveSpecificStuff(attacker, defender, pb, result)
     }
   }
 }
 
 
 trait Recoil extends Move {
-  // Take damage equal to some proportion of the damage dealt to the opponent,
-  // usually 25%. Because of the fact that the damage must be dealt before
-  // recoil can figure out how much damage to deal, Recoil should only be mixed
-  // in TO THE LEFT of SingleStrike
+  /*
+   * Take damage equal to some proportion of the damage dealt to the opponent,
+   * usually 25%. Because of the fact that the damage must be dealt before
+   * recoil can figure out how much damage to deal, Recoil should only be mixed
+   * in TO THE LEFT of SingleStrike
+   *
+   * Substitutes don't absorb recoil damage, so we bypass the substitute. And
+   * since we're going to be dealing damage directly to the underlying Pokemon,
+   * that's the quantity of HP we need to use to truncate
+   */
   def recoilProportion: Double
 
   abstract override def moveSpecificStuff(
@@ -268,29 +278,25 @@ trait Recoil extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    // println("Calling Recoil's moveSpecificStuff")
-    /*
-     * A Recoil just hurts the user itself, so we have to worry about
-     * - selfKO
-     */
-    // if (mrb.damageDealt == 0)
-    //   println("""|Recoil lacks damage in moveSpecificStuff - attack missed,
-    //              |unaffective movetype, or Recoil mixed in wrong""".stripMargin)
-    val damageToTake =
-      (mrb.damageDealt * recoilProportion).toInt min attacker.currentHP
-    attacker.takeDamage(damageToTake)
-    val result = new MoveResultBuilder()
-    result.selfKO(!attacker.isAlive)
-    result.merge(mrb)
-    super.moveSpecificStuff(attacker, defender, pb, result)
+    val bypassSub = true
+    val result = new MoveResultBuilder().moveIndex(index)
+    result.merge(mrb)  // need to know how much damage was dealt; don't mutate mrb!
+    val damageToTake = (result.damageDealt * recoilProportion).toInt min attacker.currentHP(bypassSub)
+    val damageResult = attacker.takeDamage(damageToTake, bypassSub)
+    assert(damageResult != SUBKO)  // recoil damage shouldn't touch sub!
+    if (damageResult == KO) {
+      result.selfKO(true)
+      assert(!attacker.isAlive)
+    }
+    super.moveSpecificStuff(attacker, defender, pb, result)  // already merged
   }
 }
 
 
-trait StatusChange extends Move {
+trait NonVolatileStatusChange extends Move {
   // Cause some kind of StatusAilment to the opponent, non-volatile or
   // volatile, with a probability that depends on the move
-  def statusAilmentToCause   : StatusAilment
+  def statusAilmentToCause   : NonVolatileStatusAilment
   def chanceOfCausingAilment : Double
   def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
 
@@ -299,34 +305,11 @@ trait StatusChange extends Move {
       defender: Pokemon,
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
     val result = new MoveResultBuilder().moveIndex(index)
     if (statusAilmentCaused) {
-      statusAilmentToCause match {
-        case (_ : NonVolatileStatusAilment) => {
-          if (pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
-            result.statusChange(statusAilmentToCause)
-          }
-        }
-        case (_ : CONFUSION) => {
-          if (pb.statusManager.tryToCauseConfusion(defender)) {
-            result.statusChange(statusAilmentToCause)
-          }
-        }
-        case (_ : FLINCH) => {
-          if (pb.statusManager.causeToFlinch(defender)) {
-            result.statusChange(statusAilmentToCause)
-          }
-        }
-        case (_ : PARTIALLYTRAPPED) => {
-          if (pb.statusManager.tryToPartiallyTrap(defender)) {
-            result.statusChange(statusAilmentToCause)
-          }
-        }
-        case (_ : SEEDED) => {
-          if (pb.statusManager.tryToSeed(defender)) {
-            result.statusChange(statusAilmentToCause)
-          }
-        }
+      if (pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
+        result.nvsa(statusAilmentToCause)
       }
     }
     result.merge(mrb)
@@ -334,7 +317,8 @@ trait StatusChange extends Move {
   }
 }
 
-class TestBurner extends SpecialMove with StatusChange {
+
+class TestBurner extends SpecialMove with NonVolatileStatusChange {
   override val index = 999
   override val type1 = Fire  // shouldn't be used
   override val power = 40    // shouldn't be used
@@ -345,7 +329,7 @@ class TestBurner extends SpecialMove with StatusChange {
   override def chanceOfCausingAilment = 1.0
 }
 
-class TestAsleep extends SpecialMove with StatusChange {
+class TestAsleep extends SpecialMove with NonVolatileStatusChange {
   override val index = 999
   override val type1 = Normal  // shouldn't be used
   override val power = 40      // shouldn't be used
@@ -356,6 +340,51 @@ class TestAsleep extends SpecialMove with StatusChange {
   override def chanceOfCausingAilment = 1.0  // always cause, for test purposes
 }
 
+
+trait VolatileStatusChange extends Move {
+  // Cause some kind of StatusAilment to the opponent, non-volatile or
+  // volatile, with a probability that depends on the move
+  def statusAilmentToCause   : VolatileStatusAilment
+  def chanceOfCausingAilment : Double
+  def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
+
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index)
+    if (statusAilmentCaused) {
+      statusAilmentToCause match {
+        case (_ : CONFUSION) => {
+          if (pb.statusManager.tryToCauseConfusion(defender)) {
+            result.vsa(statusAilmentToCause)
+          }
+        }
+        case (_ : FLINCH) => {
+          if (pb.statusManager.causeToFlinch(defender)) {
+            result.vsa(statusAilmentToCause)
+          }
+        }
+        case (_ : PARTIALLYTRAPPED) => {
+          if (pb.statusManager.tryToPartiallyTrap(defender)) {
+            result.vsa(statusAilmentToCause)
+          }
+        }
+        case (_ : SEEDED) => {
+          if (pb.statusManager.tryToSeed(defender)) {
+            result.vsa(statusAilmentToCause)
+          }
+        }
+      }
+    }
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+// TODO: Test VolatileStatusChange
 
 
 trait MultiStrike extends Move {

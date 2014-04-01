@@ -377,7 +377,7 @@ class LeechLife extends PhysicalMove {
 }
 
 /* PHYSICAL, SINGLE STRIKE + POTENTIAL STATUS CHANGE */
-class Bite extends PhysicalMove with SingleStrike with StatusChange {
+class Bite extends PhysicalMove with SingleStrike with VolatileStatusChange {
   override val index = 44
   override val power = 60
   override val maxPP = 25
@@ -385,7 +385,7 @@ class Bite extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.10
 }
 
-class BoneClub extends PhysicalMove with SingleStrike with StatusChange {
+class BoneClub extends PhysicalMove with SingleStrike with VolatileStatusChange {
   override val index = 125
   override val type1 = Ground
   override val power = 65
@@ -396,7 +396,7 @@ class BoneClub extends PhysicalMove with SingleStrike with StatusChange {
   // TODO: Bone Club cannot cause a target with a substitute to flinch.
 }
 
-class HyperFang extends PhysicalMove with SingleStrike with StatusChange {
+class HyperFang extends PhysicalMove with SingleStrike with VolatileStatusChange {
   override val index = 158
   override val power = 80
   override val maxPP = 15
@@ -405,7 +405,7 @@ class HyperFang extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.10
 }
 
-class LowKick extends PhysicalMove with SingleStrike with StatusChange {
+class LowKick extends PhysicalMove with SingleStrike with VolatileStatusChange {
   override val index = 67
   override val type1 = Fighting
   override val power = 50
@@ -415,7 +415,7 @@ class LowKick extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.30
 }
 
-class Headbutt extends PhysicalMove with SingleStrike with StatusChange {
+class Headbutt extends PhysicalMove with SingleStrike with VolatileStatusChange {
   override val index = 29
   override val power = 70
   override val maxPP = 15
@@ -423,7 +423,7 @@ class Headbutt extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.30
 }
 
-class Stomp extends PhysicalMove with SingleStrike with StatusChange {
+class Stomp extends PhysicalMove with SingleStrike with VolatileStatusChange {
   override val index = 23
   override val power = 65
   override val maxPP = 20
@@ -432,7 +432,7 @@ class Stomp extends PhysicalMove with SingleStrike with StatusChange {
   // TODO: Stomp cannot make a target with a substitute flinch.
 }
 
-class RollingKick extends PhysicalMove with SingleStrike with StatusChange {
+class RollingKick extends PhysicalMove with SingleStrike with VolatileStatusChange {
   override val index = 27
   override val type1 = Fighting
   override val power = 60
@@ -443,7 +443,7 @@ class RollingKick extends PhysicalMove with SingleStrike with StatusChange {
   // TODO: Rolling Kick cannot make a target with a substitute flinch.
 }
 
-class ThunderPunch extends PhysicalMove with SingleStrike with StatusChange {
+class ThunderPunch extends PhysicalMove with SingleStrike with NonVolatileStatusChange {
   override val index = 9
   override val type1 = Electric
   override val power = 75
@@ -452,7 +452,7 @@ class ThunderPunch extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.10
 }
 
-class IcePunch extends PhysicalMove with SingleStrike with StatusChange {
+class IcePunch extends PhysicalMove with SingleStrike with NonVolatileStatusChange {
   override val index = 8
   override val type1 = Ice
   override val power = 75
@@ -461,7 +461,7 @@ class IcePunch extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.10
 }
 
-class FirePunch extends PhysicalMove with SingleStrike with StatusChange {
+class FirePunch extends PhysicalMove with SingleStrike with NonVolatileStatusChange {
   override val index = 7
   override val type1 = Fire
   override val power = 75
@@ -470,7 +470,7 @@ class FirePunch extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.10
 }
 
-class Lick extends PhysicalMove with SingleStrike with StatusChange {
+class Lick extends PhysicalMove with SingleStrike with NonVolatileStatusChange {
   override val index = 122
   override val type1 = Ghost
   override val power = 20
@@ -479,7 +479,7 @@ class Lick extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.3
 }
 
-class BodySlam extends PhysicalMove with SingleStrike with StatusChange {
+class BodySlam extends PhysicalMove with SingleStrike with NonVolatileStatusChange {
   override val index = 34
   override val power = 85
   override val maxPP = 15
@@ -487,7 +487,7 @@ class BodySlam extends PhysicalMove with SingleStrike with StatusChange {
   override val chanceOfCausingAilment = 0.3
 }
 
-class PoisonSting extends PhysicalMove with SingleStrike with StatusChange {
+class PoisonSting extends PhysicalMove with SingleStrike with NonVolatileStatusChange {
   override val index = 40
   override val type1 = Poison
   override val power = 15
@@ -694,7 +694,7 @@ class SonicBoom extends SpecialMove with ConstantDamage {
   override def damageAmount = 20
 }
 
-class Thunder extends SpecialMove with SingleStrike with StatusChange {
+class Thunder extends SpecialMove with SingleStrike with NonVolatileStatusChange {
   override val index = 87
   override val type1 = Electric
   override val power = 110
