@@ -213,7 +213,6 @@ trait SingleStrike extends Move {
 
 class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
   override val index = 999
-  override val type1 = Normal
   override val power = 40
   override val maxPP = 20
 }
@@ -234,7 +233,7 @@ trait ConstantDamage extends Move {
 
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
-      val damageToDeal = damageAmount min defender.currentHP
+      val damageToDeal = damageAmount min defender.currentHP()
       val hitResult = defender.takeDamage(damageToDeal)
 
       result.damageCalc(damageAmount)
@@ -243,7 +242,7 @@ trait ConstantDamage extends Move {
 
       // no crithits, STAB, moveType, typeMult, or statusChange for
       // ConstantDamage moves
-      damageResult match {
+      hitResult match {
         case KO => { result.KO(true); assert(!(defender.isAlive)) }
         case SUBKO => result.subKO(true)
         case ALIVE => {}
@@ -415,7 +414,7 @@ trait MultiStrike extends Move {
       val damageEachStrike = result.damageDealt
 
       // Figure out what sequence of damages we should actually deal
-      val damageSeq = Utils.damageSeqCalc(numStrikes, damageEachStrike, defender.currentHP)
+      val damageSeq = Utils.damageSeqCalc(numStrikes, damageEachStrike, defender.currentHP())
       assert(damageSeq.last > 0, "damageSeqCalc fail")
 
       // Actually deal the damage in damageSeq
@@ -470,7 +469,7 @@ trait DoubleStrike extends Move {
        * Same deal as MultiStrike - at this point, we should figure out how much
        * damage we're going to deal on each hit, taking fainting into account
        */
-      val damageSeq = Utils.damageSeqCalc(numStrikes, damageEachStrike, defender.currentHP)
+      val damageSeq = Utils.damageSeqCalc(numStrikes, damageEachStrike, defender.currentHP())
       assert(damageSeq.last > 0, "damageSeqCalc fail")
 
       // Actually deal the damage in damageSeq
@@ -599,7 +598,7 @@ trait OneHitKO extends Move {
     val result = new MoveResultBuilder().moveIndex(index)
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
-      val damageToDeal = defender.currentHP
+      val damageToDeal = defender.currentHP()
       defender.takeDamage(damageToDeal)
 
       result.damageDealt(damageToDeal)
@@ -640,7 +639,7 @@ trait SingleStrikeLoseHPOnMiss extends Move {
 
     if (moveHits) {
       val result = pb.dc.calc(attacker, defender, this, pb)
-      defender.takeDamage(result.damageDealt min defender.currentHP)
+      defender.takeDamage(result.damageDealt min defender.currentHP())
 
       result.numTimesHit(1)
       // moveIndex, damageDealt, critHit, STAB, moveType, typeMult from calc
@@ -652,7 +651,7 @@ trait SingleStrikeLoseHPOnMiss extends Move {
 
     } else {
       // deal yourself damage, then record the result
-      attacker.takeDamage(hpToLoseOnMiss min attacker.currentHP)
+      attacker.takeDamage(hpToLoseOnMiss min attacker.currentHP())
       val missResult = new MoveResultBuilder().moveIndex(index)
       // all defaults are correct, except you need to check for selfKO
       missResult.selfKO(!attacker.isAlive)

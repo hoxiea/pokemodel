@@ -22,13 +22,13 @@ class PokemonSuite extends FunSuite {
   test("create Pokemon, limited health") {
     val pb = new PokemonBuilder("Pikachu", 50).currentHP(20)
     val p = new Pokemon(pb)
-    assert (p.currentHP == 20)
+    assert (p.currentHP() == 20)
   }
 
   test("PokemonBuilder.maxOut correctly updates currentHP to new maxHP") {
     val pb = new PokemonBuilder("Pikachu", 50).maxOut()
     val p = new Pokemon(pb)
-    assert (p.currentHP == p.maxHP)
+    assert (p.currentHP() == p.maxHP)
   }
 
   test("test base stats of Pikachu") {

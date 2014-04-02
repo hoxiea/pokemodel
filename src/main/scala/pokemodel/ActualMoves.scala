@@ -523,7 +523,7 @@ class Twineedle extends PhysicalMove {
       // In Gen 1, damage was calculated once and then used for each blow
       val result = pb.dc.calc(attacker, defender, this, pb)
       val damageEachStrike = result.damageDealt
-      val damageSeq = Utils.damageSeqCalc(numStrikes, damageEachStrike, defender.currentHP)
+      val damageSeq = Utils.damageSeqCalc(numStrikes, damageEachStrike, defender.currentHP())
       assert(damageSeq.last > 0, "damageSeqCalc fail")
 
       // We now diverge from MultiStrike and start stealing from StatusChange
@@ -603,7 +603,7 @@ class SeismicToss extends PhysicalMove {
         pb.statusManager.canBeHit(defender)) {
       // The damage is not altered by weakness, resistance, or immunity.
       // Seismic Toss doesn't receive STAB.
-      val damageToDeal = attacker.level min defender.currentHP
+      val damageToDeal = attacker.level min defender.currentHP()
       defender.takeDamage(damageToDeal)
 
       // Build an MRB from scratch
@@ -639,7 +639,7 @@ class SuperFang extends PhysicalMove {
         pb.statusManager.canBeHit(defender)) {
       // The damage is not altered by weakness, resistance, or immunity.
       // Doesn't receive STAB.
-      val damageToDeal = (defender.currentHP / 2) max 1
+      val damageToDeal = (defender.currentHP() / 2) max 1
       defender.takeDamage(damageToDeal)
 
       // Build an MRB from scratch, since we skipped damage calculator

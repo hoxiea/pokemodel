@@ -33,6 +33,7 @@ class MoveSuite extends FunSuite {
     val trainer2 = new UseFirstAvailableMove(team2)
     val battle = new Battle(trainer1, trainer2)
     val result = charizard.useMove(1, venusaur, battle)
+
     // used calculators for these values
     if (!result.critHit) {
       assert (29 <= result.damageDealt, s"reg damage ${result.damageDealt} too low")
@@ -44,10 +45,11 @@ class MoveSuite extends FunSuite {
     assert (result.numTimesHit == 1, "numTimesHit")
     assert (result.STAB == false, "stab")
     assert (result.typeMult == 1.0, "typeMult")
-    assert (result.statusChange.isEmpty, "statusChange")
+    assert (result.nvsa.isEmpty, "nvsa")
+    assert (result.vsa.isEmpty, "vsa")
     assert (result.KO == false, "KO")
     assert (result.selfKO == false, "selfKO")
-    assert (venusaur.currentHP == venusaur.maxHP - result.damageDealt, "opponent HP")
+    assert (venusaur.currentHP() == venusaur.maxHP - result.damageDealt, "opponent HP")
   }
 
   test("Trying TestPhysicalSingleStrike, Power80") {
@@ -76,10 +78,11 @@ class MoveSuite extends FunSuite {
     }
     assert (result.STAB == false, "stab")
     assert (result.typeMult == 1.0, "typeMult")
-    assert (result.statusChange.isEmpty, "statusChange")
+    assert (result.nvsa.isEmpty, "nvsa")
+    assert (result.vsa.isEmpty, "vsa")
     assert (result.KO == false, "KO")
     assert (result.selfKO == false, "selfKO")
-    assert (venusaur.currentHP == venusaur.maxHP - result.damageDealt, "opponent HP")
+    assert (venusaur.currentHP() == venusaur.maxHP - result.damageDealt, "opponent HP")
   }
 
   test("Trying TestPhysicalSingleStrike, Power120") {
@@ -106,10 +109,11 @@ class MoveSuite extends FunSuite {
     }
     assert (result.STAB == false, "stab")
     assert (result.typeMult == 1.0, "typeMult")
-    assert (result.statusChange.isEmpty, "statusChange")
+    assert (result.nvsa.isEmpty, "nvsa")
+    assert (result.vsa.isEmpty, "vsa")
     assert (result.KO == false, "KO")  // venusaur has 363 HP
     assert (result.selfKO == false, "selfKO")
-    assert (venusaur.currentHP == venusaur.maxHP - result.damageDealt)
+    assert (venusaur.currentHP() == venusaur.maxHP - result.damageDealt)
   }
 
   test("Trying TestPhysicalSingleStrike: Power120 + Fire + Weak Opponent = KO!") {
@@ -132,7 +136,8 @@ class MoveSuite extends FunSuite {
     assert (result.damageDealt == venusaur.maxHP, "damageDealt didn't equal Venusaur's maxHP")
     assert (result.STAB == true, "stab")  // Charizard is Type1 Fire
     assert (result.typeMult == 2.0, "typeMult")  // Fire is super effective against Plant
-    assert (result.statusChange.isEmpty, "statusChange")
+    assert (result.nvsa.isEmpty, "nvsa")
+    assert (result.vsa.isEmpty, "vsa")
     assert (result.KO == true, "KO")  // venusaur has 222 HP
     assert (result.selfKO == false, "selfKO")
   }
@@ -152,7 +157,8 @@ class MoveSuite extends FunSuite {
     assert (result.damageDealt == 40, "damageDealt")
     assert (result.STAB == false, "stab")
     assert (result.typeMult == 1.0, "typeMult")
-    assert (result.statusChange.isEmpty, "statusChange")
+    assert (result.nvsa.isEmpty, "nvsa")
+    assert (result.vsa.isEmpty, "vsa")
     assert (result.KO == false, "KO")
     assert (result.selfKO == false, "selfKO")
   }
@@ -184,8 +190,8 @@ class MoveSuite extends FunSuite {
     val battle = new Battle(trainer1, trainer2)
 
     val result = dragonite.useMove(1, p2, battle)
-    assert(p2.currentHP == p2.maxHP - result.damageDealt)
-    assert(dragonite.maxHP - dragonite.currentHP == result.damageDealt / 2)
+    assert(p2.currentHP() == p2.maxHP - result.damageDealt)
+    assert(dragonite.maxHP - dragonite.currentHP() == result.damageDealt / 2)
   }
 
   test("Struggle: only receive 50% of damage DEALT, not damage calculated") {
@@ -207,7 +213,7 @@ class MoveSuite extends FunSuite {
     val result = dragonite.useMove(1, p2, battle)
     if (result.damageDealt > 0) {
       assert(!p2.isAlive, "opponent")
-      assert(dragonite.maxHP - dragonite.currentHP == opponentHP / 2, "self")
+      assert(dragonite.maxHP - dragonite.currentHP() == opponentHP / 2, "self")
     }
   }
 
@@ -241,14 +247,14 @@ class MoveSuite extends FunSuite {
     // Ghost, do this first so that Dragonite doesn't lose HP
     val result1 = dragonite.useMove(1, gengar, battle)
     assert(result1.typeMult == 0.0)
-    assert(gengar.currentHP == gengar.maxHP)
-    assert(dragonite.currentHP == dragonite.maxHP)
+    assert(gengar.currentHP() == gengar.maxHP)
+    assert(dragonite.currentHP() == dragonite.maxHP)
 
     // Rock - geodude
     val result2 = dragonite.useMove(1, geodude, battle)
     assert(result2.typeMult == 0.5)
-    assert(geodude.currentHP == geodude.maxHP - result2.damageDealt)
-    assert(dragonite.maxHP - dragonite.currentHP == result2.damageDealt / 2)
+    assert(geodude.currentHP() == geodude.maxHP - result2.damageDealt)
+    assert(dragonite.maxHP - dragonite.currentHP() == result2.damageDealt / 2)
   }
 
   test("Test StatusChange - BRN") {
@@ -309,7 +315,7 @@ class MoveSuite extends FunSuite {
     val trainer2 = new UseFirstAvailableMove(team2)
     val battle = new Battle(trainer1, trainer2)
     val result = charizard.useMove(1, venusaur, battle)
-    assert(venusaur.maxHP - venusaur.currentHP == result.numTimesHit * result.damageDealt)
+    assert(venusaur.maxHP - venusaur.currentHP() == result.numTimesHit * result.damageDealt)
   }
 
   test("Basic Multistrike attack, defender dies on first strike") {
@@ -465,7 +471,7 @@ class MoveSuite extends FunSuite {
     // I left the print statements in place so that my big comment above makes
     // more sense. But if smaller values are failing to overwrite larger ones,
     // we won't always have...
-    assert(result1.damageDealt + result2.damageDealt == venusaur.maxHP - venusaur.currentHP)
+    assert(result1.damageDealt + result2.damageDealt == venusaur.maxHP - venusaur.currentHP())
   }
 
 

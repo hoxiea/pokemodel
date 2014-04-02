@@ -113,29 +113,30 @@ class MoveResultBuilder {
 
   private val validTypeMults: Set[Double] = Set(0.0, 0.25, 0.5, 1.0, 2.0, 4.0)
 
-  // Methods to mutate things
+  // Setters
   def moveIndex(x: Int): MoveResultBuilder = {
-    require(1 <= x && x <= 165)
+    require((1 <= x && x <= 165) || x == 999,  // 999 is the TestMove index
+      "MRB.moveIndex")
     moveIndex = x
     this
   }
   def damageCalc(x: Int): MoveResultBuilder = {
-    require(x >= 0)
-    damageDealt = x
+    require(x >= 0, "MRB.damageCalc")
+    damageCalc = x
     this
   }
   def numTimesHit(x: Int): MoveResultBuilder = {
-    require(x >= 0)
+    require(x >= 0, "MRB.numTimesHit")
     numTimesHit = x
     this
   }
   def damageDealt(x: Int): MoveResultBuilder = {
-    require(x >= 0)
+    require(x >= 0, "MRB.damageDealt")
     damageDealt = x
     this
   }
   def hpGained(x: Int): MoveResultBuilder = {
-    require(x >= 0)
+    require(x >= 0, "MRB.hpGained")
     hpGained = x
     this
   }
@@ -277,21 +278,26 @@ class MoveResultBuilder {
     KO(KO         || other.KO)
     subKO(subKO   || other.subKO)
     selfKO(selfKO || other.selfKO)
-
-
-
   }
 
   override def toString: String = {
     val repr = new StringBuilder()
     repr.append(s"moveIndex = $moveIndex\n")
-    repr.append(s"damageDealt = $damageDealt\n")
+    repr.append(s"damageCalc = $damageCalc\n")
     repr.append(s"numTimesHit = $numTimesHit\n")
+    repr.append(s"damageDealt = $damageDealt\n")
     repr.append(s"hpGained = $hpGained\n")
     repr.append(s"critHit = $critHit\n")
     repr.append(s"STAB = $STAB\n")
     repr.append(s"typeMult = $typeMult\n")
+    repr.append(s"nvsa = $nvsa\n")
+    repr.append(s"vsa = $vsa\n")
+    repr.append(s"selfStat = $selfStat\n")
+    repr.append(s"selfStatAmount = $selfStatAmount\n")
+    repr.append(s"enemyStat = $enemyStat\n")
+    repr.append(s"enemyStatAmount = $enemyStatAmount\n")
     repr.append(s"KO = $KO\n")
+    repr.append(s"subKO = $subKO\n")
     repr.append(s"selfKO = $selfKO\n")
     repr.toString()
   }

@@ -39,16 +39,17 @@ class DamageCalculator {
                     .typeMult(calculateTypeMultiplier(move.type1, defender))
 
     if (Random.nextDouble < criticalChance) {
+      // CRITICAL HIT
+      result.critHit(true)
+
       // Calculate how much the critical hit could do - MRB.damageCalc
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
       result.damageCalc(chd)
 
       // Calculate how much damage the Pokemon should actually deal - MRB.damageDealt
-      val damageToDeal = chd min defender.currentHP
+      val damageToDeal = chd min defender.currentHP()
       result.damageDealt(damageToDeal)
 
-      // Will dealing damageToDeal KO the opponent?
-      result.KO(defender.currentHP <= damageToDeal)
       result
 
     } else {
@@ -57,11 +58,9 @@ class DamageCalculator {
       result.damageCalc(rhd)
 
       // Calculate how much damage the Pokemon should actually deal - MRB.damageDealt
-      val damageToDeal = rhd min defender.currentHP
+      val damageToDeal = rhd min defender.currentHP()
       result.damageDealt(damageToDeal)
 
-      // Will dealing damageToDeal KO the opponent?
-      result.KO(defender.currentHP <= damageToDeal)
       result
     }
   }

@@ -62,19 +62,45 @@ class Pokemon(builder : PokemonBuilder) {
 
   // Now we add substitute stuff
   private var subHP: Option[Int] = None
+  def tryToMakeSub(): Boolean = {
+    if (subHP.isDefined) {
+      throw new Exception(s"$name tried to create a sub, but it already has one!")
+    }
+
+    val success =
+      if (currentHP() < maxHP / 4)
+        false  // not enough HP to make Substitute
+      else if (currentHP() == maxHP / 4) {
+        // In Gen 1, you faint if you make a Sub with exactly 25% of HP
+        currHP = 0
+        false
+      } else {
+      val hpToLose =
+        if (maxHP <= 3) 0
+        else maxHP / 4
+
+      val hpToGain = hpToLose + 1
+      subHP = Some(hpToGain)
+      true
+      }
+    success
+  }
   def hasSub : Boolean = subHP.isDefined
   private def resetSub() = { subHP = None }
 
   /* METHODS */
-  def isAlive: Boolean = currentHP > 0
-  def currentHP(bypassSub: Boolean = false): Int = subHP match {
-    case Some(hp) => hp
-    case None => currHP
+  def isAlive: Boolean = currHP > 0
+  def currentHP(bypassSub: Boolean = false): Int = {
+    if (bypassSub) currHP
+    else subHP match {
+      case Some(hp) => hp
+      case None => currHP
+    }
   }
 
   def takeDamage(damage: Int, bypassSub: Boolean = false): TakeDamageResult = {
     // If you have a substitute, it should absorb damage
-    require(0 <= damage && damage <= currentHP,
+    require(0 <= damage && damage <= currentHP(),
         "Don't expect Pokemon.takeDamage to truncate for you!")
     subHP match {
       case Some(sHP) => {
@@ -97,6 +123,16 @@ class Pokemon(builder : PokemonBuilder) {
   }
 
   def gainHP(amount : Int) { currHP = maxHP min (currHP + amount) }
+
+  def heal() {
+    currHP = maxHP
+    subHP = None
+    statusAilment = None
+    if (move1.isDefined) pp1 = Some(move1.get.maxPP)
+    if (move2.isDefined) pp2 = Some(move2.get.maxPP)
+    if (move3.isDefined) pp3 = Some(move3.get.maxPP)
+    if (move4.isDefined) pp4 = Some(move4.get.maxPP)
+  }
 
   def getMove(index: Int): Option[Move] = {
     require(1 <= index && index <= 4, s"illegal index $index passed to getMove - $name($level)")
@@ -206,17 +242,24 @@ class Pokemon(builder : PokemonBuilder) {
   /* NICETIES */
   private def checkConsistency {
     assert(1 <= index && index <= 165)
-    assert(0 <= currentHP && currentHP <= maxHP)
+    assert(0 <= currHP && currHP <= maxHP)
 
     // Check that moves that exist have existing PPs, and that non-existant moves don't
-
-
+    if (pp1.isDefined) assert(move1.isDefined)
+    if (pp2.isDefined) assert(move2.isDefined)
+    if (pp3.isDefined) assert(move3.isDefined)
+    if (pp4.isDefined) assert(move4.isDefined)
+    if (move1.isDefined) assert(pp1.isDefined)
+    if (move2.isDefined) assert(pp2.isDefined)
+    if (move3.isDefined) assert(pp3.isDefined)
+    if (move4.isDefined) assert(pp4.isDefined)
   }
+
   private def allInfoString : String = {
     val repr = new StringBuilder()
     repr.append(s"$name, level $level\n")
     repr.append(s"Type1 = $type1, Type2 = $type2\n")
-    repr.append(s"HP = $currentHP / $maxHP, Status = $statusAilment\n")
+    repr.append(s"HP = $currHP / $maxHP, Status = $statusAilment\n")
     repr.append(s"A|D|Spd|Spcl = $attack $defense $speed $special\n")
     repr.append(s"IV (A|D|Spd|Spcl|HP) = $attackIV $defenseIV $speedIV $specialIV $hpIV\n")
     repr.append(s"EV (A|D|Spd|Spcl|HP) = $attackEV $defenseEV $speedEV $specialEV $hpEV\n")
@@ -227,7 +270,8 @@ class Pokemon(builder : PokemonBuilder) {
   private def basicInfoString : String = {
     val repr = new StringBuilder()
     repr.append(s"$name, level $level\n")
-    repr.append(s"HP = $currentHP / $maxHP, Status = $statusAilment\n")
+    if (hasSub) repr.append(s"subHP = ${currentHP()}\n")
+    repr.append(s"HP = $currHP / $maxHP, Status = $statusAilment\n")
     repr.toString()
   }
 
