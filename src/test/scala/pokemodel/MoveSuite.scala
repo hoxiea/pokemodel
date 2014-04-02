@@ -558,6 +558,24 @@ class MoveSuite extends FunSuite {
     assert(!result.selfKO)
   }
 
+  test("OneHitKO: break substitute?") {
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, new TestOneHitKO)
+    val charizard = new Pokemon(pb1)
+    val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+    val venusaur = new Pokemon(pb2)
+    val team1 = new PokemonTeam(charizard)
+    val team2 = new PokemonTeam(venusaur)
+    val trainer1 = new UseFirstAvailableMove(team1)
+    val trainer2 = new UseFirstAvailableMove(team2)
+    val battle = new Battle(trainer1, trainer2)
+
+    assert(venusaur.tryToMakeSub())
+    val result = charizard.useMove(1, venusaur, battle)  // hit
+    assert(result.numTimesHit == 1)
+    assert(!result.KO)
+    assert(!result.selfKO)
+    assert(result.subKO)
+  }
   // TODO: Test DoubleStrike trait
   // TODO: Test LeechLife, especially with a substitute in place
   // TODO: Test Twineedle, especially with a substitute in place

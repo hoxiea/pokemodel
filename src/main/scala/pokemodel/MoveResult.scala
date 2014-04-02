@@ -26,7 +26,7 @@ import BattleStat._
  * - moveType
  * - typeMult
  *
- * That means a move/trait should modify any of the following as needed:
+ * That means a move/trait that uses DC should modify the following as needed:
  * - numTimesHit if it's != 1
  * - hpGained
  * - nvsa / vsa
