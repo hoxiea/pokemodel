@@ -203,8 +203,8 @@ trait SingleStrike extends Move {
       super.moveSpecificStuff(attacker, defender, pb, result)
 
     } else {
-      // Pass along what you got + moveIndex
-      val missResult = new MoveResultBuilder().moveIndex(index)
+      // Pass along what you got + moveIndex + moveType
+      val missResult = new MoveResultBuilder().moveIndex(index).moveType(type1)
       missResult.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
@@ -229,7 +229,7 @@ trait ConstantDamage extends Move {
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
     // In this case, we skip DamageCalculator and build a MRB from scratch
-    val result = new MoveResultBuilder().moveIndex(index)
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
 
     // Add the effects of hitting if necessary
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
@@ -277,7 +277,7 @@ trait Recoil extends Move {
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
     val bypassSub = true
-    val result = new MoveResultBuilder().moveIndex(index)
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     result.merge(mrb)  // need to know how much damage was dealt; don't mutate mrb!
     val damageToTake = (result.damageDealt * recoilProportion).toInt min attacker.currentHP(bypassSub)
     val damageResult = attacker.takeDamage(damageToTake, bypassSub)
@@ -304,7 +304,7 @@ trait NonVolatileStatusChange extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val result = new MoveResultBuilder().moveIndex(index)
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if (statusAilmentCaused) {
       if (pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
         result.nvsa(statusAilmentToCause)
@@ -353,7 +353,7 @@ trait VolatileStatusChange extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val result = new MoveResultBuilder().moveIndex(index)
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if (statusAilmentCaused) {
         result.numTimesHit(1)
         statusAilmentToCause match {
@@ -436,7 +436,7 @@ trait MultiStrike extends Move {
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
       // Miss, pass along what you got + moveIndex without mutating mrb
-      val missResult = new MoveResultBuilder().moveIndex(index)
+      val missResult = new MoveResultBuilder().moveIndex(index).moveType(type1)
       missResult.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
@@ -489,7 +489,7 @@ trait DoubleStrike extends Move {
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
       // Pass along what you got + moveIndex
-      val missResult = new MoveResultBuilder().moveIndex(index)
+      val missResult = new MoveResultBuilder().moveIndex(index).moveType(type1)
       missResult.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
@@ -508,7 +508,7 @@ trait SelfStatChange extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val result = new MoveResultBuilder().moveIndex(index)
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if (pb.statManager.canChangeOwnStats(attacker, pb)) {
       statToChange match {
         case ATTACK   => pb.statManager.changeAttackStage(attacker, amountToChangeBy)
@@ -557,7 +557,7 @@ trait EnemyStatChange extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val result = new MoveResultBuilder().moveIndex(index)
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if (statChangeHits &&
         pb.statManager.canChangeDefenderStats(attacker, defender, pb)) {
       statToChange match {
@@ -603,16 +603,20 @@ trait OneHitKO extends Move {
     pb: Battle,
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val result = new MoveResultBuilder().moveIndex(index)
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
       val damageToDeal = defender.currentHP()
-      defender.takeDamage(damageToDeal)
+      val damageResult = defender.takeDamage(damageToDeal)
 
-      result.damageDealt(damageToDeal)
-      result.KO(!defender.isAlive)
-      result.moveType(type1)
+      result.damageCalc(damageToDeal)
       result.numTimesHit(1)
+      result.damageDealt(damageToDeal)
+      damageResult match {
+        case KO => { result.KO(true); assert(!(defender.isAlive)) }
+        case SUBKO => result.subKO(true)
+        case ALIVE => {}
+      }
       result.merge(mrb)
     }
     super.moveSpecificStuff(attacker, defender, pb, result)
@@ -630,7 +634,7 @@ trait SingleStrikeLoseHPOnMiss extends Move {
   def hpToLoseOnMiss: Int
   def typesMissAgainst: Set[Type]
 
-  // TODO: If there's a substitute and you hit, break the substitute
+  // TODO: Does the Pokemon or the substitute take the HP hit if you miss?
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
@@ -647,22 +651,29 @@ trait SingleStrikeLoseHPOnMiss extends Move {
 
     if (moveHits) {
       val result = pb.dc.calc(attacker, defender, this, pb)
-      defender.takeDamage(result.damageDealt min defender.currentHP())
+      val damageResult = defender.takeDamage(result.damageDealt)
 
-      result.numTimesHit(1)
       // moveIndex, damageDealt, critHit, STAB, moveType, typeMult from calc
-      result.KO(!defender.isAlive)
-      result.moveType(type1)
+      damageResult match {
+        case KO => { result.KO(true); assert(!(defender.isAlive)) }
+        case SUBKO => result.subKO(true)
+        case ALIVE => {}
+      }
       result.merge(mrb)
       // hpGained, statusChange, selfKO irrelevant
       super.moveSpecificStuff(attacker, defender, pb, result)
 
     } else {
       // deal yourself damage, then record the result
-      attacker.takeDamage(hpToLoseOnMiss min attacker.currentHP())
-      val missResult = new MoveResultBuilder().moveIndex(index)
+      val missResult = new MoveResultBuilder().moveIndex(index).moveType(type1)
+
+      val damageResult = attacker.takeDamage(hpToLoseOnMiss min attacker.currentHP())
       // all defaults are correct, except you need to check for selfKO
-      missResult.selfKO(!attacker.isAlive)
+      damageResult match {
+        case KO => { missResult.selfKO(true); assert(!(attacker.isAlive)) }
+        case SUBKO => {}
+        case ALIVE => {}
+      }
       missResult.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
