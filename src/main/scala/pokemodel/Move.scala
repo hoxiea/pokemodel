@@ -557,6 +557,7 @@ trait EnemyStatChange extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
+    val result = new MoveResultBuilder().moveIndex(index)
     if (statChangeHits &&
         pb.statManager.canChangeDefenderStats(attacker, defender, pb)) {
       statToChange match {
@@ -567,10 +568,10 @@ trait EnemyStatChange extends Move {
         case ACCURACY => pb.statManager.changeAccuracyStage(defender, amountToChangeBy)
         case EVASION  => pb.statManager.changeEvasionStage(defender, amountToChangeBy)
       }
+      result.addEnemyStat(statToChange, amountToChangeBy)
     }
 
     // Pass along what you got + moveIndex
-    val result = new MoveResultBuilder().moveIndex(index)
     result.merge(mrb)
     super.moveSpecificStuff(attacker, defender, pb, result)
   }
