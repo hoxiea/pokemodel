@@ -508,6 +508,7 @@ trait SelfStatChange extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
+    val result = new MoveResultBuilder().moveIndex(index)
     if (pb.statManager.canChangeOwnStats(attacker, pb)) {
       statToChange match {
         case ATTACK   => pb.statManager.changeAttackStage(attacker, amountToChangeBy)
@@ -517,10 +518,10 @@ trait SelfStatChange extends Move {
         case ACCURACY => pb.statManager.changeAccuracyStage(attacker, amountToChangeBy)
         case EVASION  => pb.statManager.changeEvasionStage(attacker, amountToChangeBy)
       }
+      result.addSelfStat(statToChange, amountToChangeBy)
     }
 
     // Pass along what you got + moveIndex
-    val result = new MoveResultBuilder().moveIndex(index)
     result.merge(mrb)
     super.moveSpecificStuff(attacker, defender, pb, result)
   }
