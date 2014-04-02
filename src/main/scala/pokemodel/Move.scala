@@ -10,10 +10,68 @@ import scala.util.Random
 import Battle.{verbose=>VERBOSE}
 
 /*
- * TODO: Overview of the final version of the Move design goes here
- * Ideally, something about stackable traits with a MoveResultBuilder that gets
- * passed up and appended as it goes, until it's converted to a MoveResult by
- * either PhysicalMove, SpecialMove, or StatusMove
+ * The Move hierarchy is as follows:
+ *                       Move
+ *                     /   |   \
+ *                    /    |    \
+ *                   /     |     \
+ *           Physical   Special   Status
+ *
+ * Physical moves use the Attack stat of attacker and Defense stat of defender
+ * Special moves use the Special stat of attacker and Special stat of defender
+ * Status moves ignore stats and typically do pretty weird stuff
+ *
+ * There are 165 moves that Pokemon can learn and use in Generation 1.
+ *
+ * Many moves have things in common. For example, there are 21 Physical moves
+ * and 5 Special moves that just deal damage. There are a bunch of both
+ * Physical and Special moves that deal damage and, if they hit, have some
+ * chance of causing a status ailment. There are also a bunch of both Physical
+ * and Special moves that deal damage and, if they hit, have some chance of
+ * causing a battlestat change. This suggests we should be able to use object-
+ * oriented techniques to cut down on code reuse and increase maintainability.
+ *
+ * My inital attempt was to subclass Physical, Special, and Status into things
+ * like PhysicalSingleStrike, SpecialSingleStrikeStatusChange, and so on. But
+ * that led to code duplication: the SingleStrike logic appeared in
+ * PhysicalSingleStrike, SpecialSingleStrike, SpecialSingleStrikeStatusChange,
+ * and so on.
+ *
+ * I then stumbled upon the idea of stacking traits: for each behavior that I
+ * needed to capture (SingleStrike, MultiStrike, StatusChange, OneHitKO, etc.),
+ * I could encapsulate that behavior's logic in a single trait that all moves
+ * of that type could mixin.
+ *
+ * This works quite elegantly, as long as you're careful about the order in
+ * which you mix in traits. For example, every move that causes recoil damage
+ * in this game has two common components to it: SingleStrike, and Recoil.
+ * And every recoil move deals recoil damage as a function of the amount of
+ * damage dealt to the other Pokemon. So before the Recoil trait can deduct
+ * HP from the attacker, it has to know how much damage was dealt to the enemy.
+ * That's why all recoil Moves defined in ActualMoves are of the forms:
+ * class MyRecoilMove extends PhysicalMove with Recoil with SingleStrike
+ * class MyRecoilMove extends SpecialMove  with Recoil with SingleStrike
+ * The SingleStrike does its thing, records how much damage it dealt, and
+ * then passes that left to Recoil, which can then act accordingly.
+ *
+ * As another example of trait ordering being important, consider something
+ * like Thunder, which deals damage in one strike and has the chance of
+ * paralyzing the enemy. The paralysis is only considered if the attack hits,
+ * so SingleStrike should do its thing before StatusChange does, and StatusChange
+ * needs to check and make sure that numTimesHit != 0 before even thinking about
+ * generating a random number and causing PAR.
+ *
+ * Anyway, with a handful of traits that are arranged carefully, it's possible
+ * to implement
+ * TODO: how many moves are just clever combinations of traits?
+ * out of 165 Moves with just a few lines of code each.
+ *
+ * This file starts by defining what a Move is. It then defines the three
+ * subclasses in the diagram above, making sure to give default values as per
+ * the Stacking Traits Pattern. And finally, a bunch of traits each capture one
+ * piece of useful logic that multiple moves can take advantage of.
+ *
+ * For the actual instantiation of the 165 Moves, see ActualMoves.scala.
  */
 
 // TODO: Any move that can cause a stat change to opponent needs to make sure that the opponent's stats can change via the battle's statManager
@@ -596,7 +654,6 @@ class TestDecreaseEnemyAttack extends StatusMove with EnemyStatChange {
 
 
 trait OneHitKO extends Move {
-  // TODO: If there's a substitute and you hit, break the substitute
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,

@@ -6,10 +6,11 @@ import scala.collection.mutable
 import scala.util.Random
 
 /*
- * Protip: If you pass String.split a double-quoted string, then it treats that as a regex
- * And if your splitting character happens to be |, then "|" is actually the regex for
- * "nothing or nothing", which matches everything. That's why we use single-quotes for the
- * pipe split below: single-quotes capture a character literal
+ * Protip: If you pass String.split a double-quoted string, then it treats that
+ * as a regex And if your splitting character happens to be |, then "|" is
+ * actually the regex for "nothing or nothing", which matches everything.
+ * That's why we use single-quotes for the pipe split below: single-quotes
+ * capture a character literal
  */
 
 object LearnsetData {
