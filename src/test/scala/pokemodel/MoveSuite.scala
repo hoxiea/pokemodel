@@ -578,6 +578,7 @@ class MoveSuite extends FunSuite {
   }
 
   // TODO: Test every Move trait, using the descriptions of the move's behavior as spec instead of code
+  // TODO: Test every combination of Move trait that appears in ActualMoves
   // TODO: Test every hand-rolled Move moveSpecificStuff, using move's behavior as spec instead of code
   // TODO: Test SingleStrike requiredStatusAilments, for example that DreamEater only succeeds when the opponent is asleep
 }

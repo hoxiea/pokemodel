@@ -1,7 +1,4 @@
-/* STATUS MOVES */
-
 // STATUSMOVES that change the opponent's stats
-// TODO: Make sure that the opponent's stats can actually be changed!
 class StringShot extends StatusChangeDefenderStats {
   override val index = 81
   override val accuracy = .95          // in [0.0, 1.0]
@@ -13,7 +10,6 @@ class StringShot extends StatusChangeDefenderStats {
 
 class SandAttack extends StatusChangeDefenderStats {
   override val index = 28
-  override val type1 = Normal  // changed in later Gens
   override val maxPP = 15
   override val statToChange = ACCURACY
   override val amount = -1
@@ -21,7 +17,6 @@ class SandAttack extends StatusChangeDefenderStats {
 
 class Flash extends StatusChangeDefenderStats {
   override val index = 148
-  override val type1 = Normal
   override val maxPP = 20
   override val accuracy = 0.7
   override val statToChange = ACCURACY
@@ -30,7 +25,6 @@ class Flash extends StatusChangeDefenderStats {
 
 class SmokeScreen extends StatusChangeDefenderStats {
   override val index = 108
-  override val type1 = Normal
   override val maxPP = 20
   override val statToChange = ACCURACY
   override val amount = -1
@@ -47,7 +41,6 @@ class Kinesis extends StatusChangeDefenderStats {
 
 class Growl extends StatusChangeDefenderStats {
   override val index = 45
-  override val type1 = Normal
   override val maxPP = 40
   override val statToChange = ATTACK
   override val amount = -1
@@ -55,7 +48,6 @@ class Growl extends StatusChangeDefenderStats {
 
 class Leer extends StatusChangeDefenderStats {
   override val index = 43
-  override val type1 = Normal
   override val maxPP = 30
   override val statToChange = DEFENSE
   override val amount = -1
@@ -63,7 +55,6 @@ class Leer extends StatusChangeDefenderStats {
 
 class TailWhip extends StatusChangeDefenderStats {
   override val index = 39
-  override val type1 = Normal
   override val maxPP = 30
   override val statToChange = DEFENSE
   override val amount = -1
@@ -71,7 +62,6 @@ class TailWhip extends StatusChangeDefenderStats {
 
 class Screech extends StatusChangeDefenderStats {
   override val index = 103
-  override val type1 = Normal
   override val maxPP = 40
   override val accuracy = 0.85
   override val statToChange = DEFENSE
@@ -119,7 +109,6 @@ class StunSpore extends StatusCauseStatusAilment {
 
 class Glare extends StatusCauseStatusAilment {
   override val index = 137
-  override val type1 = Normal
   override val maxPP = 30
   val statusAilmentToCause = new PAR
   val chanceOfCausingAilment = 1.0
@@ -137,7 +126,6 @@ class ConfuseRay extends StatusCauseStatusAilment {
 
 class Supersonic extends StatusCauseStatusAilment {
   override val index = 48
-  override val type1 = Normal
   override val maxPP = 20
   val statusAilmentToCause = new CONFUSION
   val chanceOfCausingAilment = 1.0
@@ -266,7 +254,6 @@ class Mist extends StatusMove {
 
 class Conversion extends StatusMove {
   override val index = 160
-  override val type1 = Normal
   override val maxPP = 30
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
@@ -305,7 +292,6 @@ class Metronome extends StatusMove {
 
 class Mimic extends StatusMove {
   override val index = 102
-  override val type1 = Normal
   override val maxPP = 20
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
@@ -315,7 +301,6 @@ class Mimic extends StatusMove {
 
 class Recovery extends StatusMove {
   override val index = 105
-  override val type1 = Normal
   override val maxPP = 10
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
@@ -372,7 +357,6 @@ class SoftBoiled extends StatusMove {
 
 class Roar extends StatusMove {
   override val index = 46
-  override val type1 = Normal
   override val maxPP = 20
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // no effect in Gen 1 against another trainer
@@ -381,7 +365,6 @@ class Roar extends StatusMove {
 
 class Whirlwind extends StatusMove {
   override val index = 18
-  override val type1 = Normal
   override val maxPP = 20
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // no effect in Gen 1 against another trainer
@@ -399,7 +382,6 @@ class Teleport extends StatusMove {
 
 class Splash extends StatusMove {
   override val index = 150
-  override val type1 = Normal
   override val maxPP = 40
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // no effect in Gen 1 against anyone
@@ -408,7 +390,6 @@ class Splash extends StatusMove {
 
 class Transform extends StatusMove {
   override val index = 144
-  override val type1 = Normal
   override val maxPP = 10
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // http://bulbapedia.bulbagarden.net/wiki/Transform_(move)

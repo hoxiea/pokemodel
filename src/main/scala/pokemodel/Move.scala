@@ -353,100 +353,6 @@ trait Recoil extends Move {
 }
 
 
-trait NonVolatileStatusChange extends Move {
-  // Cause some kind of StatusAilment to the opponent, non-volatile or
-  // volatile, with a probability that depends on the move
-  def statusAilmentToCause   : NonVolatileStatusAilment
-  def chanceOfCausingAilment : Double
-  def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
-
-  abstract override def moveSpecificStuff(
-      attacker: Pokemon,
-      defender: Pokemon,
-      pb: Battle,
-      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-
-    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    if (statusAilmentCaused) {
-      if (pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
-        result.nvsa(statusAilmentToCause)
-        result.numTimesHit(1)
-      }
-    }
-    result.merge(mrb)
-    super.moveSpecificStuff(attacker, defender, pb, result)
-  }
-}
-
-
-class TestBurner extends SpecialMove with NonVolatileStatusChange {
-  override val index = 999
-  override val type1 = Fire  // shouldn't be used
-  override val power = 40    // shouldn't be used
-  override val maxPP = 10
-  override val accuracy = 1.0
-
-  override def statusAilmentToCause = new BRN
-  override def chanceOfCausingAilment = 1.0
-}
-
-class TestAsleep extends SpecialMove with NonVolatileStatusChange {
-  override val index = 999
-  override val type1 = Normal  // shouldn't be used
-  override val power = 40      // shouldn't be used
-  override val maxPP = 10
-  override val accuracy = 1.0  // always hit, for test purposes
-
-  override def statusAilmentToCause = new SLP
-  override def chanceOfCausingAilment = 1.0  // always cause, for test purposes
-}
-
-
-trait VolatileStatusChange extends Move {
-  // Cause some kind of StatusAilment to the opponent, non-volatile or
-  // volatile, with a probability that depends on the move
-  // TODO: Some moves (LowKick, BoneClub, Stomp, RollingKick) don't cause target to get status if it has a substitute
-  def statusAilmentToCause   : VolatileStatusAilment
-  def chanceOfCausingAilment : Double
-  def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
-
-  abstract override def moveSpecificStuff(
-      attacker: Pokemon,
-      defender: Pokemon,
-      pb: Battle,
-      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-
-    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    if (statusAilmentCaused) {
-        result.numTimesHit(1)
-        statusAilmentToCause match {
-        case (_ : CONFUSED) => {
-          if (pb.statusManager.tryToCauseConfusion(defender)) {
-            result.vsa(statusAilmentToCause)
-          }
-        }
-        case (_ : FLINCH) => {
-          if (pb.statusManager.causeToFlinch(defender)) {
-            result.vsa(statusAilmentToCause)
-          }
-        }
-        case (_ : PARTIALLYTRAPPED) => {
-          if (pb.statusManager.tryToPartiallyTrap(defender)) {
-            result.vsa(statusAilmentToCause)
-          }
-        }
-        case (_ : SEEDED) => {
-          if (pb.statusManager.tryToSeed(defender)) {
-            result.vsa(statusAilmentToCause)
-          }
-        }
-      }
-    }
-    result.merge(mrb)
-    super.moveSpecificStuff(attacker, defender, pb, result)
-  }
-}
-
 
 
 trait MultiStrike extends Move {
@@ -552,7 +458,20 @@ trait DoubleStrike extends Move {
 
 
 trait SelfStatChange extends Move {
-  // Change one of your own Battle Stats
+  /*
+   * A trait for Moves that let you change your own battle stats.
+   *
+   * Example Moves: Sharpen, SwordsDance, Harden, Amnesia, etc.
+   *
+   * This is the simplest of the 4 stat/status change traits, because the move
+   * always succeeds(1) and doesn't depend on the success of a SingleStrike or
+   * anything like that. (Of course, that's only because there aren't any moves
+   * in Gen 1 that simultaneously deal damage AND have a chance of improving
+   * your battle stats, but still.)
+   *
+   * (1): subject to logic about changing your own stats in BattleStatManager
+   */
+
   def statToChange: BattleStat
   def amountToChangeBy: Int
 
@@ -604,12 +523,12 @@ trait EnemyStatChange extends Move {
    * There are two situations in which this can happen:
    * 1. Moves whose sole purpose it is to do so.
    *    Examples: TailWhip, SandAttack, StringShot, Growl, Leer, Kinesis, etc.
-   *    These moves have an accuracy, use the standard accuracy formula to
-   *    determine hit/miss. If they hit, they have a 100% chance of causing
-   *    the stat change.
+   *    These moves have an accuracy and use the standard accuracy formula to
+   *    determine hit/miss. If they hit, they have a 100% chance of causing the
+   *    stat change.
    *
    * 2. Moves that combine SingleStrike with a small chance of changing a stat.
-   *    Examples:
+   *    Examples: AuroraBeam, Acid, Psychic, Bubble, Bubblebeam
    *    These Moves should only consider causing the status change if
    *    a) The SingleStrike portion of the Move didn't kill the enemy
    *    b) The SingleStrike portion hit
@@ -637,17 +556,19 @@ trait EnemyStatChange extends Move {
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
     if (soloStatChange && chanceOfStatChange < 1.0) {
-      throw new Exception("Incorrect soloStatChange + chanceOfStatChange combo; capture hit/miss in Move accuracy")
+      throw new Exception("soloStatChange + chanceOfStatChange combo")
     }
 
-    val proceedCase1 =  // could tack '&& statChangeHits' on end, but why bother?
+    val proceedType1 =
       soloStatChange && Random.nextDouble < chanceHit(attacker, defender, pb)
+    // could tack '&& statChangeHits' on end, but chanceOfStatChange was
+    // verified to be 1.0 in this case
 
-    val proceedCase2 = !soloStatChange && !mrb.KO && mrb.numTimesHit > 0 && statChangeHits
+    val proceedType2 = !soloStatChange && !mrb.KO && mrb.numTimesHit > 0 && statChangeHits
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if (pb.statManager.canChangeDefenderStats(attacker, defender, pb) &&
-        (proceedCase1 || proceedCase2)) {
+        (proceedType1 || proceedType2)) {
       statToChange match {
         case ATTACK   => pb.statManager.changeAttackStage(defender, amountToChangeBy)
         case DEFENSE  => pb.statManager.changeDefenseStage(defender, amountToChangeBy)
@@ -657,9 +578,9 @@ trait EnemyStatChange extends Move {
         case EVASION  => pb.statManager.changeEvasionStage(defender, amountToChangeBy)
       }
       result.addEnemyStat(statToChange, amountToChangeBy)
+      result.numTimesHit(1)   // for Type1 situations where no hit previously registered
     }
 
-    // Pass along what you got + moveIndex
     result.merge(mrb)
     super.moveSpecificStuff(attacker, defender, pb, result)
   }
@@ -685,6 +606,179 @@ class TestDecreaseEnemyAttack extends StatusMove with EnemyStatChange {
 }
 
 
+trait NonVolatileStatusChange extends Move {
+  /*
+   * Cause some kind of NonVolatileStatusAilment (NVSA) to the opponent.
+   * See StatusAilment.scala to understand volatile vs. non-volatile.
+   *
+   * Like EnemyStatChange, there are two use cases:
+   * 1. Moves whose sole purpose is to cause a NVSA.
+   *    Examples: = ThunderWave, StunSpore, Glare, SleepPowder, etc.
+   *    These moves have an accuracy and use the standard accuracy formula to
+   *    determine hit/miss. If they hit, they have a 100% chance of causing the
+   *    status change.
+   *
+   * 2. Moves that combine SingleStrike with a small chance of a status change.
+   *    Examples: Thunderbolt, Flamethrower, Sludge, Blizzard
+   *    These Moves should only consider causing the status change if:
+   *    a) The SingleStrike portion of the Move didn't kill the enemy
+   *    b) The SingleStrike portion hit
+   *    These moves have a <100% chance of causing the stat change; the actual
+   *    chance is specified in chanceOfCausingAilment below. Also, SingleStrike must
+   *    be mixed in to the right, so that a hit can be verified by NVSA
+   *
+   * The flag soloStatusChange controls which case is used.
+   * - true  => Type 1. In every Type 1 case, chanceOfCausingAilment should be 1.0
+   * - false => Type 2. Check for hit && KO before proceeding, probably with
+   *                    chanceOfStatChange < 1.0
+   */
+
+  def statusAilmentToCause : NonVolatileStatusAilment
+  def chanceOfCausingAilment : Double
+  def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
+  def soloStatusChange : Boolean
+
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    if (soloStatusChange && chanceOfCausingAilment < 1.0)
+      throw new Exception("soloStatusChange + chanceOfCausingAilment combo")
+
+    val proceedType1 =
+      soloStatusChange && Random.nextDouble < chanceHit(attacker, defender, pb)
+    val proceedType2 =
+      !soloStatusChange && !mrb.KO && mrb.numTimesHit > 0 && statusAilmentCaused
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    if ((proceedType1 || proceedType2) &&
+      pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
+      result.nvsa(statusAilmentToCause)
+      result.numTimesHit(1)  // for Type1 situations
+    }
+
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+
+class TestBurner extends SpecialMove with NonVolatileStatusChange {
+  override val index = 999
+  override val type1 = Fire  // shouldn't be used
+  override val power = 40    // shouldn't be used
+  override val maxPP = 10
+  override val accuracy = 1.0
+
+  override def statusAilmentToCause = new BRN
+  override def chanceOfCausingAilment = 1.0
+  override def soloStatusChange = true
+}
+
+class TestAsleep extends SpecialMove with NonVolatileStatusChange {
+  override val index = 999
+  override val type1 = Normal  // shouldn't be used
+  override val power = 40      // shouldn't be used
+  override val maxPP = 10
+  override val accuracy = 1.0  // always hit, for test purposes
+
+  override def statusAilmentToCause = new SLP
+  override def chanceOfCausingAilment = 1.0  // always cause, for test purposes
+  override def soloStatusChange = true
+}
+
+
+trait VolatileStatusChange extends Move {
+  /*
+   * Cause some kind of VolatileStatusAilment (VSA) to the opponent.
+   * See StatusAilment.scala to understand volatile vs. non-volatile.
+   *
+   * Like EnemyStatChange and NVSA, there are two use cases:
+   * 1. Moves whose sole purpose is to cause a NVSA.
+   *    Examples: = ConfuseRay, Supersonic
+   *    These moves have an accuracy and use the standard accuracy formula to
+   *    determine hit/miss. If they hit, they have a 100% chance of causing the
+   *    status change.
+   *
+   * 2. Moves that combine SingleStrike with a small chance of a status change.
+   *    Examples: Confusion, Psybeam
+   *    These Moves should only consider causing the status change if:
+   *    a) The SingleStrike portion of the Move didn't kill the enemy
+   *    b) The SingleStrike portion hit
+   *    These moves have a <100% chance of causing the stat change; the actual
+   *    chance is specified in chanceOfCausingAilment below. Also, SingleStrike must
+   *    be mixed in to the right, so that a hit can be verified by NVSA
+   *
+   * The flag soloStatusChange controls which case is used.
+   * - true  => Type 1. In every Type 1 case, chanceOfCausingAilment should be 1.0
+   * - false => Type 2. Check for hit && KO before proceeding, probably with
+   *                    chanceOfStatChange < 1.0
+   *
+   * Unique to VolatileStatusAilment moves is that for some reason, some of them
+   * claim to fail when a substitute is present. Whether or not your move works
+   * should be captured in the worksWhenSubPresent variable.
+   */
+
+  def statusAilmentToCause   : VolatileStatusAilment
+  def chanceOfCausingAilment : Double
+  def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
+  def soloStatusChange : Boolean
+  def worksWhenSubPresent: Boolean
+
+  abstract override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    if (soloStatusChange && chanceOfCausingAilment < 1.0)
+      throw new Exception("soloStatusChange + chanceOfCausingAilment combo")
+
+    val proceedType1 =
+      soloStatusChange && Random.nextDouble < chanceHit(attacker, defender, pb)
+    val proceedType2 =
+      !soloStatusChange && !mrb.KO && mrb.numTimesHit > 0 && statusAilmentCaused
+
+    val subSituationOK = worksWhenSubPresent || !defender.hasSub
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    if (subSituationOK && (proceedType1 || proceedType2)) {
+      statusAilmentToCause match {
+        case (_ : CONFUSED) => {
+          if (pb.statusManager.tryToCauseConfusion(defender)) {
+            result.vsa(statusAilmentToCause)
+            result.numTimesHit(1)
+          }
+        }
+        case (_ : FLINCH) => {
+          if (pb.statusManager.causeToFlinch(defender)) {
+            result.vsa(statusAilmentToCause)
+            result.numTimesHit(1)
+          }
+        }
+        case (_ : PARTIALLYTRAPPED) => {
+          if (pb.statusManager.tryToPartiallyTrap(defender)) {
+            result.vsa(statusAilmentToCause)
+            result.numTimesHit(1)
+          }
+        }
+        case (_ : SEEDED) => {
+          if (pb.statusManager.tryToSeed(defender)) {
+            result.vsa(statusAilmentToCause)
+            result.numTimesHit(1)
+          }
+        }
+      }
+    }
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+
+/** Less Commonly-Used (but still code-saving) Traits **/
 trait OneHitKO extends Move {
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
@@ -830,20 +924,6 @@ trait SuicideDamage extends Move {
     result.merge(mrb)
     super.moveSpecificStuff(attacker, defender, pb, result)
   }
-}
-
-class Explosion extends PhysicalMove with SuicideDamage {
-  override val index = 153
-  override val power = 340   // Doubled, to take halved defense into account
-  override val maxPP = 5
-  // Normal, 100% accuracy
-}
-
-class Selfdestruct extends PhysicalMove with SuicideDamage {
-  override val index = 120
-  override val power = 260   // Doubled, to take halved defense into account
-  override val maxPP = 5
-  // Normal, 100% accuracy
 }
 
 

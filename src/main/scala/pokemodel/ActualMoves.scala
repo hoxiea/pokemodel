@@ -364,6 +364,8 @@ class Bite extends PhysicalMove with VolatileStatusChange with SingleStrike {
   override val maxPP = 25
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.10
+  def soloStatusChange = false
+  def worksWhenSubPresent = true
 }
 
 class HyperFang extends PhysicalMove with VolatileStatusChange with SingleStrike {
@@ -373,6 +375,8 @@ class HyperFang extends PhysicalMove with VolatileStatusChange with SingleStrike
   override val accuracy = 0.9
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.10
+  def soloStatusChange = false
+  def worksWhenSubPresent = true
 }
 
 class Headbutt extends PhysicalMove with VolatileStatusChange with SingleStrike {
@@ -381,6 +385,8 @@ class Headbutt extends PhysicalMove with VolatileStatusChange with SingleStrike 
   override val maxPP = 15
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.30
+  def soloStatusChange = false
+  def worksWhenSubPresent = true
 }
 
 class LowKick extends PhysicalMove with VolatileStatusChange with SingleStrike {
@@ -391,7 +397,8 @@ class LowKick extends PhysicalMove with VolatileStatusChange with SingleStrike {
   override val accuracy = 0.9
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.30
-  // TODO: Low Kick cannot make a target with a substitute flinch.
+  def soloStatusChange = false
+  def worksWhenSubPresent = false
 }
 
 class BoneClub extends PhysicalMove with VolatileStatusChange with SingleStrike {
@@ -402,7 +409,8 @@ class BoneClub extends PhysicalMove with VolatileStatusChange with SingleStrike 
   override val accuracy = 0.85
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.10
-  // TODO: Bone Club cannot cause a target with a substitute to flinch.
+  def soloStatusChange = false
+  def worksWhenSubPresent = false
 }
 
 class Stomp extends PhysicalMove with VolatileStatusChange with SingleStrike {
@@ -411,7 +419,8 @@ class Stomp extends PhysicalMove with VolatileStatusChange with SingleStrike {
   override val maxPP = 20
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.30
-  // TODO: Stomp cannot make a target with a substitute flinch.
+  def soloStatusChange = false
+  def worksWhenSubPresent = false
 }
 
 class RollingKick extends PhysicalMove with VolatileStatusChange with SingleStrike {
@@ -422,7 +431,8 @@ class RollingKick extends PhysicalMove with VolatileStatusChange with SingleStri
   override val accuracy = 0.85
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.30
-  // TODO: Rolling Kick cannot make a target with a substitute flinch.
+  def soloStatusChange = false
+  def worksWhenSubPresent = false
 }
 
 class ThunderPunch extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -432,6 +442,7 @@ class ThunderPunch extends PhysicalMove with NonVolatileStatusChange with Single
   override val maxPP = 15
   override val statusAilmentToCause = new PAR
   override val chanceOfCausingAilment = 0.10
+  override def soloStatusChange = false
 }
 
 class IcePunch extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -441,6 +452,7 @@ class IcePunch extends PhysicalMove with NonVolatileStatusChange with SingleStri
   override val maxPP = 15
   override val statusAilmentToCause = new FRZ
   override val chanceOfCausingAilment = 0.10
+  override def soloStatusChange = false
 }
 
 class FirePunch extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -450,6 +462,7 @@ class FirePunch extends PhysicalMove with NonVolatileStatusChange with SingleStr
   override val maxPP = 15
   override val statusAilmentToCause = new BRN
   override val chanceOfCausingAilment = 0.10
+  override def soloStatusChange = false
 }
 
 class Lick extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -459,6 +472,7 @@ class Lick extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
   override val maxPP = 30
   override val statusAilmentToCause = new PAR
   override val chanceOfCausingAilment = 0.3
+  override def soloStatusChange = false
 }
 
 class BodySlam extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -467,6 +481,7 @@ class BodySlam extends PhysicalMove with NonVolatileStatusChange with SingleStri
   override val maxPP = 15
   override val statusAilmentToCause = new PAR
   override val chanceOfCausingAilment = 0.3
+  override def soloStatusChange = false
 }
 
 class PoisonSting extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -476,6 +491,7 @@ class PoisonSting extends PhysicalMove with NonVolatileStatusChange with SingleS
   override val maxPP = 35
   override val statusAilmentToCause = new PSN
   override val chanceOfCausingAilment = 0.3
+  override def soloStatusChange = false
 }
 
 class Twineedle extends PhysicalMove {
@@ -553,6 +569,22 @@ class Guillotine extends PhysicalMove with OneHitKO {
 class HornDrill extends PhysicalMove with OneHitKO {
   override val index = 32
   override val maxPP = 5
+}
+
+
+/* PHYSICAL, SUICIDE + DAMAGE */
+class Explosion extends PhysicalMove with SuicideDamage {
+  override val index = 153
+  override val power = 340   // Doubled, to take halved defense into account
+  override val maxPP = 5
+  // Normal, 100% accuracy
+}
+
+class Selfdestruct extends PhysicalMove with SuicideDamage {
+  override val index = 120
+  override val power = 260   // Doubled, to take halved defense into account
+  override val maxPP = 5
+  // Normal, 100% accuracy
 }
 
 
@@ -706,6 +738,7 @@ class Thunder extends SpecialMove with NonVolatileStatusChange with SingleStrike
 
   override def statusAilmentToCause = new PAR
   override def chanceOfCausingAilment = 0.1
+  override def soloStatusChange = false
 }
 
 class Thunderbolt extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -717,6 +750,7 @@ class Thunderbolt extends SpecialMove with NonVolatileStatusChange with SingleSt
 
   override def statusAilmentToCause = new PAR
   override def chanceOfCausingAilment = 0.1
+  override def soloStatusChange = false
 }
 
 class ThunderShock extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -728,6 +762,7 @@ class ThunderShock extends SpecialMove with NonVolatileStatusChange with SingleS
 
   override def statusAilmentToCause = new PAR
   override def chanceOfCausingAilment = 0.1
+  override def soloStatusChange = false
 }
 
 class Ember extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -739,6 +774,7 @@ class Ember extends SpecialMove with NonVolatileStatusChange with SingleStrike {
 
   override def statusAilmentToCause = new BRN
   override def chanceOfCausingAilment = 0.1
+  override def soloStatusChange = false
 }
 
 class FireBlast extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -750,6 +786,7 @@ class FireBlast extends SpecialMove with NonVolatileStatusChange with SingleStri
 
   override def statusAilmentToCause = new BRN
   override def chanceOfCausingAilment = 0.3
+  override def soloStatusChange = false
 }
 
 class Flamethrower extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -761,6 +798,7 @@ class Flamethrower extends SpecialMove with NonVolatileStatusChange with SingleS
 
   override def statusAilmentToCause = new BRN
   override def chanceOfCausingAilment = 0.1
+  override def soloStatusChange = false
 }
 
 class Sludge extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -772,6 +810,7 @@ class Sludge extends SpecialMove with NonVolatileStatusChange with SingleStrike 
 
   override def statusAilmentToCause = new PSN
   override def chanceOfCausingAilment = 0.3
+  override def soloStatusChange = false
 }
 
 class Smog extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -783,6 +822,7 @@ class Smog extends SpecialMove with NonVolatileStatusChange with SingleStrike {
 
   override def statusAilmentToCause = new PSN
   override def chanceOfCausingAilment = 0.4
+  override def soloStatusChange = false
 }
 
 class Blizzard extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -794,6 +834,7 @@ class Blizzard extends SpecialMove with NonVolatileStatusChange with SingleStrik
 
   override def statusAilmentToCause = new FRZ
   override def chanceOfCausingAilment = 0.1
+  override def soloStatusChange = false
 }
 
 class IceBeam extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -805,6 +846,7 @@ class IceBeam extends SpecialMove with NonVolatileStatusChange with SingleStrike
 
   override def statusAilmentToCause = new FRZ
   override def chanceOfCausingAilment = 0.1
+  override def soloStatusChange = false
 }
 
 // SPECIAL, SINGLE STRIKE + POTENTIAL VOLATILE STATUS CHANGE
@@ -817,6 +859,8 @@ class Confusion extends SpecialMove with VolatileStatusChange with SingleStrike 
 
   override def statusAilmentToCause = new CONFUSED
   override def chanceOfCausingAilment = 0.1
+  def soloStatusChange = false
+  def worksWhenSubPresent = true
 }
 
 class Psybeam extends SpecialMove with VolatileStatusChange with SingleStrike {
@@ -828,6 +872,8 @@ class Psybeam extends SpecialMove with VolatileStatusChange with SingleStrike {
 
   override def statusAilmentToCause = new CONFUSED
   override def chanceOfCausingAilment = 0.1
+  def soloStatusChange = false
+  def worksWhenSubPresent = true
 }
 
 
