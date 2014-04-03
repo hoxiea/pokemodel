@@ -193,7 +193,7 @@ class DamageCalculator {
       case ALWAYS => 1.0
     }
     if (battle.statusManager.hasFocusEnergy(attacker)) {
-      if (Battle.focusEnergyHelps) criticalChance * 4
+      if (Glitch.focusEnergyHelps) criticalChance * 4
       else criticalChance / 4
     } else criticalChance
   }
