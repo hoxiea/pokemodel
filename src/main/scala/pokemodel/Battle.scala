@@ -107,8 +107,9 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
       }
     }
 
-    // Process any status ailments that take effect at the end of the round, assuming the opponent
-    // didn't faint, in which case status ailments don't kick in
+    // Process any status ailments that take effect at the end of the round,
+    // assuming the opponent didn't faint, in which case status ailments don't
+    // kick in
     if (!team2Fainted) { team1.activePokemon.takeStatusAilmentDamage() }
     if (!team1Fainted) { team2.activePokemon.takeStatusAilmentDamage() }
 
@@ -123,7 +124,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     }
   }
 
-  def battleIsOver: Boolean = { !(team1.hasSomeoneAlive && team2.hasSomeoneAlive) }
+  def battleIsOver: Boolean = !(team1.hasSomeoneAlive && team2.hasSomeoneAlive)
 
   override def toString() : String = {
     val s = new StringBuilder()
@@ -141,29 +142,41 @@ object Battle {
   // Battle customizations and bug fixes
 
   /*
-   * In Gen1, teams weren't actually healed before link battles started, and some
-   * players took advantage of this fact by poisoning some or all of their Pokemon.
-   * Though counter-intuitive, it actually protects them from all the other non-volatile
-   * status effects, since Pokemon can only have one non-volatile status effect at any
-   * point in time, and newer ones don't displace older ones. This was fixed in later
-   * Generations.
+   * In Gen1, teams weren't actually healed before link battles started, and
+   * some players took advantage of this fact by poisoning some or all of their
+   * Pokemon.  Though counter-intuitive, it actually protects them from all the
+   * other non-volatile status effects, since Pokemon can only have one
+   * non-volatile status effect at any point in time, and newer ones don't
+   * displace older ones. This was fixed in later Generations.
    */
   val healBefore: Boolean = false
 
+
+  val verbose = true
+}
+
+object Glitch {
+  // Enable/disable bugs that were in Gen 1 but are kinda lame
+
   /*
-   * The move Focus Energy is supposed to quadruple the user's critical hit rate.
-   * In Gen 1, however, it divides it by 4 instead.
+   * The move Focus Energy is supposed to quadruple the user's critical hit
+   * rate.  In Gen 1, however, it divides it by 4 instead.
    */
   val focusEnergyHelps: Boolean = false
 
   /*
-   * In Gen 1, Recover fails if (user's maximum HP - user's current HP) is one less than a multiple of 256.
-   * Which is stupid. This was fixed in later generations. You can fix it here if you'd like.
+   * In Gen 1, Recover fails if (user's maximum HP - user's current HP) is one
+   * less than a multiple of 256.  Which is stupid. This was fixed in later
+   * generations. You can fix it here if you'd like.
    */
   val recoverBugEnabled: Boolean = true
 
   /* Soft-Boiled has the same bug as Recover does. */
   val softboiledBugEnabled: Boolean = true
 
-  val verbose = true
+  /*
+   * Using Explosion or Selfdestruct to break a substitute doesn't actually
+   * cause the user to faint. This was fixed in Stadium.
+   */
+  val suicideGlitchOn: Boolean = true
 }
