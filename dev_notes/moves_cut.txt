@@ -355,39 +355,6 @@ class SoftBoiled extends StatusMove {
   }
 }
 
-class Roar extends StatusMove {
-  override val index = 46
-  override val maxPP = 20
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // no effect in Gen 1 against another trainer
-  }
-}
-
-class Whirlwind extends StatusMove {
-  override val index = 18
-  override val maxPP = 20
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // no effect in Gen 1 against another trainer
-  }
-}
-
-class Teleport extends StatusMove {
-  override val index = 100
-  override val type1 = Psychic
-  override val maxPP = 20
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // no effect in Gen 1 against another trainer
-  }
-}
-
-class Splash extends StatusMove {
-  override val index = 150
-  override val maxPP = 40
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    // no effect in Gen 1 against anyone
-  }
-}
-
 class Transform extends StatusMove {
   override val index = 144
   override val maxPP = 10

@@ -93,8 +93,3 @@ THINGS THAT JUST NEED TO BE FILLED IN
     = Poison Gas: poison
     = PoisonPowder: poison
     = Toxic: badly poison, WSSC
-
-    = Roar: no effect whatsoever in link battles (causes battle to end in wild encounters)
-    = Whirlwind: no effect whatsoever in link battles (causes battle to end in wild encounters)
-    = Teleport: no effect whatsoever in link battles (causes escape in wild encounters)
-    = Splash: no effect whatsoever anywhere

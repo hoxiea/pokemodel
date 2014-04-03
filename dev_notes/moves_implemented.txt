@@ -104,6 +104,7 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 = HydroPump: damage
 = Surf: damage
 = WaterGun: damage
+= Waterfall: damage
 = VineWhip: damage
 = RazorLeaf: damage, high crit hit rate
 
@@ -111,7 +112,6 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 = Thunderbolt: damage, 10% chance PAR
 = ThunderShock: damage, 10% chance PAR
 = Ember: damage, 10% chance BRN
-= Waterfall: damage
 = FireBlast: damage, 30% chance BRN
 = Flamethrower: damage, 10% chance BRN
 = Sludge: damage, 30% chance PSN
@@ -135,3 +135,8 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 
 
 STATUS MOVES (any type, don't deal damage directly):
+- Useless
+= Roar: no effect whatsoever in link battles (causes battle to end in wild encounters)
+= Whirlwind: no effect whatsoever in link battles (causes battle to end in wild encounters)
+= Teleport: no effect whatsoever in link battles (causes escape in wild encounters)
+= Splash: no effect whatsoever anywhere

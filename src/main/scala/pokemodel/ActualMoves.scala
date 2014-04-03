@@ -1095,3 +1095,27 @@ class Amnesia extends StatusMove with SelfStatChange {
 
 
 /* STATUS: WEAKEN YOUR OPPONENT'S BATTLE STATS */
+
+// STATUS: Useless stuff
+class Roar extends StatusMove {
+  override val index = 46
+  override val maxPP = 20
+}
+
+class Whirlwind extends StatusMove {
+  override val index = 18
+  override val maxPP = 20
+}
+
+class Teleport extends StatusMove {
+  override val index = 100
+  override val type1 = Psychic
+  override val maxPP = 20
+}
+
+class Splash extends StatusMove {
+  override val index = 150
+  override val maxPP = 40
+}
+
+
