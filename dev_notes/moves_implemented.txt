@@ -81,6 +81,14 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Fury Swipes: Same as PinMissile
 = Spike Cannon:Same as PinMissile
 
+- SingleStrike with Miss Penalty
+= Hi Jump Kick: damage with base power of 85; if you miss, lose 1 HP.  If you miss and then faint, the target doesn't attack and isn't subjected to recurrent damage during that round
+= Jump Kick: damage; if you miss, lose 1 HP.  If you miss and then faint, the target doesn't attack and isn't subjected to recurrent damage during that round
+
+- Kill Yourself, Deal Damage
+= Explosion: deal damage, kill the user, halve the opponent's defenses, etc.
+= Self-Destruct: deal damage, kill the user, halve the opponent's defenses, etc.
+
 - Weird Stuff
 = Counter: wait until opponent attacks (low priority), then return twice damage dealt from certain types, WSSC
 
@@ -90,6 +98,40 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 = Sonic Boom: Always inflict exactly 20 damage if it hits
 = Thunder: damage, 10% chance PAR
 
+= Night Shade: deal damage equal to user's level (like SeismicToss)
+
+- Single-Strike (like all SingleStrike moves)
+= HydroPump: damage
+= Surf: damage
+= WaterGun: damage
+= VineWhip: damage
+= RazorLeaf: damage, high crit hit rate
+
+- SingleStrike + StatusChange (Like Thunder)
+= Thunderbolt: damage, 10% chance PAR
+= ThunderShock: damage, 10% chance PAR
+= Ember: damage, 10% chance BRN
+= Waterfall: damage
+= FireBlast: damage, 30% chance BRN
+= Flamethrower: damage, 10% chance BRN
+= Sludge: damage, 30% chance PSN
+= Smog: damage, 40% chance PSN
+= Blizzard: damage, 10% chance FRZ
+= Ice Beam: damage, 10% chance FRZ
+= Confusion: damage, 10% chance CONFUSE
+= Psybeam: damage, 10% chance CONFUSE
+
+- Damage + Potential Stat Change (SingleStrike + EnemyStatChange)
+= AuroraBeam: damage, 10% chance opponent's Attack -1 stage
+= Acid: damage, 10% chance opponent's Defense -1 stage
+= Psychic: damage, 30% chance opponent's Special -1 stage
+= Bubble: damage, 10% chance opponent's Speed -1 stage
+= BubbleBeam: damage, 10% chance opponent's Speed -1 stage
+
+- Transfer HP
+= Absorb: like LeechLife, but Special
+= MegaDrain: like LeechLife, but Special
+= DreamEater: like LeechLife, but Special, plus enemy must be asleep
 
 
 STATUS MOVES (any type, don't deal damage directly):
