@@ -12,6 +12,6 @@ case class PAR()  extends NonVolatileStatusAilment
 
 sealed abstract class VolatileStatusAilment extends StatusAilment
 case class FLINCH()           extends VolatileStatusAilment
-case class CONFUSION()        extends VolatileStatusAilment
+case class CONFUSED()         extends VolatileStatusAilment
 case class PARTIALLYTRAPPED() extends VolatileStatusAilment
 case class SEEDED()           extends VolatileStatusAilment
