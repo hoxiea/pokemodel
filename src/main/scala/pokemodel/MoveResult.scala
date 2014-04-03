@@ -2,6 +2,7 @@ package pokemodel
 
 import Type._
 import BattleStat._
+import TakeDamageResult._
 
 /*
  * After implementing Moves that mutated Battles/Pokemon but didn't return any
@@ -182,6 +183,18 @@ class MoveResultBuilder {
 
   def selfKO(k: Boolean): MoveResultBuilder = { selfKO = k ; this }
   def selfKO(p: Pokemon): MoveResultBuilder = { selfKO = !p.isAlive ; this }
+
+  // Other useful methods
+  def processTakeDamageResult(defender: Pokemon, tdr: TakeDamageResult) {
+      tdr match {
+        case TakeDamageResult.KO => {
+          KO(true)
+          assert(!(defender.isAlive))
+        }
+        case TakeDamageResult.SUBKO => subKO(true)
+        case TakeDamageResult.ALIVE => {}
+      }
+  }
 
   def checkConsistency {
     // TODO: make sure the numbers all make sense
