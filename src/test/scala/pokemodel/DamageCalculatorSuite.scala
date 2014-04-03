@@ -36,7 +36,7 @@ class DamageCalculatorSuite extends FunSuite {
     val f = fixture
     import f._
     assert(battle.dc.stabBonus(pikachu, new TestPhysicalSingleStrike) == 1.0)
-    assert(battle.dc.stabBonus(pikachu, new TestPhysicalSingleStrike with Psychic) == 1.0)
+    assert(battle.dc.stabBonus(pikachu, new TestPhysicalSingleStrike with PsychicT) == 1.0)
     assert(battle.dc.stabBonus(pikachu, new TestPhysicalSingleStrike with Ice) == 1.0)
     assert(battle.dc.stabBonus(pikachu, new TestPhysicalSingleStrike with Electric) == 1.5)
   }
@@ -45,7 +45,7 @@ class DamageCalculatorSuite extends FunSuite {
     val f = fixture
     import f._
     assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike) == 1.0)
-    assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike with Psychic) == 1.0)
+    assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike with PsychicT) == 1.0)
     assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike with Ice) == 1.0)
     assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike with Electric) == 1.0)
     assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike with Grass) == 1.5)

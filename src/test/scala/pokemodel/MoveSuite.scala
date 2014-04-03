@@ -576,10 +576,8 @@ class MoveSuite extends FunSuite {
     assert(!result.selfKO)
     assert(result.subKO)
   }
-  // TODO: Test DoubleStrike trait
-  // TODO: Test LeechLife, especially with a substitute in place
-  // TODO: Test Twineedle, especially with a substitute in place
-  // TODO: Test SeismicToss
-  // TODO: Test SuperFang
-  // TODO: Test Counter: fast Pokemon goes second, Normal/Fighting attack, non-Normal/Fighting attack, substitute, etc.
+
+  // TODO: Test every Move trait, using the descriptions of the move's behavior as spec instead of code
+  // TODO: Test every hand-rolled Move moveSpecificStuff, using move's behavior as spec instead of code
+  // TODO: Test SingleStrike requiredStatusAilments, for example that DreamEater only succeeds when the opponent is asleep
 }
