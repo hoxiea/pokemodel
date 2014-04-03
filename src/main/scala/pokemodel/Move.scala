@@ -81,6 +81,19 @@ import Battle.{verbose=>VERBOSE}
  * All Moves are a subclass of type Move, which defines what it means to be a move.
  * It captures the basic but necessary information about a move, and makes sure that
  * all Moves do the required set-up and clean-up by declaring #use to be final.
+ *
+ * Essentially, moves fill in their unique information (index number, type, power,
+ * maxPP), override anything else unique about them (high critical hit rate, weird
+ * priority, imperfect accuracy).
+ *
+ * Moves also fill in things that the specific traits that they mix in require:
+ * a status to cause and the chance of causing it for StatusChange, the
+ * proportion of damage dealt to incur in Recoil, etc.
+ *
+ * Finally, a move must implement moveSpecificStuff, which captures the behavior
+ * of the move as it interacts with the active enemy and the battle. Many moves
+ * have a common behavior that's totally taken care of by traits. Others are
+ * unique and had to be written by hand.
  */
 abstract class Move {
   val index : Int                // in 1 .. 165, plus Test Moves
@@ -185,21 +198,11 @@ class StatusMove extends Move {
 
 
 /*
- * I originally just subclassed these three guys to specialize them further:
- * PhysicalSingleStrike, PhysicalSingleStrikeStatusChange,
- * SpecialSingleStrikeStatChange, stuff like that. But I found myself
- * duplicating efforts: for example, there are PhysicalSingleStrike moves and
- * there are SpecialSingleStrike moves, and the logic for both was basically
- * the same, just the stats involved changed.
- *
- * I then realized that stacking traits would be the perfect way to capture the
- * different types of moves just once.
+ * These allow you to change the type of a move on the fly. For example,
+ * val m1 = new TestPhysicalSingleStrike with Electric
+ * val m2 = new TestPhysicalSingleStrike with PsychicT
+ * Very useful for testing effectivenesses, etc.
  */
-
-// These allow you to change the type of a move on the fly. For example,
-// val m1 = new TestPhysicalSingleStrike with Electric
-// val m2 = new TestPhysicalSingleStrike with Psychic
-// Very useful for testing effectivenesses, etc.
 trait Normal extends Move   { override val type1 = Normal }
 trait Fighting extends Move { override val type1 = Fighting }
 trait Flying extends Move   { override val type1 = Flying }
@@ -212,7 +215,7 @@ trait Fire extends Move     { override val type1 = Fire }
 trait Water extends Move    { override val type1 = Water }
 trait Grass extends Move    { override val type1 = Grass }
 trait Electric extends Move { override val type1 = Electric }
-trait Psychic extends Move  { override val type1 = Psychic }
+trait PsychicT extends Move  { override val type1 = Psychic }  // avoid conflict with move Psychic
 trait Ice extends Move      { override val type1 = Ice }
 trait Dragon extends Move   { override val type1 = Dragon }
 
@@ -227,20 +230,29 @@ trait HighCritHit extends Move   { override val critHitRate = HIGH }
 trait AlwaysCritHit extends Move { override val critHitRate = ALWAYS }
 
 // High priority, for testing purposes
-trait HighPriority extends Move  { override val priority = 1 }
+trait Priority1 extends Move  { override val priority = 1 }
+trait Priority2 extends Move  { override val priority = 2 }
+
+// Super useful for metronome
+trait PriorityNormal extends Move  { override val priority = 0 }
 
 
 /* Next, capture common behaviors of Moves - damage, stats, status, etc. */
 trait SingleStrike extends Move {
-  // A basic damage-dealing experience
-  // Any move that strikes once and uses DamageCalculator to figure out the
-  // appropriate damage will extend SingleStrike
+  /*
+   * A basic damage-dealing experience
+   * Any move that strikes once and uses DamageCalculator to figure out the
+   * appropriate damage should extend SingleStrike
+   */
+  def requiredStatusAilments: Set[StatusAilment] = Set()
+
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
+    // TODO: Make sure that any requiredStatusAilments are present
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
       val result = pb.dc.calc(attacker, defender, this, pb)
@@ -248,11 +260,7 @@ trait SingleStrike extends Move {
 
       // Update result values
       // numTimesHit == 1, no hpGained, no statusAilments, no stat changes
-      damageResult match {
-        case KO => { result.KO(true); assert(!(defender.isAlive)) }
-        case SUBKO => result.subKO(true)
-        case ALIVE => {}
-      }
+      result.processTakeDamageResult(defender, damageResult)
 
       // Combine anything passed in from traits further to the right
       result.merge(mrb)
@@ -295,17 +303,13 @@ trait ConstantDamage extends Move {
 
       result.damageCalc(damageAmount)
       val damageToDeal = damageAmount min defender.currentHP()
-      val hitResult = defender.takeDamage(damageToDeal)
+      val damageResult = defender.takeDamage(damageToDeal)
 
       result.numTimesHit(1)
       result.damageDealt(damageToDeal)
 
       // no crithits, STAB, moveType, typeMult, statusChange, statChange
-      hitResult match {
-        case KO => { result.KO(true); assert(!(defender.isAlive)) }
-        case SUBKO => result.subKO(true)
-        case ALIVE => {}
-      }
+      result.processTakeDamageResult(defender, damageResult)
     }
 
     // Merge with given stuff and pass it along
@@ -401,6 +405,7 @@ class TestAsleep extends SpecialMove with NonVolatileStatusChange {
 trait VolatileStatusChange extends Move {
   // Cause some kind of StatusAilment to the opponent, non-volatile or
   // volatile, with a probability that depends on the move
+  // TODO: Some moves (LowKick, BoneClub, Stomp, RollingKick) don't cause target to get status if it has a substitute
   def statusAilmentToCause   : VolatileStatusAilment
   def chanceOfCausingAilment : Double
   def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
@@ -415,7 +420,7 @@ trait VolatileStatusChange extends Move {
     if (statusAilmentCaused) {
         result.numTimesHit(1)
         statusAilmentToCause match {
-        case (_ : CONFUSION) => {
+        case (_ : CONFUSED) => {
           if (pb.statusManager.tryToCauseConfusion(defender)) {
             result.vsa(statusAilmentToCause)
           }
@@ -442,7 +447,6 @@ trait VolatileStatusChange extends Move {
   }
 }
 
-// TODO: Test VolatileStatusChange
 
 
 trait MultiStrike extends Move {
@@ -480,16 +484,12 @@ trait MultiStrike extends Move {
       // All that we really care about is the last MoveResult in resultSeq,
       // since that will have information about KO/subKO, damageDealt for
       // Bide/Counter, etc.
-      val relevantTakeDamageResult = takeDamageResultSeq.last
+      val relevantDamageResult = takeDamageResultSeq.last
 
       // Update result with information from relevantTakeDamageResult
       result.numTimesHit(damageSeq.length)
       result.damageDealt(damageSeq.last)
-      relevantTakeDamageResult match {
-        case KO => { result.KO(true); assert(!(defender.isAlive)) }
-        case SUBKO => result.subKO(true)
-        case ALIVE => {}
-      }
+      result.processTakeDamageResult(defender, relevantDamageResult)
       result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
@@ -533,16 +533,12 @@ trait DoubleStrike extends Move {
       // All that we really care about is the last MoveResult in resultSeq,
       // since that will have information about KO/subKO, damageDealt for
       // Bide/Counter, etc.
-      val relevantTakeDamageResult = takeDamageResultSeq.last
+      val relevantDamageResult = takeDamageResultSeq.last
 
       // Update result with information from relevantTakeDamageResult
       result.numTimesHit(damageSeq.length)
       result.damageDealt(damageSeq.last)
-      relevantTakeDamageResult match {
-        case KO => { result.KO(true); assert(!(defender.isAlive)) }
-        case SUBKO => result.subKO(true)
-        case ALIVE => {}
-      }
+      result.processTakeDamageResult(defender, relevantDamageResult)
       result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
@@ -602,10 +598,35 @@ class TestIncreaseSelfDefenseStat extends StatusMove with SelfStatChange {
 
 
 trait EnemyStatChange extends Move {
-  // Change your opponent's battle stats
+  /*
+   * A trait for moves that let you change your opponent's battle stats.
+   *
+   * There are two situations in which this can happen:
+   * 1. Moves whose sole purpose it is to do so.
+   *    Examples: TailWhip, SandAttack, StringShot, Growl, Leer, Kinesis, etc.
+   *    These moves have an accuracy, use the standard accuracy formula to
+   *    determine hit/miss. If they hit, they have a 100% chance of causing
+   *    the stat change.
+   *
+   * 2. Moves that combine SingleStrike with a small chance of changing a stat.
+   *    Examples:
+   *    These Moves should only consider causing the status change if
+   *    a) The SingleStrike portion of the Move didn't kill the enemy
+   *    b) The SingleStrike portion hit
+   *    These moves have a <100% chance of causing the stat change; the actual
+   *    chance is specified in chanceOfStatChange below. Also, SingleStrike must
+   *    be mixed in to the right, so that a hit can be verified by enemyStatChange
+   *
+   * The flag soloStatChange controls which case is used.
+   * - true  => Type 1. In every type 1 case, chanceOfStatChange should be 1.0
+   * - false => Type 2. Check for hit && KO before proceeding, probably with
+   *                    chanceOfStatChange < 1.0
+   */
+
   def statToChange: BattleStat
   def amountToChangeBy: Int
   def chanceOfStatChange: Double
+  def soloStatChange: Boolean
 
   def statChangeHits: Boolean = Random.nextDouble < chanceOfStatChange
 
@@ -615,9 +636,18 @@ trait EnemyStatChange extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
+    if (soloStatChange && chanceOfStatChange < 1.0) {
+      throw new Exception("Incorrect soloStatChange + chanceOfStatChange combo; capture hit/miss in Move accuracy")
+    }
+
+    val proceedCase1 =  // could tack '&& statChangeHits' on end, but why bother?
+      soloStatChange && Random.nextDouble < chanceHit(attacker, defender, pb)
+
+    val proceedCase2 = !soloStatChange && !mrb.KO && mrb.numTimesHit > 0 && statChangeHits
+
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    if (statChangeHits &&
-        pb.statManager.canChangeDefenderStats(attacker, defender, pb)) {
+    if (pb.statManager.canChangeDefenderStats(attacker, defender, pb) &&
+        (proceedCase1 || proceedCase2)) {
       statToChange match {
         case ATTACK   => pb.statManager.changeAttackStage(defender, amountToChangeBy)
         case DEFENSE  => pb.statManager.changeDefenseStage(defender, amountToChangeBy)
@@ -641,6 +671,7 @@ class TestDecreaseEnemyDefense extends StatusMove with EnemyStatChange {
   def statToChange = DEFENSE
   def amountToChangeBy = -3
   def chanceOfStatChange = 1.0
+  def soloStatChange = true
 }
 
 
@@ -650,6 +681,7 @@ class TestDecreaseEnemyAttack extends StatusMove with EnemyStatChange {
   def statToChange = ATTACK
   def amountToChangeBy = -3
   def chanceOfStatChange = 1.0
+  def soloStatChange = true
 }
 
 
@@ -669,11 +701,7 @@ trait OneHitKO extends Move {
       result.damageCalc(damageToDeal)
       result.numTimesHit(1)
       result.damageDealt(damageToDeal)
-      damageResult match {
-        case KO => { result.KO(true); assert(!(defender.isAlive)) }
-        case SUBKO => result.subKO(true)
-        case ALIVE => {}
-      }
+      result.processTakeDamageResult(defender, damageResult)
       result.merge(mrb)
     }
     super.moveSpecificStuff(attacker, defender, pb, result)
@@ -711,11 +739,7 @@ trait SingleStrikeLoseHPOnMiss extends Move {
       val damageResult = defender.takeDamage(result.damageDealt)
 
       // moveIndex, damageDealt, critHit, STAB, moveType, typeMult from calc
-      damageResult match {
-        case KO => { result.KO(true); assert(!(defender.isAlive)) }
-        case SUBKO => result.subKO(true)
-        case ALIVE => {}
-      }
+      result.processTakeDamageResult(defender, damageResult)
       result.merge(mrb)
       // hpGained, statusChange, selfKO irrelevant
       super.moveSpecificStuff(attacker, defender, pb, result)
@@ -725,7 +749,7 @@ trait SingleStrikeLoseHPOnMiss extends Move {
       val missResult = new MoveResultBuilder().moveIndex(index).moveType(type1)
 
       val damageResult = attacker.takeDamage(hpToLoseOnMiss min attacker.currentHP())
-      // all defaults are correct, except you need to check for selfKO
+      // DIFFERENT - all defaults are correct, except you need to check for selfKO
       damageResult match {
         case KO => { missResult.selfKO(true); assert(!(attacker.isAlive)) }
         case SUBKO => {}
@@ -734,6 +758,143 @@ trait SingleStrikeLoseHPOnMiss extends Move {
       missResult.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
+  }
+}
+
+
+trait DamageEqualsUserLevel extends Move {
+  // SeismicToss and NightShade both deal damage equal to the attacker's level,
+  // ignoring all STABs, type effectiveness, etc.
+  abstract override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+      val damageToDeal = attacker.level min defender.currentHP()
+      val damageResult = defender.takeDamage(damageToDeal)
+
+      // Build an MRB from scratch
+      result.damageCalc(attacker.level)
+      result.numTimesHit(1)
+      result.damageDealt(damageToDeal)
+      // no hpGained, critHit, STAB, typeMult, nvsa, vsa, stat changes
+      result.processTakeDamageResult(defender, damageResult)
+    }
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+
+
+trait SuicideDamage extends Move {
+  /*
+   * This trait KOs its user and deals a good amount of damage to the defender.
+   *
+   * This functionality is used by Explosion and Selfdestruct in Gen 1.
+   *
+   * Incredibly, a bug in the game allows you lose 0 HP if you use one of these
+   * moves to break a substitute. See for example
+   * https://www.youtube.com/watch?v=lr05doU5oAQ
+   */
+  def defenderDefenseProp = 0.5
+
+  abstract override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+      val result = pb.dc.calc(attacker, defender, this, pb)
+      val damageResult = defender.takeDamage(result.damageDealt)
+
+      // Update result values
+      // numTimesHit == 1, no hpGained, no statusAilments, no stat changes
+      result.processTakeDamageResult(defender, damageResult)
+    }
+
+    // Faint unless you KOed a sub AND Glitch.suicideGlitchOn
+    if (!(result.subKO && Glitch.suicideGlitchOn)) {
+      result.selfKO(true)
+      attacker.takeDamage(attacker.currentHP())
+    }
+
+    // Combine and pass along
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+class Explosion extends PhysicalMove with SuicideDamage {
+  override val index = 153
+  override val power = 340   // Doubled, to take halved defense into account
+  override val maxPP = 5
+  // Normal, 100% accuracy
+}
+
+class Selfdestruct extends PhysicalMove with SuicideDamage {
+  override val index = 120
+  override val power = 260   // Doubled, to take halved defense into account
+  override val maxPP = 5
+  // Normal, 100% accuracy
+}
+
+
+trait GainPropDamageDealt extends Move {
+  /*
+   * This trait captures the property of LeechLife, Absorb, MegaDrain, and
+   * DreamEater, whereby up to 50% of the damage dealt by a single strike
+   * attack is restored to the attacker. These moves should extend SingleStrike
+   * on the right so that GainPropDamageDealt has access to mrb.damageDealt.
+   *
+   * This trait is never used on its own: you transfer HP to yourself
+   * iff a SingleStrike succeeded first.
+   *
+   * No HP is restored if the move BREAKS a substitute.
+   *
+   * SingleStrike has a member requiredStatusAilments: Set[StatusAilment].
+   * This was inspired by DreamEater, and means that DreamEater can extend
+   * GainPropDamageDealt without worrying about whether the defender is asleep:
+   * SingleStrike will take care of that, and DreamEater just checking for
+   * damage dealt is good enough.
+   */
+
+  def propToRestore = 0.5
+
+  abstract override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    // Start with a new MRB so that we don't mutate mrb
+    val result = new MoveResultBuilder()
+    result.merge(mrb)
+
+    if (result.moveIndex == -1)
+      throw new Exception("GainPropDamageDealt called without a former move")
+
+    // The SingleStrike should have filled in most of the MRB details already
+    // We just worry about gaining HP here
+    val shouldTransferHP = mrb.numTimesHit == 1 && !mrb.subKO
+    if (shouldTransferHP) {
+      val hpToGain = result.damageDealt match {
+        case 1 => 1
+        case n => n / 2
+      }
+      attacker.gainHP(hpToGain)
+      result.hpGained(hpToGain)
+    }
+
+    // Already merged, just pass things along
+    super.moveSpecificStuff(attacker, defender, pb, result)
   }
 }
 
