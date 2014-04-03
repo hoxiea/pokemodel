@@ -1,96 +1,5 @@
-// STATUSMOVES that change the opponent's stats
-class StringShot extends StatusChangeDefenderStats {
-  override val index = 81
-  override val accuracy = .95          // in [0.0, 1.0]
-  override val type1 = Bug
-  override val maxPP = 40
-  override val statToChange = SPEED
-  override val amount = -1
-}
-
-class SandAttack extends StatusChangeDefenderStats {
-  override val index = 28
-  override val maxPP = 15
-  override val statToChange = ACCURACY
-  override val amount = -1
-}
-
-class Flash extends StatusChangeDefenderStats {
-  override val index = 148
-  override val maxPP = 20
-  override val accuracy = 0.7
-  override val statToChange = ACCURACY
-  override val amount = -1
-}
-
-class SmokeScreen extends StatusChangeDefenderStats {
-  override val index = 108
-  override val maxPP = 20
-  override val statToChange = ACCURACY
-  override val amount = -1
-}
-
-class Kinesis extends StatusChangeDefenderStats {
-  override val index = 134
-  override val type1 = Psychic
-  override val maxPP = 15
-  override val accuracy = 0.8
-  override val statToChange = ACCURACY
-  override val amount = -1
-}
-
-class Growl extends StatusChangeDefenderStats {
-  override val index = 45
-  override val maxPP = 40
-  override val statToChange = ATTACK
-  override val amount = -1
-}
-
-class Leer extends StatusChangeDefenderStats {
-  override val index = 43
-  override val maxPP = 30
-  override val statToChange = DEFENSE
-  override val amount = -1
-}
-
-class TailWhip extends StatusChangeDefenderStats {
-  override val index = 39
-  override val maxPP = 30
-  override val statToChange = DEFENSE
-  override val amount = -1
-}
-
-class Screech extends StatusChangeDefenderStats {
-  override val index = 103
-  override val maxPP = 40
-  override val accuracy = 0.85
-  override val statToChange = DEFENSE
-  override val amount = -2
-}
-
-
 // STATUSMOVES that change the opponent's statusAilment
-abstract class StatusCauseStatusAilment extends StatusMove {
-  val statusAilmentToCause : StatusAilment
-  val chanceOfCausingAilment : Double
-
-  def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
-
-  // TODO: Figure out if there are times when a Pokemon is immune to StatusAilment changes, and incorporate them
-  override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) && statusAilmentCaused) {
-      statusAilmentToCause match {
-        case (_ : NonVolatileStatusAilment) => pb.statusManager.tryToChangeStatusAilment(defender, statusAilmentToCause)
-        case (_ : CONFUSION) => pb.statusManager.tryToCauseConfusion(defender)
-        case (_ : FLINCH) => pb.statusManager.causeToFlinch(defender)
-        case (_ : PARTIALLYTRAPPED) => { pb.statusManager.tryToPartiallyTrap(defender) }
-        case (_ : SEEDED) => pb.statusManager.tryToSeed(defender)
-      }
-    }
-  }
-}
-
-class ThunderWave extends StatusCauseStatusAilment {
+class ThunderWave extends StatusMove with NonVolatileStatChange {
   override val index = 86
   override val type1 = Electric
   override val maxPP = 20
@@ -98,7 +7,7 @@ class ThunderWave extends StatusCauseStatusAilment {
   val chanceOfCausingAilment = 1.0
 }
 
-class StunSpore extends StatusCauseStatusAilment {
+class StunSpore extends StatusMove with NonVolatileStatChange {
   override val index = 78
   override val type1 = Grass
   override val maxPP = 30
@@ -107,7 +16,7 @@ class StunSpore extends StatusCauseStatusAilment {
   override val accuracy = 0.75
 }
 
-class Glare extends StatusCauseStatusAilment {
+class Glare extends StatusMove with NonVolatileStatChange {
   override val index = 137
   override val maxPP = 30
   val statusAilmentToCause = new PAR
@@ -115,25 +24,25 @@ class Glare extends StatusCauseStatusAilment {
   override val accuracy = 0.75  // increased in later generations
 }
 
-class ConfuseRay extends StatusCauseStatusAilment {
+class ConfuseRay extends StatusMove with VolatileStatChange {
   override val index = 109
   override val type1 = Ghost
   override val maxPP = 10
-  val statusAilmentToCause = new CONFUSION
+  val statusAilmentToCause = new CONFUSED
   val chanceOfCausingAilment = 1.0
   // TODO: ConfuseRay will fail if the target has a substitute
 }
 
-class Supersonic extends StatusCauseStatusAilment {
+class Supersonic extends StatusMove with VolatileStatChange {
   override val index = 48
   override val maxPP = 20
-  val statusAilmentToCause = new CONFUSION
+  val statusAilmentToCause = new CONFUSED
   val chanceOfCausingAilment = 1.0
   override val accuracy = 0.55
   // TODO: Supersonic will fail if the target has a substitute
 }
 
-class SleepPowder extends StatusCauseStatusAilment {
+class SleepPowder extends StatusMove with NonVolatileStatChange {
   override val index = 79
   override val type1 = Grass
   override val maxPP = 15
@@ -143,7 +52,7 @@ class SleepPowder extends StatusCauseStatusAilment {
   // TODO: SleepPowder will fail if the target has a substitute
 }
 
-class Hypnosis extends StatusCauseStatusAilment {
+class Hypnosis extends StatusMove with NonVolatileStatChange {
   override val index = 95
   override val type1 = Psychic
   override val maxPP = 15
@@ -152,7 +61,7 @@ class Hypnosis extends StatusCauseStatusAilment {
   override val accuracy = 0.60
 }
 
-class PoisonGas extends StatusCauseStatusAilment {
+class PoisonGas extends StatusMove with NonVolatileStatChange {
   override val index = 139
   override val type1 = Poison
   override val maxPP = 40

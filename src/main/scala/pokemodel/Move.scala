@@ -637,6 +637,7 @@ trait NonVolatileStatusChange extends Move {
   def chanceOfCausingAilment : Double
   def statusAilmentCaused : Boolean = Random.nextDouble < chanceOfCausingAilment
   def soloStatusChange : Boolean
+  def worksWhenSubPresent : Boolean  // Sleep Powder is the only move with false
 
   abstract override def moveSpecificStuff(
       attacker: Pokemon,
@@ -675,6 +676,7 @@ class TestBurner extends SpecialMove with NonVolatileStatusChange {
   override def statusAilmentToCause = new BRN
   override def chanceOfCausingAilment = 1.0
   override def soloStatusChange = true
+  override val worksWhenSubPresent = true
 }
 
 class TestAsleep extends SpecialMove with NonVolatileStatusChange {
@@ -687,6 +689,7 @@ class TestAsleep extends SpecialMove with NonVolatileStatusChange {
   override def statusAilmentToCause = new SLP
   override def chanceOfCausingAilment = 1.0  // always cause, for test purposes
   override def soloStatusChange = true
+  override val worksWhenSubPresent = true
 }
 
 

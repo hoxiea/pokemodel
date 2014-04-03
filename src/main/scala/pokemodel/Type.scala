@@ -18,11 +18,6 @@ object Type extends Enumeration {
   val Ice = Value("Ice")
   val Dragon = Value("Dragon")
 
-  val double = 2.0
-  val normal = 1.0
-  val half = 0.5
-  val not = 0.0
-
   val stringToType: Map[String, Type.Value] = Map(
     "Normal" -> Normal,
     "Fighting" -> Fighting,
@@ -41,12 +36,17 @@ object Type extends Enumeration {
     "Dragon" -> Dragon
   )
 
+  val double = 2.0
+  val normal = 1.0
+  val half = 0.5
+  val not = 0.0
+
   /*
    * Capture all of the various effectiveness of one element against another.
    * This can be read as, for example:
    * Normal against Rock is half effective
    * Normal against Ghost is not effective
-   * Fighting against Rock is super/double effective
+   * Fighting against Rock is double(super) effective
    * ...
    */
   val typeMap : Map[Type.Value, Map[Type.Value, Double]] = Map(

@@ -443,6 +443,7 @@ class ThunderPunch extends PhysicalMove with NonVolatileStatusChange with Single
   override val statusAilmentToCause = new PAR
   override val chanceOfCausingAilment = 0.10
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class IcePunch extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -453,6 +454,7 @@ class IcePunch extends PhysicalMove with NonVolatileStatusChange with SingleStri
   override val statusAilmentToCause = new FRZ
   override val chanceOfCausingAilment = 0.10
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class FirePunch extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -463,6 +465,7 @@ class FirePunch extends PhysicalMove with NonVolatileStatusChange with SingleStr
   override val statusAilmentToCause = new BRN
   override val chanceOfCausingAilment = 0.10
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class Lick extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -473,6 +476,7 @@ class Lick extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
   override val statusAilmentToCause = new PAR
   override val chanceOfCausingAilment = 0.3
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class BodySlam extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -482,6 +486,7 @@ class BodySlam extends PhysicalMove with NonVolatileStatusChange with SingleStri
   override val statusAilmentToCause = new PAR
   override val chanceOfCausingAilment = 0.3
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class PoisonSting extends PhysicalMove with NonVolatileStatusChange with SingleStrike {
@@ -492,6 +497,7 @@ class PoisonSting extends PhysicalMove with NonVolatileStatusChange with SingleS
   override val statusAilmentToCause = new PSN
   override val chanceOfCausingAilment = 0.3
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class Twineedle extends PhysicalMove {
@@ -739,6 +745,7 @@ class Thunder extends SpecialMove with NonVolatileStatusChange with SingleStrike
   override def statusAilmentToCause = new PAR
   override def chanceOfCausingAilment = 0.1
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class Thunderbolt extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -751,6 +758,7 @@ class Thunderbolt extends SpecialMove with NonVolatileStatusChange with SingleSt
   override def statusAilmentToCause = new PAR
   override def chanceOfCausingAilment = 0.1
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class ThunderShock extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -763,6 +771,7 @@ class ThunderShock extends SpecialMove with NonVolatileStatusChange with SingleS
   override def statusAilmentToCause = new PAR
   override def chanceOfCausingAilment = 0.1
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class Ember extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -775,6 +784,7 @@ class Ember extends SpecialMove with NonVolatileStatusChange with SingleStrike {
   override def statusAilmentToCause = new BRN
   override def chanceOfCausingAilment = 0.1
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class FireBlast extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -787,6 +797,7 @@ class FireBlast extends SpecialMove with NonVolatileStatusChange with SingleStri
   override def statusAilmentToCause = new BRN
   override def chanceOfCausingAilment = 0.3
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class Flamethrower extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -799,6 +810,7 @@ class Flamethrower extends SpecialMove with NonVolatileStatusChange with SingleS
   override def statusAilmentToCause = new BRN
   override def chanceOfCausingAilment = 0.1
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class Sludge extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -811,6 +823,7 @@ class Sludge extends SpecialMove with NonVolatileStatusChange with SingleStrike 
   override def statusAilmentToCause = new PSN
   override def chanceOfCausingAilment = 0.3
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class Smog extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -823,6 +836,7 @@ class Smog extends SpecialMove with NonVolatileStatusChange with SingleStrike {
   override def statusAilmentToCause = new PSN
   override def chanceOfCausingAilment = 0.4
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class Blizzard extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -835,6 +849,7 @@ class Blizzard extends SpecialMove with NonVolatileStatusChange with SingleStrik
   override def statusAilmentToCause = new FRZ
   override def chanceOfCausingAilment = 0.1
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 class IceBeam extends SpecialMove with NonVolatileStatusChange with SingleStrike {
@@ -847,6 +862,7 @@ class IceBeam extends SpecialMove with NonVolatileStatusChange with SingleStrike
   override def statusAilmentToCause = new FRZ
   override def chanceOfCausingAilment = 0.1
   override def soloStatusChange = false
+  override val worksWhenSubPresent = true
 }
 
 // SPECIAL, SINGLE STRIKE + POTENTIAL VOLATILE STATUS CHANGE
@@ -1095,8 +1111,182 @@ class Amnesia extends StatusMove with SelfStatChange {
 
 
 /* STATUS: WEAKEN YOUR OPPONENT'S BATTLE STATS */
+class StringShot extends StatusMove with EnemyStatChange {
+  override val index = 81
+  override val type1 = Bug
+  override val maxPP = 40
+  override val accuracy = .95
+  override val statToChange = SPEED
+  override val amountToChangeBy = -1
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
 
-// STATUS: Useless stuff
+class SandAttack extends StatusMove with EnemyStatChange {
+  override val index = 28
+  override val maxPP = 15
+  override val statToChange = ACCURACY
+  override val amountToChangeBy = -1
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
+
+class Flash extends StatusMove with EnemyStatChange {
+  override val index = 148
+  override val maxPP = 20
+  override val accuracy = 0.7
+  override val statToChange = ACCURACY
+  override val amountToChangeBy = -1
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
+
+class SmokeScreen extends StatusMove with EnemyStatChange {
+  override val index = 108
+  override val maxPP = 20
+  override val statToChange = ACCURACY
+  override val amountToChangeBy = -1
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
+
+class Kinesis extends StatusMove with EnemyStatChange {
+  override val index = 134
+  override val type1 = Psychic
+  override val maxPP = 15
+  override val accuracy = 0.8
+  override val statToChange = ACCURACY
+  override val amountToChangeBy = -1
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
+
+class Growl extends StatusMove with EnemyStatChange {
+  override val index = 45
+  override val maxPP = 40
+  override val statToChange = ATTACK
+  override val amountToChangeBy = -1
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
+
+class Leer extends StatusMove with EnemyStatChange {
+  override val index = 43
+  override val maxPP = 30
+  override val statToChange = DEFENSE
+  override val amountToChangeBy = -1
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
+
+class TailWhip extends StatusMove with EnemyStatChange {
+  override val index = 39
+  override val maxPP = 30
+  override val statToChange = DEFENSE
+  override val amountToChangeBy = -1
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
+
+class Screech extends StatusMove with EnemyStatChange {
+  override val index = 103
+  override val maxPP = 40
+  override val accuracy = 0.85
+  override val statToChange = DEFENSE
+  override val amountToChangeBy = -2
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
+
+
+// STATUS: NONVOLATILE STATUS CHANGE
+class ThunderWave extends StatusMove with NonVolatileStatusChange {
+  override val index = 86
+  override val type1 = Electric
+  override val maxPP = 20
+  override val statusAilmentToCause = new PAR
+  override val chanceOfCausingAilment = 1.0
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = true
+}
+
+class StunSpore extends StatusMove with NonVolatileStatusChange {
+  override val index = 78
+  override val type1 = Grass
+  override val maxPP = 30
+  override val statusAilmentToCause = new PAR
+  override val chanceOfCausingAilment = 1.0
+  override val accuracy = 0.75
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = true
+}
+
+class Glare extends StatusMove with NonVolatileStatusChange {
+  override val index = 137
+  override val maxPP = 30
+  override val statusAilmentToCause = new PAR
+  override val chanceOfCausingAilment = 1.0
+  override val accuracy = 0.75  // increased in later generations
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = true
+}
+
+class SleepPowder extends StatusMove with NonVolatileStatusChange {
+  override val index = 79
+  override val type1 = Grass
+  override val maxPP = 15
+  override val statusAilmentToCause = new SLP
+  override val chanceOfCausingAilment = 1.0
+  override val accuracy = 0.75
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = false
+}
+
+class Hypnosis extends StatusMove with NonVolatileStatusChange {
+  override val index = 95
+  override val type1 = Psychic
+  override val maxPP = 15
+  override val statusAilmentToCause = new SLP
+  override val chanceOfCausingAilment = 1.0
+  override val accuracy = 0.60
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = true
+}
+
+class PoisonGas extends StatusMove with NonVolatileStatusChange {
+  override val index = 139
+  override val type1 = Poison
+  override val maxPP = 40
+  override val statusAilmentToCause = new PSN
+  override val chanceOfCausingAilment = 1.0
+  override val accuracy = 0.55
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = true
+}
+
+// STATUS: VOLATILE STATUS CHANGE
+class ConfuseRay extends StatusMove with VolatileStatusChange {
+  override val index = 109
+  override val type1 = Ghost
+  override val maxPP = 10
+  override val statusAilmentToCause = new CONFUSED
+  override val chanceOfCausingAilment = 1.0
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = false
+}
+
+class Supersonic extends StatusMove with VolatileStatusChange {
+  override val index = 48
+  override val maxPP = 20
+  override val accuracy = 0.55
+  override val statusAilmentToCause = new CONFUSED
+  override val chanceOfCausingAilment = 1.0
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = false
+}
+
+
+// STATUS: USELESS STUFF
 class Roar extends StatusMove {
   override val index = 46
   override val maxPP = 20

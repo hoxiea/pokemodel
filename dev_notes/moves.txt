@@ -28,7 +28,7 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 - CUSTOM
 = Swift: damage, unaffected by mods to accuracy and evasion; can hit Fly and Dug Pokemon
 = Psywave: deal between 0.5x and 1.5x the user's level of typeless damage
-= Hyper Beam: deal damage, then idle for a turn
+= Hyper Beam: deal damage, then idle for a turn, with weird stuff and bugs
 
 
 STATUS MOVES (any type, don't deal damage directly):
@@ -47,49 +47,26 @@ STATUS MOVES (any type, don't deal damage directly):
 = MirrorMove: use the last move used by the target, WSSC
 = Rest: restore max HP, fall asleep and awaken two turns after it's used, WSSC
 = Conversion: change the user's current types(s) to the target's current types(s) (Porygon unique move)
+= Toxic: badly poison, WSSC
 
 - Restore up to 50% of User's HP (see old code)
 = Recover: restore up to 50% of user's maxHP, WSSC
 = Softboiled: restore up to 50% of user's maxHP, WSSC
 
 THINGS THAT JUST NEED TO BE FILLED IN
-    - Change your stats:
-    = Sharpen: Attack +1 stage
-    = Meditate: Attack +1 stage
-    = SwordsDance: Attack +2 stages
-    = DefenseCurl: Defense +1 stage
-    = Withdraw: Defense +1 stage
-    = Harden: Defense +1 stage
-    = AcidArmor: Defense +2 stages
-    = Barrier: Defense +2 stages
-    = DoubleTeam: Evasion +1 stage
-    = Minimize: Evasion +1 stage
-    = Agility: Speed +2 stages
-    = Growth: Special +1 stage
-    = Amnesia: Special +2 stages
+- Change your stats:
+= Sharpen: Attack +1 stage
+= Meditate: Attack +1 stage
+= SwordsDance: Attack +2 stages
+= DefenseCurl: Defense +1 stage
+= Withdraw: Defense +1 stage
+= Harden: Defense +1 stage
+= AcidArmor: Defense +2 stages
+= Barrier: Defense +2 stages
+= DoubleTeam: Evasion +1 stage
+= Minimize: Evasion +1 stage
+= Agility: Speed +2 stages
+= Growth: Special +1 stage
+= Amnesia: Special +2 stages
 
-    - Change opponent's stats
-    = String Shot: Speed stat -1 stage
-    = SandAttack: Accuracy stat -1 stage
-    = Flash: Accuracy stat -1 stage
-    = SmokeScreen: Accuracy stat -1 stage
-    = Kinesis: Accuracy stat -1 stage
-    = Growl: Attack stat -1 stage
-    = Leer: Defense stat -1 stage
-    = Tail Whip: Defense stat -1 stage
-    = Screech: Defense stat -2 stages
-
-    - Change opponent's status (StatusChange)
-    = Thunder Wave: paralyze
-    = Stun Spore: paralyze
-    = Glare: paralyze
-    = Confuse Ray: confusion, WSSC
-    = Supersonic: confusion, WSSC
-    = Sleep Powder: sleep
-    = Spore: sleep
-    = Lovely Kiss: sleep
-    = Sing: sleep
-    = Hypnosis: sleep, WSSC
-    = Poison Gas: poison
-    = PoisonPowder: poison
-    = Toxic: badly poison, WSSC
+    

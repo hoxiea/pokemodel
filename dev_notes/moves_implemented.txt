@@ -140,3 +140,33 @@ STATUS MOVES (any type, don't deal damage directly):
 = Whirlwind: no effect whatsoever in link battles (causes battle to end in wild encounters)
 = Teleport: no effect whatsoever in link battles (causes escape in wild encounters)
 = Splash: no effect whatsoever anywhere
+
+- Change opponent's stats
+= String Shot: Speed stat -1 stage
+= SandAttack: Accuracy stat -1 stage
+= Flash: Accuracy stat -1 stage
+= SmokeScreen: Accuracy stat -1 stage
+= Kinesis: Accuracy stat -1 stage
+= Growl: Attack stat -1 stage
+= Leer: Defense stat -1 stage
+= Tail Whip: Defense stat -1 stage
+= Screech: Defense stat -2 stages
+
+- NonVolatileStatusChange
+= Thunder Wave: paralyze
+= Stun Spore: paralyze
+= Glare: paralyze
+= Sleep Powder: sleep
+= Spore: sleep
+= Lovely Kiss: sleep
+= Sing: sleep
+= Hypnosis: sleep, WSSC
+= Poison Gas: poison
+= PoisonPowder: poison
+= Toxic: badly poison, WSSC
+
+- VolatileStatusChange
+= Confuse Ray: confusion, WSSC
+= Supersonic: confusion, WSSC
+
+
