@@ -72,6 +72,7 @@ import Battle.{verbose=>VERBOSE}
  * piece of useful logic that multiple moves can take advantage of.
  *
  * For the actual instantiation of the 165 Moves, see ActualMoves.scala.
+ * See also MoveMaker.scala.
  */
 
 // TODO: Any move that can cause a stat change to opponent needs to make sure that the opponent's stats can change via the battle's statManager
@@ -981,3 +982,96 @@ trait GainPropDamageDealt extends Move {
   }
 }
 
+
+trait ViolentStruggle extends Move {
+  /*
+   * This trait captures the behavior of Thrash and PetalDance in Gen 1
+   * TODO: Fill this in
+   */
+
+  abstract override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+trait WaitThenAttack extends Move {
+  /*
+   * This trait captures the behavior of SkyAttack, SkullBash, SolarBeam, and
+   * RazorWind in Gen1. Also Fly and Dig, though those two make most Moves
+   * miss.
+   * TODO: Fill this in. These are mostly registration moves, so find some way
+   *       to sign them up to the correct data structure
+   */
+
+  abstract override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+
+trait PartiallyTrapping extends Move {
+  /*
+   * This trait captures the behavior of Bind, Wrap, Clam, and FireSpin
+   * in Gen1.
+   *
+   * TODO: Fill this in. These are mostly registration moves, so find some way
+   *       to sign them up to the correct data structure
+   */
+
+  abstract override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+trait RestoreHP extends Move {
+  /*
+   * This trait captures the behavior of Recover and Softboiled in Gen 1
+   *
+   * TODO: Fill this in.
+   */
+
+  abstract override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    // TODO: make sure this is all kosher... need currentHP() call, for example
+    // val currentHP = attacker.currentHP
+    // val maxHP = attacker.maxHP
+    // if (currentHP > maxHP) {
+    //   attacker.currentHP = maxHP
+    // } else if (currentHP == maxHP) {
+    //   // no recovering necessary
+    // } else if (Battle.recoverBugEnabled && ((maxHP - currentHP) + 1) % 256 == 0) {
+    //   // bug - do nothing!
+    // } else {
+    //   val hpToHeal = maxHP / 2
+    //   attacker.gainHP(hpToHeal)
+    // }
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}

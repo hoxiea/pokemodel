@@ -241,7 +241,7 @@ class Counter extends PhysicalMove {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val result = new MoveResultBuilder().moveIndex(index)
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
 
@@ -667,6 +667,158 @@ class JumpKick extends PhysicalMove with SingleStrikeLoseHPOnMiss {
 }
 
 
+/* PHYSICAL, CUSTOM AND WEIRD */
+class Bide extends PhysicalMove {
+  override val index = 117
+  override val maxPP = 10
+  override val priority = 1
+  // no accurary: works pretty much everywhere
+  // no power: absorbs damage, then deals it back
+  // Normal type
+
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+class Rage extends PhysicalMove {
+  override val index = 99
+  override val maxPP = 20
+  override val power = 20
+  // Normal, 100 accuracy
+
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+class Thrash extends PhysicalMove with ViolentStruggle {
+  override val index = 37
+  override val maxPP = 10
+  override val power = 120
+  // Normal, 100 accuracy
+}
+
+class PetalDance extends SpecialMove with ViolentStruggle {
+  // TODO: Move to SpecialMove section
+  override val index = 80
+  override val type1 = Grass
+  override val maxPP = 10
+  override val power = 120
+  // 100 accuracy
+}
+
+class SkyAttack extends PhysicalMove with WaitThenAttack {
+  override val index = 143
+  override val type1 = Flying
+  override val maxPP = 5
+  override val power = 140
+  override val accuracy = 0.95
+}
+
+class SkullBash extends PhysicalMove with WaitThenAttack {
+  override val index = 130
+  override val maxPP = 10
+  override val power = 130
+  // Normal, accuracy 100
+}
+
+class SolarBeam extends SpecialMove with WaitThenAttack {
+  // TODO: Move into SpecialMove section
+  override val index = 76
+  override val type1 = Grass
+  override val maxPP = 10
+  override val power = 120
+  // accuracy 100
+}
+
+class RazorWind extends PhysicalMove with WaitThenAttack {
+  // What an awful move, compared to the other WaitThenAttacks
+  override val index = 13
+  override val maxPP = 10
+  override val power = 80
+  override val accuracy = 0.75   // much higher later
+  // Normal
+}
+
+class Fly extends PhysicalMove with WaitThenAttack {
+  override val index = 19
+  override val type1 = Flying
+  override val maxPP = 15
+  override val power = 90
+  override val accuracy = 0.95
+}
+
+class Dig extends PhysicalMove with WaitThenAttack {
+  override val index = 91
+  override val type1 = Ground
+  override val maxPP = 10
+  override val power = 100  // lower in later games
+  // 100 accuracy
+}
+
+class HyperBeam extends PhysicalMove {
+  override val index = 63
+  override val maxPP = 5
+  override val power = 150
+  override val accuracy = 0.9
+  // TODO: Implement HyperBeam
+}
+
+class Bind extends PhysicalMove with PartiallyTrapping {
+  override val index = 20
+  override val maxPP = 20
+  override val power = 15
+  override val accuracy = 0.85
+  // Normal
+}
+
+class Wrap extends PhysicalMove with PartiallyTrapping {
+  override val index = 35
+  override val maxPP = 20
+  override val power = 15
+  override val accuracy = 0.9
+  // Normal
+}
+
+class Clamp extends SpecialMove with PartiallyTrapping {
+  // TODO: Move to Special section
+  override val index = 128
+  override val type1 = Water
+  override val maxPP = 10
+  override val power = 35
+  override val accuracy = 0.75  // higher later
+}
+
+class FireSpin extends SpecialMove with PartiallyTrapping {
+  // TODO: Move to Special section
+  override val index = 83
+  override val type1 = Fire
+  override val maxPP = 15
+  override val power = 15
+  override val accuracy = 0.70
+}
+
+class Swift extends PhysicalMove {
+  override val index = 129
+  override val maxPP = 20
+  override val power = 60
+}
+
 /******** SPECIAL MOVES ********/
 // SPECIAL, SINGLE STRIKE
 class HydroPump extends SpecialMove with SingleStrike {
@@ -961,25 +1113,6 @@ class BubbleBeam extends SpecialMove with EnemyStatChange with SingleStrike {
 }
 
 
-// SPECIAL, WEIRD
-class NightShade extends SpecialMove with DamageEqualsUserLevel {
-  override val index = 101
-  override val type1 = Ghost
-  override val maxPP = 15
-  // no power, 100% accuracy
-}
-
-// class Psywave extends SpecialMove {
-//   override val index = 149
-//   override val type1 = Psychic
-//   override val power = 0
-//   override val maxPP = 15
-
-//   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-//     // TODO: Fill in Psywave implementation
-//   }
-// }
-
 /* ----------------------------- */
 /* SPECIAL, STRIKE + TRANSFER HP */
 /* ----------------------------- */
@@ -1006,6 +1139,23 @@ class DreamEater extends SpecialMove with GainPropDamageDealt with SingleStrike 
   override val maxPP = 15
   override def requiredStatusAilments: Set[StatusAilment] = Set(SLP())
   // 100% accuracy
+}
+
+
+// SPECIAL, WEIRD
+class NightShade extends SpecialMove with DamageEqualsUserLevel {
+  override val index = 101
+  override val type1 = Ghost
+  override val maxPP = 15
+  // no power, 100% accuracy
+}
+
+class Psywave extends SpecialMove {
+  override val index = 149
+  override val type1 = Psychic
+  override val power = 0
+  override val maxPP = 15
+  // TODO: Fill in Psywave implementation
 }
 
 
@@ -1141,15 +1291,6 @@ class Flash extends StatusMove with EnemyStatChange {
   override val soloStatChange = true
 }
 
-class SmokeScreen extends StatusMove with EnemyStatChange {
-  override val index = 108
-  override val maxPP = 20
-  override val statToChange = ACCURACY
-  override val amountToChangeBy = -1
-  override val chanceOfStatChange = 1.0
-  override val soloStatChange = true
-}
-
 class Kinesis extends StatusMove with EnemyStatChange {
   override val index = 134
   override val type1 = Psychic
@@ -1194,6 +1335,16 @@ class Screech extends StatusMove with EnemyStatChange {
   override val accuracy = 0.85
   override val statToChange = DEFENSE
   override val amountToChangeBy = -2
+  override val chanceOfStatChange = 1.0
+  override val soloStatChange = true
+}
+
+class Smokescreen extends StatusMove with EnemyStatChange {
+  override val index = 108
+  override val maxPP = 20
+  // Normal, 100 accuracy
+  override val statToChange = ACCURACY
+  override val amountToChangeBy = -1
   override val chanceOfStatChange = 1.0
   override val soloStatChange = true
 }
@@ -1396,6 +1547,219 @@ class Conversion extends StatusMove {
   }
 }
 
+class Disable extends StatusMove {
+  override val index = 50
+  override val maxPP = 20
+  // TODO: Fill in Disable
+}
+
+class Mist extends StatusMove {
+  override val index = 54
+  override val type1 = Ice
+  override val maxPP = 30
+  // accuracy 1.0
+  // TODO: fill in Mist
+}
+
+class LeechSeed extends StatusMove {
+  override val index = 73
+  override val type1 = Grass
+  override val maxPP = 10
+  override val accuracy = 0.9
+  // TODO: implement LeechSeed
+}
+
+class Toxic extends StatusMove with NonVolatileStatusChange {
+  override val index = 92
+  override val type1 = Poison
+  override val maxPP = 10
+  override val accuracy = 0.85
+
+  def chanceOfCausingAilment: Double = 1.0
+  def soloStatusChange: Boolean = true
+  def statusAilmentToCause: pokemodel.NonVolatileStatusAilment = new BPSN()
+  def worksWhenSubPresent: Boolean = true
+}
+
+class Mimic extends StatusMove {
+  override val index = 102
+  override val maxPP = 10
+  // TODO: implement Mimic
+}
+
+class Recover extends StatusMove with RestoreHP {
+  override val index = 105
+  override val maxPP = 10
+}
+
+class Softboiled extends StatusMove with RestoreHP {
+  override val index = 135
+  override val maxPP = 10
+}
+
+class Haze extends StatusMove {
+  override val index = 114
+  override val type1 = Ice
+  override val maxPP = 30
+  // TODO: implement Haze
+
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    // http://bulbapedia.bulbagarden.net/wiki/Haze_(move)
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+
+    // reset the stat levels of both active Pokemon to 0
+    pb.statManager.resetAll(attacker)
+    pb.statManager.resetAll(defender)
+
+    // TODO: fill in all the crazy stuff that Haze does
+    // remove the stat reductions due to BRN/PAR
+
+    // negate Focus Energy for both active Pokemon
+
+    // negate Leech Seed for both active Pokemon
+
+    // negate Light Screen for both active Pokemon
+
+    // negate Mist for both active Pokemon
+
+    // negate Reflect for both active Pokemon
+
+    // negate confusion for both active Pokemon
+
+    // negate Leech Seed for both active Pokemon
+
+    // negate any major status ailments for THE ENEMY
+
+    // Superweird thing that happens if an opponent is trying to use Hyper
+    // Beam, then gets frozen, and then Haze unfreezes him
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+class FocusEnergy extends StatusMove {
+  override val index = 116
+  override val maxPP = 30
+  // TODO: implement FocusEnergy, very doable
+}
+
+class Metronome extends StatusMove {
+  override val index = 118
+  override val maxPP = 20
+
+  // TODO: implement Metronome
+  private def getValidIndex() : Int = {
+      val potentialIndex = Utils.intBetween(1, 165 + 1)
+      if (potentialIndex != index && potentialIndex != 165) potentialIndex
+      else getValidIndex()
+  }
+}
+
+class Rest extends StatusMove {
+  override val index = 156
+  override val type1 = Psychic
+  override val maxPP = 10
+
+  // TODO: implement Rest, probably in the sleeping data structure
+  // http://bulbapedia.bulbagarden.net/wiki/Rest_(move)
+  // On the turn that the Pokemon uses it: switch to SLP, regain all HP
+  // Next turn: Pokemon is asleep, can Switch; choosing Fight causes it to tell you that Pokemon is asleep
+  // Next turn: wake up at beginning of turn, can use an action
+}
+
+class MirrorMove extends StatusMove {
+  override val index = 119
+  override val type1 = Flying
+  override val maxPP = 20
+
+  // TODO: implement MirrorMove
+  /*
+   * MirrorMove would get the updateLastMoveIndex wrong, since the order would be:
+   * MirrorMove.startUsingMove()
+   * MirrorMove.moveSpecificStuff()   => uses Move m
+   *   m.startUsingMove()
+   *   m.moveSpecificStuff()
+   *   m.finishUsingMove()            => sets lastMoveUsed to the correct value
+   * Move.finishUsingMove()     => sets it back to incorrect value
+   * So just don't update lastMoveUsed after calling MirrorMove!
+   */
+  // override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  //   currentPP -= 1
+  // }
+}
+
+class Transform extends StatusMove {
+  override val index = 144
+  override val maxPP = 10
+  // TODO: implement Transform
+  // override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  //   // http://bulbapedia.bulbagarden.net/wiki/Transform_(move)
+  //   // http://www.smogon.com/rb/moves/Transform
+
+  //   // Change the user's current type to that of the target
+  //   attacker.type1 = defender.type1
+  //   attacker.type2 = defender.type2
+
+  //   // Change the user's current stats to that of the target
+  //   // TODO: which stats, exactly, are duplicated? EV? IV? attack/defense?
+
+  //   // Change the user's current stat modifications to that of the target
+  //   pb.statManager.setAttackStage(attacker, pb.statManager.attackStages(defender))
+  //   pb.statManager.setDefenseStage(attacker, pb.statManager.defenseStages(defender))
+  //   pb.statManager.setSpecialStage(attacker, pb.statManager.specialStages(defender))
+  //   pb.statManager.setSpeedStage(attacker, pb.statManager.speedStages(defender))
+  //   pb.statManager.setAccuracyStage(attacker, pb.statManager.accuracyStages(defender))
+  //   pb.statManager.setEvasionStage(attacker, pb.statManager.evasionStages(defender))
+
+  //   // Change the user's current moves to those of the target
+  //   val move1 = defender.move1 match {
+  //     case None => None
+  //     case Some(m) => {
+  //       val newMove = MoveMaker.makeMove(m.index)
+  //       newMove.maxPP = 5
+  //       newMove.currentPP = 5
+  //       newMove
+  //     }
+  //   }
+  //   val move2 = defender.move2 match {
+  //     case None => None
+  //     case Some(m) => {
+  //       val newMove = MoveMaker.makeMove(m.index)
+  //       newMove.maxPP = 5
+  //       newMove.currentPP = 5
+  //       newMove
+  //     }
+  //   }
+  //   val move3 = defender.move3 match {
+  //     case None => None
+  //     case Some(m) => {
+  //       val newMove = MoveMaker.makeMove(m.index)
+  //       newMove.maxPP = 5
+  //       newMove.currentPP = 5
+  //       newMove
+  //     }
+  //   }
+  //   val move4 = defender.move4 match {
+  //     case None => None
+  //     case Some(m) => {
+  //       val newMove = MoveMaker.makeMove(m.index)
+  //       newMove.maxPP = 5
+  //       newMove.currentPP = 5
+  //       newMove
+  //     }
+  //   }
+  // }
+}
+
+class Substitute extends StatusMove {
+  override val index = 164
+  override val maxPP = 10
+  // TODO: call Pokemon methods that create a substitute
+}
 
 // STATUS: USELESS STUFF
 class Roar extends StatusMove {
