@@ -80,7 +80,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   private val focusEnergySet = mutable.Set[Pokemon]()
   private val reflectSet     = mutable.Set[Pokemon]()
   private val lightScreenSet = mutable.Set[Pokemon]()
-  private val conversionSet  = mutable.Set[Pokemon]()
 
   /* METHODS FOR INTERACTING WITH THIS STUFF */
   def tryToCauseConfusion(p: Pokemon): Boolean = {
@@ -146,8 +145,15 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
    * opponent until the user switches out.
    *
    * It doesn't do anything to existing mods
-   * It doesn't prevent the stat mods from
-   * BRN
+   * It doesn't prevent the stat mods from BRN and PAR
+   * It doesn't prevent the user from lowering its own stats
+   * It fails if you use it and already have it cast
+   * It can be removed by Haze and by switching out.
+   *
+   * The logic that actually puts Mist to work is in
+   * StatManager.canChangeDefenderStats: the attacker can change the defender's
+   * stats iff the defender doesn't have Mist cast. And EnemyStatChange checks for
+   * this before trying anything.
    */
   private val mistSet = mutable.Set[Pokemon]()
 
@@ -172,11 +178,27 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   def hasMist(p : Pokemon) : Boolean = mistSet contains p
 
 
+  /*
+   * CONVERSION
+   * This is a move that only Porygon knows.
+   * It changes his Types to be those of his opponent.
+   */
+  private val conversionSet  = mutable.Set[Pokemon]()
+
   def registerConversion(p: Pokemon): Boolean = {
     if (p.index != 137)   // Porygon
       throw new Exception("someone other than Porygon using Conversion")
     if (!conversionSet.contains(p)) conversionSet += p
     true
+  }
+
+  def deregisterConversion(p: Pokemon): Boolean = {
+    if (p.index != 137)   // Porygon
+      throw new Exception("someone other than Porygon dereg Conversion")
+    if (conversionSet.contains(p)) {
+      conversionSet -= p
+      true
+    } else false
   }
 
   def causeToFlinch(p: Pokemon): Boolean = {
