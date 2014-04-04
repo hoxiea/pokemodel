@@ -1047,9 +1047,9 @@ trait PartiallyTrapping extends Move {
 trait RestoreHP extends Move {
   /*
    * This trait captures the behavior of Recover and Softboiled in Gen 1
-   *
-   * TODO: Fill this in.
    */
+
+  def proportionToRestore = 0.5
 
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
@@ -1058,19 +1058,23 @@ trait RestoreHP extends Move {
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    // TODO: make sure this is all kosher... need currentHP() call, for example
-    // val currentHP = attacker.currentHP
-    // val maxHP = attacker.maxHP
-    // if (currentHP > maxHP) {
-    //   attacker.currentHP = maxHP
-    // } else if (currentHP == maxHP) {
-    //   // no recovering necessary
-    // } else if (Battle.recoverBugEnabled && ((maxHP - currentHP) + 1) % 256 == 0) {
-    //   // bug - do nothing!
-    // } else {
-    //   val hpToHeal = maxHP / 2
-    //   attacker.gainHP(hpToHeal)
-    // }
+
+    val currentHP = attacker.currentHP()
+    val maxHP = attacker.maxHP
+    if (currentHP > maxHP) {
+      // weird case that I doubt you'll ever find yourself in
+      attacker.toFullHealth()
+    } else if (currentHP == maxHP) {
+      // no recovering necessary
+    } else if (Glitch.recoverBugEnabled && ((maxHP - currentHP) + 1) % 256 == 0) {
+      // bug - do nothing!
+    } else {
+      // let the healing begin
+      val hpToHeal = (maxHP * proportionToRestore).toInt
+      attacker.gainHP(hpToHeal)
+      result.hpGained(hpToHeal)
+    }
+
     result.merge(mrb)
     super.moveSpecificStuff(attacker, defender, pb, result)
   }

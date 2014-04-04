@@ -121,6 +121,9 @@ class Pokemon(builder : PokemonBuilder) {
     // If you have a substitute, it should absorb damage
     require(0 <= damage && damage <= currentHP(),
         "Don't expect Pokemon.takeDamage to truncate for you!")
+
+    // TODO: doesn't actually bypass Sub!
+
     subHP match {
       case Some(sHP) => {
         if (sHP > damage) {
@@ -142,6 +145,7 @@ class Pokemon(builder : PokemonBuilder) {
   }
 
   def gainHP(amount : Int) { currHP = maxHP min (currHP + amount) }
+  def toFullHealth() = { currHP = maxHP }
 
   def heal() {
     currHP = maxHP

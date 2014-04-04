@@ -1782,5 +1782,3 @@ class Splash extends StatusMove {
   override val index = 150
   override val maxPP = 40
 }
-
-
