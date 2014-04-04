@@ -232,6 +232,6 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   // Can attacker change the battle stats of defender in Battle pb?
   def canChangeDefenderStats(attacker: Pokemon, defender: Pokemon, pb: Battle): Boolean = {
     // TODO: when is a Pokemon immune to stat-changing moves? Mist
-    !pb.statusManager.hasMist(defender)
+    !pb.weirdMoveStatusManager.hasMist(defender)
   }
 }

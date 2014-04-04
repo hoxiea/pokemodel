@@ -10,10 +10,11 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   val team2 = trainer2.team
 
   // Create and register various managers and calculators for this battle
-  val statManager = new BattleStatManager(team1, team2)
-  val moveManager = new BattleMoveManager(team1, team2)
-  val statusManager = new BattleStatusManager(team1, team2)
-  val moveHistory = new MoveHistory()
+  val statManager = new BattleStatManager(team1, team2)  // temporary battle stats
+  val moveManager = new BattleMoveManager(team1, team2)  // keeps track of the last move used by each Pokemon
+  val statusManager = new BattleStatusManager(team1, team2)  // track SLP and VSAs
+  val moveHistory = new MoveHistory()    // MoveResult repository
+  val weirdMoveStatusManager = new WeirdMoveStatusManager(team1, team2)  // track weird moves
   val dc = new DamageCalculator()
 
   var time: Int = 0

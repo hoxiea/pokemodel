@@ -1566,7 +1566,7 @@ class Mist extends StatusMove {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    val success = pb.statusManager.tryToRegisterMist(attacker)
+    val success = pb.weirdMoveStatusManager.tryToRegisterMist(attacker)
     if (success)
       result.numTimesHit(1)
     result.merge(mrb)
@@ -1657,7 +1657,19 @@ class Haze extends StatusMove {
 class FocusEnergy extends StatusMove {
   override val index = 116
   override val maxPP = 30
-  // TODO: implement FocusEnergy, very doable
+
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    val success = pb.weirdMoveStatusManager.tryToRegisterFocusEnergy(attacker)
+    if (success)
+      result.numTimesHit(1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
 }
 
 class Metronome extends StatusMove {

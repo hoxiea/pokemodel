@@ -193,3 +193,4 @@ STATUS MOVES (any type, don't deal damage directly):
 = LightScreen: double the user's Special when the opponent damages the user with a special move, WSSC
 = Conversion: change the user's current types(s) to the target's current types(s) (Porygon unique move)
 = Mist: protect user from future stat mods until he's switched out or faints
+= Focus Energy: multiply the user's Crit Hit ratio by 4 (except in Gen 1 it divided by 4 instead)

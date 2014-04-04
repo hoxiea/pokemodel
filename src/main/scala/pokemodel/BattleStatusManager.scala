@@ -77,7 +77,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   private val digSet  = mutable.Set[Pokemon]()
 
   // Modifying moves
-  private val focusEnergySet = mutable.Set[Pokemon]()
   private val reflectSet     = mutable.Set[Pokemon]()
   private val lightScreenSet = mutable.Set[Pokemon]()
 
@@ -139,67 +138,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     }
   }
 
-  /*
-   * MIST
-   * This StatusMove protects the user from stat modifications inflicted by the
-   * opponent until the user switches out.
-   *
-   * It doesn't do anything to existing mods
-   * It doesn't prevent the stat mods from BRN and PAR
-   * It doesn't prevent the user from lowering its own stats
-   * It fails if you use it and already have it cast
-   * It can be removed by Haze and by switching out.
-   *
-   * The logic that actually puts Mist to work is in
-   * StatManager.canChangeDefenderStats: the attacker can change the defender's
-   * stats iff the defender doesn't have Mist cast. And EnemyStatChange checks for
-   * this before trying anything.
-   */
-  private val mistSet = mutable.Set[Pokemon]()
-
-  def tryToRegisterMist(p: Pokemon): Boolean = {
-    if (mistSet contains p) {
-      // no stacking involved, fails if you already have it cast
-      false
-    } else {
-      mistSet += p
-      true
-    }
-  }
-
-  def tryToRemoveMist(p: Pokemon): Boolean = {
-    // Useful for Haze
-    if (mistSet contains p) {
-      mistSet -= p
-      true
-    } else false
-  }
-
-  def hasMist(p : Pokemon) : Boolean = mistSet contains p
-
-
-  /*
-   * CONVERSION
-   * This is a move that only Porygon knows.
-   * It changes his Types to be those of his opponent.
-   */
-  private val conversionSet  = mutable.Set[Pokemon]()
-
-  def registerConversion(p: Pokemon): Boolean = {
-    if (p.index != 137)   // Porygon
-      throw new Exception("someone other than Porygon using Conversion")
-    if (!conversionSet.contains(p)) conversionSet += p
-    true
-  }
-
-  def deregisterConversion(p: Pokemon): Boolean = {
-    if (p.index != 137)   // Porygon
-      throw new Exception("someone other than Porygon dereg Conversion")
-    if (conversionSet.contains(p)) {
-      conversionSet -= p
-      true
-    } else false
-  }
 
   def causeToFlinch(p: Pokemon): Boolean = {
     /*
@@ -213,10 +151,8 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     true  // TODO: this could be better, but it's not far off
   }
 
-  def hasFocusEnergy(p : Pokemon) : Boolean = focusEnergySet contains p
   def hasReflect(p : Pokemon) : Boolean = reflectSet contains p
   def hasLightScreen(p : Pokemon) : Boolean = lightScreenSet contains p
-  def usedConversion(p: Pokemon) = conversionSet contains p
 
   def canBeHit(p: Pokemon): Boolean = {
     !flySet.contains(p) && !digSet.contains(p)
@@ -226,8 +162,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     // TODO: take care of everything that needs to be removed, zeroed, etc. when Pokemon p switches out of battle
     if (reflectSet.contains(p)) reflectSet -= p
     if (lightScreenSet.contains(p)) lightScreenSet -= p
-    tryToRemoveMist(p)
-    if (usedConversion(p)) p.resetTypes()
   }
 
   def processTurnStart() = {

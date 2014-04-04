@@ -186,13 +186,15 @@ class DamageCalculator {
       defender: Pokemon,
       move: Move,
       battle: Battle): Double = {
+
     val criticalChance = move.critHitRate match {
       case NEVER  => 0.0   // for testing purposes
       case LOW    => PokeData.getBaseSpeed(attacker.index).toDouble / 512
       case HIGH   => PokeData.getBaseSpeed(attacker.index).toDouble / 64
       case ALWAYS => 1.0
     }
-    if (battle.statusManager.hasFocusEnergy(attacker)) {
+
+    if (battle.weirdMoveStatusManager.hasFocusEnergy(attacker)) {
       if (Glitch.focusEnergyHelps) criticalChance * 4
       else criticalChance / 4
     } else criticalChance
