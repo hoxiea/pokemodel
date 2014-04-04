@@ -1558,7 +1558,7 @@ class Mist extends StatusMove {
   override val type1 = Ice
   override val maxPP = 30
 
-  // A user of mist really just needs to register itself as such 
+  // A user of mist really just needs to register itself as such
   // with the Battle.
   override def moveSpecificStuff(
       attacker: Pokemon,
@@ -1566,9 +1566,9 @@ class Mist extends StatusMove {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    attacker.changeType1(defender.type1, this)
-    attacker.changeType2(defender.type2, this)
-    result.numTimesHit(1)
+    val success = pb.statusManager.tryToRegisterMist(attacker)
+    if (success)
+      result.numTimesHit(1)
     result.merge(mrb)
     super.moveSpecificStuff(attacker, defender, pb, result)
   }

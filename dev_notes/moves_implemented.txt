@@ -192,4 +192,4 @@ STATUS MOVES (any type, don't deal damage directly):
 = Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC
 = LightScreen: double the user's Special when the opponent damages the user with a special move, WSSC
 = Conversion: change the user's current types(s) to the target's current types(s) (Porygon unique move)
-
+= Mist: protect user from future stat mods until he's switched out or faints

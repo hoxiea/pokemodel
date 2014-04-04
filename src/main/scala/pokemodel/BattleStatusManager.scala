@@ -77,7 +77,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   private val digSet  = mutable.Set[Pokemon]()
 
   // Modifying moves
-  private val mistSet        = mutable.Set[Pokemon]()
   private val focusEnergySet = mutable.Set[Pokemon]()
   private val reflectSet     = mutable.Set[Pokemon]()
   private val lightScreenSet = mutable.Set[Pokemon]()
@@ -141,6 +140,38 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     }
   }
 
+  /*
+   * MIST
+   * This StatusMove protects the user from stat modifications inflicted by the
+   * opponent until the user switches out.
+   *
+   * It doesn't do anything to existing mods
+   * It doesn't prevent the stat mods from
+   * BRN
+   */
+  private val mistSet = mutable.Set[Pokemon]()
+
+  def tryToRegisterMist(p: Pokemon): Boolean = {
+    if (mistSet contains p) {
+      // no stacking involved, fails if you already have it cast
+      false
+    } else {
+      mistSet += p
+      true
+    }
+  }
+
+  def tryToRemoveMist(p: Pokemon): Boolean = {
+    // Useful for Haze
+    if (mistSet contains p) {
+      mistSet -= p
+      true
+    } else false
+  }
+
+  def hasMist(p : Pokemon) : Boolean = mistSet contains p
+
+
   def registerConversion(p: Pokemon): Boolean = {
     if (p.index != 137)   // Porygon
       throw new Exception("someone other than Porygon using Conversion")
@@ -160,7 +191,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     true  // TODO: this could be better, but it's not far off
   }
 
-  def hasMist(p : Pokemon) : Boolean = mistSet contains p
   def hasFocusEnergy(p : Pokemon) : Boolean = focusEnergySet contains p
   def hasReflect(p : Pokemon) : Boolean = reflectSet contains p
   def hasLightScreen(p : Pokemon) : Boolean = lightScreenSet contains p
@@ -174,6 +204,7 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     // TODO: take care of everything that needs to be removed, zeroed, etc. when Pokemon p switches out of battle
     if (reflectSet.contains(p)) reflectSet -= p
     if (lightScreenSet.contains(p)) lightScreenSet -= p
+    tryToRemoveMist(p)
     if (usedConversion(p)) p.resetTypes()
   }
 
