@@ -101,11 +101,20 @@ class Pokemon(builder : PokemonBuilder) {
   }
 
   def changeType1(newType: Type, m: Move) {
-
+    if (m.index != 160) // 160 => Conversion
+      throw new Exception("something other than Conversion changing type1")
+    type1 = newType
   }
 
   def changeType2(newType: Type, m: Move) {
+    if (m.index != 160) // 160 => Conversion
+      throw new Exception("something other than Conversion changing type2")
+    type2 = newType
+  }
 
+  def resetTypes() {
+    type1 = PokeData.getType1(index)
+    type2 = PokeData.getType2(index)
   }
 
   def takeDamage(damage: Int, bypassSub: Boolean = false): TakeDamageResult = {

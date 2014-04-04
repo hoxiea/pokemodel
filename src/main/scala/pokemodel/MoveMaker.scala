@@ -123,7 +123,7 @@ object MoveMaker {
 //      case 117 => new Bide
 //      case 118 => new Metronome
 //      case 119 => new MirrorMove
-//      case 120 => new Self-Destruct
+//      case 120 => new Selfdestruct
 //      case 121 => new EggBomb
 //      case 122 => new Lick
 //      case 123 => new Smog
@@ -138,7 +138,7 @@ object MoveMaker {
 //      case 132 => new Constrict
 //      case 133 => new Amnesia
 //      case 134 => new Kinesis
-//      case 135 => new Soft-Boiled
+//      case 135 => new SoftBoiled
 //      case 136 => new HighJumpKick
 //      case 137 => new Glare
 //      case 138 => new DreamEater
@@ -170,5 +170,21 @@ object MoveMaker {
 //      case 164 => new Substitute
       case 165 => new Struggle
     }
+  }
+}
+
+object MoveDepot {
+  /*
+   * Moves are immutable objects, and now that Pokemon store their move PPs instead of
+   * bundling it up in its own member variable of a move, it makes sense for Pokemon
+   * to store move indices instead of Moves to reduce the memory footprint. The MoveDepot
+   * will hold the canonical implementation of each Move in the game.
+   *
+   * Note that it's still sometimes useful to be able to create a new copy of a move and
+   * use it. Metronome, for example, takes advantage of this functionality. But 99% of
+   * the time, the Move in MoveDepot should be what you're looking for.
+   */
+  def apply(moveIndex : Int) = {
+    require(1 <= moveIndex && moveIndex <= 165, "illegal move index passed to makeMove")
   }
 }

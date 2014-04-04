@@ -1377,6 +1377,25 @@ class LightScreen extends StatusMove {
   }
 }
 
+class Conversion extends StatusMove {
+  override val index = 160
+  override val maxPP = 30
+  // Normal, accuracy irrelevant, power irrelevant
+
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    attacker.changeType1(defender.type1, this)
+    attacker.changeType2(defender.type2, this)
+    result.numTimesHit(1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
 
 // STATUS: USELESS STUFF
 class Roar extends StatusMove {

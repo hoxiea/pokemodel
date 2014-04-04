@@ -81,6 +81,7 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   private val focusEnergySet = mutable.Set[Pokemon]()
   private val reflectSet     = mutable.Set[Pokemon]()
   private val lightScreenSet = mutable.Set[Pokemon]()
+  private val conversionSet  = mutable.Set[Pokemon]()
 
   /* METHODS FOR INTERACTING WITH THIS STUFF */
   def tryToCauseConfusion(p: Pokemon): Boolean = {
@@ -140,6 +141,13 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     }
   }
 
+  def registerConversion(p: Pokemon): Boolean = {
+    if (p.index != 137)   // Porygon
+      throw new Exception("someone other than Porygon using Conversion")
+    if (!conversionSet.contains(p)) conversionSet += p
+    true
+  }
+
   def causeToFlinch(p: Pokemon): Boolean = {
     /*
      * Technically, only the first Pokemon to make a move during a turn can be affected by Flinch.
@@ -156,6 +164,7 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   def hasFocusEnergy(p : Pokemon) : Boolean = focusEnergySet contains p
   def hasReflect(p : Pokemon) : Boolean = reflectSet contains p
   def hasLightScreen(p : Pokemon) : Boolean = lightScreenSet contains p
+  def usedConversion(p: Pokemon) = conversionSet contains p
 
   def canBeHit(p: Pokemon): Boolean = {
     !flySet.contains(p) && !digSet.contains(p)
@@ -165,6 +174,7 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     // TODO: take care of everything that needs to be removed, zeroed, etc. when Pokemon p switches out of battle
     if (reflectSet.contains(p)) reflectSet -= p
     if (lightScreenSet.contains(p)) lightScreenSet -= p
+    if (usedConversion(p)) p.resetTypes()
   }
 
   def processTurnStart() = {
