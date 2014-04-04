@@ -79,8 +79,8 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   // Modifying moves
   private val mistSet        = mutable.Set[Pokemon]()
   private val focusEnergySet = mutable.Set[Pokemon]()
-  private val lightScreenSet = mutable.Set[Pokemon]()
   private val reflectSet     = mutable.Set[Pokemon]()
+  private val lightScreenSet = mutable.Set[Pokemon]()
 
   /* METHODS FOR INTERACTING WITH THIS STUFF */
   def tryToCauseConfusion(p: Pokemon): Boolean = {
@@ -120,6 +120,26 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     }
   }
 
+  def tryToRegisterReflect(p: Pokemon): Boolean = {
+    if (reflectSet contains p) {
+      // no stacking involved, fails if you already have it cast
+      false
+    } else {
+      reflectSet += p
+      true
+    }
+  }
+
+  def tryToRegisterLightScreen(p: Pokemon): Boolean = {
+    if (lightScreenSet contains p) {
+      // no stacking involved, fails if you already have it cast
+      false
+    } else {
+      lightScreenSet += p
+      true
+    }
+  }
+
   def causeToFlinch(p: Pokemon): Boolean = {
     /*
      * Technically, only the first Pokemon to make a move during a turn can be affected by Flinch.
@@ -143,6 +163,8 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
 
   def processSwitchOut(p : Pokemon) = {
     // TODO: take care of everything that needs to be removed, zeroed, etc. when Pokemon p switches out of battle
+    if (reflectSet.contains(p)) reflectSet -= p
+    if (lightScreenSet.contains(p)) lightScreenSet -= p
   }
 
   def processTurnStart() = {
@@ -158,6 +180,7 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   def processTurnEnd() = {
     // TODO: Do everything that happens when the turn ends
     flinchSet.clear()  // Flinches last for exactly 1 turn
+    // TODO: Go through everything that's counting turns down, and decrement them
   }
 
   /*

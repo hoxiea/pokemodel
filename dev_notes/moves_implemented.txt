@@ -10,8 +10,8 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Bonemerang: 2x damage
 
 - Deal damage that's some function of the environment
-= Seismic Toss: inflict damage equal to the user's level; no STAB bonus
-= Super Fang: inflict damage equal to 50% of target's current HP, unaffected by Types
+= SeismicToss: inflict damage equal to the user's level; no STAB bonus
+= SuperFang: inflict damage equal to 50% of target's current HP, unaffected by Types
 
 - One-hit KOs
 = Fissure: 30% accuracy, inflict damage equal to target's HP; fails on faster Pokemon
@@ -54,6 +54,9 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Slash: damage, high crit hit rate
 = Crabhammer: damage, high crit hit rate
 
+- Weird Stuff
+= Counter: wait until opponent attacks (low priority), then return twice damage dealt from certain types, WSSC
+
 - Single-strike + potential status change
 = Bite: damage and 10% chance of causing a flinch
 = Bone Club: damage and 10% chance of causing a flinch
@@ -87,16 +90,13 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 
 - Kill Yourself, Deal Damage
 = Explosion: deal damage, kill the user, halve the opponent's defenses, etc.
-= Self-Destruct: deal damage, kill the user, halve the opponent's defenses, etc.
+= Selfdestruct: deal damage, kill the user, halve the opponent's defenses, etc.
 
-- Weird Stuff
-= Counter: wait until opponent attacks (low priority), then return twice damage dealt from certain types, WSSC
 
 
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 = Dragon Rage: Always inflict exactly 40 damage if it hits
 = Sonic Boom: Always inflict exactly 20 damage if it hits
-= Thunder: damage, 10% chance PAR
 
 = Night Shade: deal damage equal to user's level (like SeismicToss)
 
@@ -109,6 +109,7 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 = RazorLeaf: damage, high crit hit rate
 
 - SingleStrike + StatusChange (Like Thunder)
+= Thunder: damage, 10% chance PAR
 = Thunderbolt: damage, 10% chance PAR
 = ThunderShock: damage, 10% chance PAR
 = Ember: damage, 10% chance BRN
@@ -141,6 +142,21 @@ STATUS MOVES (any type, don't deal damage directly):
 = Teleport: no effect whatsoever in link battles (causes escape in wild encounters)
 = Splash: no effect whatsoever anywhere
 
+- Change your stats:
+= Sharpen: Attack +1 stage
+= Meditate: Attack +1 stage
+= SwordsDance: Attack +2 stages
+= DefenseCurl: Defense +1 stage
+= Withdraw: Defense +1 stage
+= Harden: Defense +1 stage
+= AcidArmor: Defense +2 stages
+= Barrier: Defense +2 stages
+= DoubleTeam: Evasion +1 stage
+= Minimize: Evasion +1 stage
+= Agility: Speed +2 stages
+= Growth: Special +1 stage
+= Amnesia: Special +2 stages
+
 - Change opponent's stats
 = String Shot: Speed stat -1 stage
 = SandAttack: Accuracy stat -1 stage
@@ -163,10 +179,12 @@ STATUS MOVES (any type, don't deal damage directly):
 = Hypnosis: sleep, WSSC
 = Poison Gas: poison
 = PoisonPowder: poison
-= Toxic: badly poison, WSSC
 
 - VolatileStatusChange
 = Confuse Ray: confusion, WSSC
 = Supersonic: confusion, WSSC
 
+- Custom
+= Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC
+= LightScreen: double the user's Special when the opponent damages the user with a special move, WSSC
 

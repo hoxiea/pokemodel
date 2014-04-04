@@ -139,13 +139,13 @@ class DamageCalculator {
     // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
     val effectiveAttack = move.moveType match {
       case PHYSICALMOVE => battle.statManager.getEffectiveAttack(attacker)
-      case SPECIALMOVE  => battle.statManager.getEffectiveSpecial(attacker)
+      case SPECIALMOVE  => battle.statManager.getEffectiveSpecialAttack(attacker)
       case STATUSMOVE   => throw new Exception("A Status move called calcRegularHitDamage!")
     }
 
     val effectiveDefense = move.moveType match {
-      case PHYSICALMOVE => battle.statManager.getEffectiveDefense(defender)
-      case SPECIALMOVE  => battle.statManager.getEffectiveSpecial(defender)
+      case PHYSICALMOVE => battle.statManager.getEffectiveDefense(defender, battle)
+      case SPECIALMOVE  => battle.statManager.getEffectiveSpecialDefense(defender, battle)
       case STATUSMOVE   => throw new Exception("A Status move called calcRegularHitDamage!")
     }
 

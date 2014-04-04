@@ -1,82 +1,11 @@
 // STATUSMOVES that change the opponent's statusAilment
-class ThunderWave extends StatusMove with NonVolatileStatChange {
-  override val index = 86
-  override val type1 = Electric
-  override val maxPP = 20
-  val statusAilmentToCause = new PAR
-  val chanceOfCausingAilment = 1.0
-}
 
-class StunSpore extends StatusMove with NonVolatileStatChange {
-  override val index = 78
-  override val type1 = Grass
-  override val maxPP = 30
-  val statusAilmentToCause = new PAR
-  val chanceOfCausingAilment = 1.0
-  override val accuracy = 0.75
-}
-
-class Glare extends StatusMove with NonVolatileStatChange {
-  override val index = 137
-  override val maxPP = 30
-  val statusAilmentToCause = new PAR
-  val chanceOfCausingAilment = 1.0
-  override val accuracy = 0.75  // increased in later generations
-}
-
-class ConfuseRay extends StatusMove with VolatileStatChange {
-  override val index = 109
-  override val type1 = Ghost
-  override val maxPP = 10
-  val statusAilmentToCause = new CONFUSED
-  val chanceOfCausingAilment = 1.0
-  // TODO: ConfuseRay will fail if the target has a substitute
-}
-
-class Supersonic extends StatusMove with VolatileStatChange {
-  override val index = 48
-  override val maxPP = 20
-  val statusAilmentToCause = new CONFUSED
-  val chanceOfCausingAilment = 1.0
-  override val accuracy = 0.55
-  // TODO: Supersonic will fail if the target has a substitute
-}
-
-class SleepPowder extends StatusMove with NonVolatileStatChange {
-  override val index = 79
-  override val type1 = Grass
-  override val maxPP = 15
-  val statusAilmentToCause = new SLP
-  val chanceOfCausingAilment = 1.0
-  override val accuracy = 0.75
-  // TODO: SleepPowder will fail if the target has a substitute
-}
-
-class Hypnosis extends StatusMove with NonVolatileStatChange {
-  override val index = 95
-  override val type1 = Psychic
-  override val maxPP = 15
-  val statusAilmentToCause = new SLP
-  val chanceOfCausingAilment = 1.0
-  override val accuracy = 0.60
-}
-
-class PoisonGas extends StatusMove with NonVolatileStatChange {
-  override val index = 139
-  override val type1 = Poison
-  override val maxPP = 40
-  val statusAilmentToCause = new PSN
-  val chanceOfCausingAilment = 1.0
-  override val accuracy = 0.55
-}
-
-class Toxic extends StatusMove {
+class Toxic extends StatusMove with NonVolatileStatChange {
   override val index = 92
   override val type1 = Poison
   override val maxPP = 10
   val chancePSN = 1.0
   override val accuracy = 0.85
-
 
   override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
     // TODO: Toxic is a mess and almost surely requires a battle data structure
@@ -101,7 +30,8 @@ class MirrorMove extends StatusMove {
     }
   }
 
-  /* MirrorMove would get the updateLastMoveIndex wrong, since the order would be:
+  /*
+   * MirrorMove would get the updateLastMoveIndex wrong, since the order would be:
    * MirrorMove.startUsingMove()
    * MirrorMove.moveSpecificStuff()   => uses Move m
    *   m.startUsingMove()

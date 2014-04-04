@@ -547,7 +547,7 @@ class Twineedle extends PhysicalMove {
       // hpGained is irrelevant
       // dc.calc takes care of moveType, STAB, critHit, typeMult
       // statusChange handled above
-      result.KO(!defender.isAlive)
+      result.KO(!defender.isAlive)   // different!
       result.merge(mrb)
       super.moveSpecificStuff(attacker, defender, pb, result)
     } else {
@@ -1242,6 +1242,37 @@ class SleepPowder extends StatusMove with NonVolatileStatusChange {
   override val worksWhenSubPresent = false
 }
 
+class Spore extends StatusMove with NonVolatileStatusChange {
+  override val index = 147
+  override val type1 = Grass
+  override val maxPP = 15
+  override val statusAilmentToCause = new SLP
+  override val chanceOfCausingAilment = 1.0
+  // 100% accuracy
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = true
+}
+
+class LovelyKiss extends StatusMove with NonVolatileStatusChange {
+  override val index = 142
+  override val maxPP = 10
+  override val statusAilmentToCause = new SLP
+  override val chanceOfCausingAilment = 1.0
+  override val accuracy = 0.75
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = true
+}
+
+class Sing extends StatusMove with NonVolatileStatusChange {
+  override val index = 47
+  override val maxPP = 15
+  override val statusAilmentToCause = new SLP
+  override val chanceOfCausingAilment = 1.0
+  override val accuracy = 0.55
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = true
+}
+
 class Hypnosis extends StatusMove with NonVolatileStatusChange {
   override val index = 95
   override val type1 = Psychic
@@ -1264,6 +1295,18 @@ class PoisonGas extends StatusMove with NonVolatileStatusChange {
   override val worksWhenSubPresent = true
 }
 
+class PoisonPowder extends StatusMove with NonVolatileStatusChange {
+  override val index = 77
+  override val type1 = Poison
+  override val maxPP = 35
+  override val statusAilmentToCause = new PSN
+  override val chanceOfCausingAilment = 1.0
+  override val accuracy = 0.75
+  override val soloStatusChange = true
+  override val worksWhenSubPresent = true
+}
+
+
 // STATUS: VOLATILE STATUS CHANGE
 class ConfuseRay extends StatusMove with VolatileStatusChange {
   override val index = 109
@@ -1283,6 +1326,55 @@ class Supersonic extends StatusMove with VolatileStatusChange {
   override val chanceOfCausingAilment = 1.0
   override val soloStatusChange = true
   override val worksWhenSubPresent = false
+}
+
+
+/*
+ * STATUS: SHIELDS THAT BOOST DEFENSE
+ * These two really just need to register themselves with the appropriate Battle
+ * data structure... their logic is handled by the StatManager.
+ */
+class Reflect extends StatusMove {
+  // TODO: The effect of Reflect is ignored by self-inflicted Confusion damage
+  override val index = 115
+  override val type1 = Psychic
+  override val maxPP = 20
+  // accuracy irrelevant, power irrelevant
+
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    val success = pb.statusManager.tryToRegisterReflect(attacker)
+    if (success) {
+      result.numTimesHit(1)
+    }
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+}
+
+class LightScreen extends StatusMove {
+  override val index = 113
+  override val type1 = Psychic
+  override val maxPP = 30
+  // accuracy irrelevant, power irrelevant
+
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    val success = pb.statusManager.tryToRegisterLightScreen(attacker)
+    if (success) {
+      result.numTimesHit(1)
+    }
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
 }
 
 

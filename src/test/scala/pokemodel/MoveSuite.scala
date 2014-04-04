@@ -510,9 +510,9 @@ class MoveSuite extends FunSuite {
     val battle = new Battle(trainer1, trainer2)
 
     val result1 = charizard.useMove(1, venusaur, battle)  // hit
-    assert(battle.statManager.getEffectiveDefense(venusaur) == venusaur.defense, "first def")
+    assert(battle.statManager.getEffectiveDefense(venusaur, battle) == venusaur.defense, "first def")
     val result2 = charizard.useMove(2, venusaur, battle)  // lower defense
-    assert(battle.statManager.getEffectiveDefense(venusaur) < venusaur.defense, "second def")
+    assert(battle.statManager.getEffectiveDefense(venusaur, battle) < venusaur.defense, "second def")
     val result3 = charizard.useMove(1, venusaur, battle)  // hit again
     assert(result1.damageDealt < result3.damageDealt, "damage off")
   }

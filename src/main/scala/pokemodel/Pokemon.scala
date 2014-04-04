@@ -31,6 +31,8 @@ class Pokemon(builder : PokemonBuilder) {
   val level = builder.level
 
   // These can technically change with some really strange moves (Conversion)
+  // There are methods for interacting with them below to ensure safety...
+  // they really shouldn't change very often
   var type1 = builder.type1
   var type2 = builder.type2
 
@@ -96,6 +98,14 @@ class Pokemon(builder : PokemonBuilder) {
       case Some(hp) => hp
       case None => currHP
     }
+  }
+
+  def changeType1(newType: Type, m: Move) {
+
+  }
+
+  def changeType2(newType: Type, m: Move) {
+
   }
 
   def takeDamage(damage: Int, bypassSub: Boolean = false): TakeDamageResult = {

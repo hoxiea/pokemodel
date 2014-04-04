@@ -37,8 +37,9 @@ class BattleStatManagerSuite extends FunSuite {
     val f = fixture
     import f._
     assert(battle.statManager.getEffectiveAttack(pikachu) == 137)
-    assert(battle.statManager.getEffectiveDefense(pikachu) == 101)
-    assert(battle.statManager.getEffectiveSpecial(pikachu) == 128)
+    assert(battle.statManager.getEffectiveDefense(pikachu, battle) == 101)
+    assert(battle.statManager.getEffectiveSpecialAttack(pikachu) == 128)
+    assert(battle.statManager.getEffectiveSpecialDefense(pikachu, battle) == 128)
     assert(battle.statManager.getEffectiveSpeed(pikachu) == 190)
     assert(battle.statManager.getEffectiveAccuracy(pikachu) == 1.0)
     assert(battle.statManager.getEffectiveEvasion(pikachu) == 1.0)
@@ -57,16 +58,18 @@ class BattleStatManagerSuite extends FunSuite {
     // Looking up values manually in table at
     // http://bulbapedia.bulbagarden.net/wiki/Stats#In-battle_stats
     assert(battle.statManager.getEffectiveAttack(pikachu) == (137 * 1.5).toInt)
-    assert(battle.statManager.getEffectiveDefense(pikachu) == (101 * 2.0).toInt)
-    assert(battle.statManager.getEffectiveSpecial(pikachu) == (128 * 2.5).toInt)
+    assert(battle.statManager.getEffectiveDefense(pikachu, battle) == (101 * 2.0).toInt)
+    assert(battle.statManager.getEffectiveSpecialAttack(pikachu) == (128 * 2.5).toInt)
+    assert(battle.statManager.getEffectiveSpecialDefense(pikachu, battle) == (128 * 2.5).toInt)
     assert(battle.statManager.getEffectiveSpeed(pikachu) == (190 * 0.333).toInt)
     assert(battle.statManager.getEffectiveAccuracy(pikachu) == (1.0 * 3.0/8).toInt)
     assert(battle.statManager.getEffectiveEvasion(pikachu) == (1.0 * 3.0).toInt)
 
     battle.statManager.resetAll(pikachu)
     assert(battle.statManager.getEffectiveAttack(pikachu) == 137)
-    assert(battle.statManager.getEffectiveDefense(pikachu) == 101)
-    assert(battle.statManager.getEffectiveSpecial(pikachu) == 128)
+    assert(battle.statManager.getEffectiveDefense(pikachu, battle) == 101)
+    assert(battle.statManager.getEffectiveSpecialAttack(pikachu) == 128)
+    assert(battle.statManager.getEffectiveSpecialDefense(pikachu, battle) == 128)
     assert(battle.statManager.getEffectiveSpeed(pikachu) == 190)
     assert(battle.statManager.getEffectiveAccuracy(pikachu) == 1.0)
     assert(battle.statManager.getEffectiveEvasion(pikachu) == 1.0)
@@ -122,13 +125,13 @@ class BattleStatManagerSuite extends FunSuite {
 
     battle.statManager.changeAttackStage(pikachu, 6)
     assert(battle.statManager.getEffectiveAttack(pikachu) == (137 * 4.0).toInt)
-    battle.statManager.changeAttackStage(pikachu, 1)   // push above 6
+    battle.statManager.changeAttackStage(pikachu, 2)   // push above 6
     assert(battle.statManager.getEffectiveAttack(pikachu) == (137 * 4.0).toInt) // unchanged
 
     battle.statManager.changeDefenseStage(pikachu, -6)
-    assert(battle.statManager.getEffectiveDefense(pikachu) == (101 * 2.0/8).toInt)
-    battle.statManager.changeDefenseStage(pikachu, -1)   // push below -6
-    assert(battle.statManager.getEffectiveDefense(pikachu) == (101 * 2.0/8).toInt) // unchanged
+    assert(battle.statManager.getEffectiveDefense(pikachu, battle) == (101 * 2.0/8).toInt)
+    battle.statManager.changeDefenseStage(pikachu, -2)   // push below -6
+    assert(battle.statManager.getEffectiveDefense(pikachu, battle) == (101 * 2.0/8).toInt) // unchanged
   }
 
   test("Basic tests with Venusaur instead of Pikachu") {
@@ -137,16 +140,24 @@ class BattleStatManagerSuite extends FunSuite {
 
     val level50MaxedVenusaurAttack  = 133
     val level50MaxedVenusaurSpecial = 151
-    assert(battle.statManager.getEffectiveAttack(venusaur) == level50MaxedVenusaurAttack)
+    assert(battle.statManager.getEffectiveAttack(venusaur) ==
+           level50MaxedVenusaurAttack)
 
     battle.statManager.changeAttackStage(venusaur, 6)
-    assert(battle.statManager.getEffectiveAttack(venusaur) == (level50MaxedVenusaurAttack * 4.0).toInt)
+    assert(battle.statManager.getEffectiveAttack(venusaur) ==
+          (level50MaxedVenusaurAttack * 4.0).toInt)
 
     battle.statManager.changeSpecialStage(venusaur, 3)
-    assert(battle.statManager.getEffectiveSpecial(venusaur) == (level50MaxedVenusaurSpecial * 5.0/2).toInt)
+    assert(battle.statManager.getEffectiveSpecialAttack(venusaur) ==
+          (level50MaxedVenusaurSpecial * 5.0/2).toInt)
+    assert(battle.statManager.getEffectiveSpecialDefense(venusaur, battle) ==
+          (level50MaxedVenusaurSpecial * 5.0/2).toInt)
 
     battle.statManager.changeSpecialStage(venusaur, -3)
-    assert(battle.statManager.getEffectiveSpecial(venusaur) == level50MaxedVenusaurSpecial)
+    assert(battle.statManager.getEffectiveSpecialAttack(venusaur) ==
+           level50MaxedVenusaurSpecial)
+    assert(battle.statManager.getEffectiveSpecialDefense(venusaur, battle) ==
+           level50MaxedVenusaurSpecial)
   }
 
   // TODO: test weird stat changes with BRN and PAR

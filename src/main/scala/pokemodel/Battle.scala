@@ -3,6 +3,8 @@ package pokemodel
 import Type._
 import scala.collection.mutable
 
+// TODO: If OneHitKO succeeds, print "One hit KO!"
+
 class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   val team1 = trainer1.team
   val team2 = trainer2.team

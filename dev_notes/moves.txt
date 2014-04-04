@@ -1,7 +1,15 @@
 PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 - CUSTOM
-= Bide: wait for 2-3 turns, then deal twice the damage you received during that waiting period. No STAB. Unaffected by accuracy, can hit Fly/Dug opponents, can hit Ghosts
-= Rage: deals damage, user can't do anything except Rage until faint or battle ends. Every time user is damaged by Attack or targeted by Disable, Attack stat increases one stage (multiple times for multi-strike attacks). Stops increasing Attack stage at +6, and doesn't boost Attack stat past 999
+Bide
+For 2-3 turns (chosen 50=50), your options are to switch (negating everything) or to stay in a holding pattern
+Then deal twice the damage you received during that waiting period. 
+Text: "${pokemon.name} unleashed energy!"
+No STAB or type effectiveness. 
+Unaffected by accuracy/evasion, can hit Fly/Dug opponents, can hit Ghosts
+
+Rage
+Lose control of your Pokemon
+Deals damage, user can't do anything except Rage until faint or battle ends. Every time user is damaged by Attack or targeted by Disable, Attack stat increases one stage (multiple times for multi-strike attacks). Stops increasing Attack stage at +6, and doesn't boost Attack stat past 999
 
 - Deal damage for a while, then suffer from confusion
 = Thrash: deal damage for 3-4 turns, user can't do anything else, then become confused
@@ -23,11 +31,10 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Fire Spin: see Bind, but SpecialMove
 
 
-
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 - CUSTOM
 = Swift: damage, unaffected by mods to accuracy and evasion; can hit Fly and Dug Pokemon
-= Psywave: deal between 0.5x and 1.5x the user's level of typeless damage
+= Psywave (stub exists, is commented): deal between 0.5x and 1.5x the user's level of typeless damage
 = Hyper Beam: deal damage, then idle for a turn, with weird stuff and bugs
 
 
@@ -35,8 +42,6 @@ STATUS MOVES (any type, don't deal damage directly):
 - CUSTOM
 = LeechSeed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
 = Focus Energy: multiply the user's Crit Hit ratio by 4 (except it was buggy in Gen 1 and divided by 4 instead)
-= Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC
-= LightScreen: double the user's Special when the opponent damages the user with a special move, WSSC
 = Haze: seems to just reset all stat changes, and status changes, and other stuff
 = Mist: protect user from future stat mods until he's switched out or faints
 = Disable: disable one randomly selected move of the opponent's with PP > 0 for 0-6 attempts to execute an attack
@@ -52,21 +57,3 @@ STATUS MOVES (any type, don't deal damage directly):
 - Restore up to 50% of User's HP (see old code)
 = Recover: restore up to 50% of user's maxHP, WSSC
 = Softboiled: restore up to 50% of user's maxHP, WSSC
-
-THINGS THAT JUST NEED TO BE FILLED IN
-- Change your stats:
-= Sharpen: Attack +1 stage
-= Meditate: Attack +1 stage
-= SwordsDance: Attack +2 stages
-= DefenseCurl: Defense +1 stage
-= Withdraw: Defense +1 stage
-= Harden: Defense +1 stage
-= AcidArmor: Defense +2 stages
-= Barrier: Defense +2 stages
-= DoubleTeam: Evasion +1 stage
-= Minimize: Evasion +1 stage
-= Agility: Speed +2 stages
-= Growth: Special +1 stage
-= Amnesia: Special +2 stages
-
-    

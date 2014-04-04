@@ -82,16 +82,48 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
     }
   }
 
-  def getEffectiveDefense(p: Pokemon) : Int = {
+  def getEffectiveDefense(p: Pokemon, pb: Battle) : Int = {
     require(defenseStages.contains(p),
             s"${p.name} doesn't have a Defense stage in this battle")
-    (defenseStageToFraction(defenseStages(p)) * p.defense).toInt min 999
+    val startingValue = (defenseStageToFraction(defenseStages(p)) * p.defense).toInt
+    if (pb.statusManager.hasReflect(p)) (startingValue * 2) % 1024
+    else startingValue min 999
   }
 
-  def getEffectiveSpecial(p: Pokemon) : Int = {
+  /*
+   * Special is interesting. In Gen 1, the Special statistic is used as both
+   * the attack and defense stats when calculating a SpecialMove damage.  I
+   * implemented a getEffectiveSpecial method and didn't think twice about it.
+   *
+   * Until it came time to implement LightScreen, which doubles the defender's
+   * effective Special DEFENSE ONLY. And having just one method to access
+   * effective Special meant that, in the statManager, I couldn't distinguish
+   * between Attack and Defense cases.
+   *
+   * While the BattleStatManager didn't know if it's being asked for an
+   * effective Special Attack or effective Special Defense, the DamageCalc
+   * does. I could have implemented the LightScreen (and Reflect) logic there.
+   * But then the StatManager would be giving erroneous information if you
+   * just asked it for the effectiveSpecial(Defense) of a Pokemon if that
+   * Pokemon had LightScreen cast, plus the StatManager should be responsible
+   * for managing stats, not the DamageCalculator.
+   *
+   * Instead, I actually split Special into SpecialAttack and SpecialDefense
+   * getters. They both read from the same data structure specialStages, but
+   * the defense one is able to take LightScreen into account.
+   */
+  def getEffectiveSpecialAttack(p: Pokemon) : Int = {
     require(specialStages.contains(p),
             s"${p.name} doesn't have a Special stage in this battle")
     (specialStageToFraction(specialStages(p)) * p.special).toInt min 999
+  }
+
+  def getEffectiveSpecialDefense(p: Pokemon, pb: Battle) : Int = {
+    require(specialStages.contains(p),
+            s"${p.name} doesn't have a Special stage in this battle")
+    val startingValue = (specialStageToFraction(specialStages(p)) * p.special).toInt
+    if (pb.statusManager.hasLightScreen(p)) (startingValue * 2) % 1024
+    else startingValue min 999
   }
 
   def getEffectiveSpeed(p: Pokemon) : Int = {
