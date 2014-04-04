@@ -184,6 +184,10 @@ STATUS MOVES (any type, don't deal damage directly):
 = Confuse Ray: confusion, WSSC
 = Supersonic: confusion, WSSC
 
+- Restore up to 50% of User's HP
+= Recover: restore up to 50% of user's maxHP, WSSC
+= Softboiled: restore up to 50% of user's maxHP, WSSC
+
 - Custom / Weird
 = Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC
 = LightScreen: double the user's Special when the opponent damages the user with a special move, WSSC

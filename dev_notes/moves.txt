@@ -10,6 +10,7 @@ Unaffected by accuracy/evasion, can hit Fly/Dug opponents, can hit Ghosts
 Rage
 Lose control of your Pokemon
 Deals damage, user can't do anything except Rage until faint or battle ends. Every time user is damaged by Attack or targeted by Disable, Attack stat increases one stage (multiple times for multi-strike attacks). Stops increasing Attack stage at +6, and doesn't boost Attack stat past 999
+Weird stuff about missing and secondary effects
 
 - Deal damage for a while, then suffer from confusion
 = Thrash: deal damage for 3-4 turns, user can't do anything else, then become confused
@@ -52,7 +53,3 @@ STATUS MOVES (any type, don't deal damage directly):
 = MirrorMove: use the last move used by the target, WSSC
 = Rest: restore max HP, fall asleep and awaken two turns after it's used, WSSC
 = Toxic: badly poison, WSSC
-
-- Restore up to 50% of User's HP (see old code)
-= Recover: restore up to 50% of user's maxHP, WSSC
-= Softboiled: restore up to 50% of user's maxHP, WSSC

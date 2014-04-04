@@ -167,14 +167,11 @@ object Glitch {
   val focusEnergyHelps: Boolean = false
 
   /*
-   * In Gen 1, Recover fails if (user's maximum HP - user's current HP) is one
-   * less than a multiple of 256.  Which is stupid. This was fixed in later
-   * generations. You can fix it here if you'd like.
+   * In Gen 1, Recover and Softboiled fail if (user's maximum HP - user's
+   * current HP) is one less than a multiple of 256.  Which is stupid. This was
+   * fixed in later generations. You can fix it here if you'd like.
    */
   val recoverBugEnabled: Boolean = true
-
-  /* Soft-Boiled has the same bug as Recover does. */
-  val softboiledBugEnabled: Boolean = true
 
   /*
    * Using Explosion or Selfdestruct to break a substitute doesn't actually

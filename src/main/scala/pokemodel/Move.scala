@@ -1046,7 +1046,11 @@ trait PartiallyTrapping extends Move {
 
 trait RestoreHP extends Move {
   /*
-   * This trait captures the behavior of Recover and Softboiled in Gen 1
+   * This trait captures the behavior of Recover and Softboiled in Gen 1:
+   * Up to 50% of the user's maxHP is restored.
+   *
+   * There's a bug that makes this fail in certain numeric cases; that
+   * logic is encoded below and is controlled by the Glitch object.
    */
 
   def proportionToRestore = 0.5

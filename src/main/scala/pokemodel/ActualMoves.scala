@@ -1557,8 +1557,21 @@ class Mist extends StatusMove {
   override val index = 54
   override val type1 = Ice
   override val maxPP = 30
-  // accuracy 1.0
-  // TODO: fill in Mist
+
+  // A user of mist really just needs to register itself as such 
+  // with the Battle.
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    attacker.changeType1(defender.type1, this)
+    attacker.changeType2(defender.type2, this)
+    result.numTimesHit(1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
 }
 
 class LeechSeed extends StatusMove {
