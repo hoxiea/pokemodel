@@ -146,11 +146,12 @@ class Pokemon(builder : PokemonBuilder) {
 
   def gainHP(amount : Int) { currHP = maxHP min (currHP + amount) }
   def toFullHealth() = { currHP = maxHP }
+  def removeStatusAilment() = { statusAilment = None }
 
   def heal() {
-    currHP = maxHP
+    toFullHealth()
+    removeStatusAilment()
     subHP = None
-    statusAilment = None
     if (move1.isDefined) pp1 = Some(move1.get.maxPP)
     if (move2.isDefined) pp2 = Some(move2.get.maxPP)
     if (move3.isDefined) pp3 = Some(move3.get.maxPP)

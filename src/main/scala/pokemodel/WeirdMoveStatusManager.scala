@@ -52,6 +52,55 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   /*
+   * REFLECT
+   */
+  private val reflectSet = mutable.Set[Pokemon]()
+  def hasReflect(p : Pokemon) : Boolean = reflectSet contains p
+
+  def tryToRegisterReflect(p: Pokemon): Boolean = {
+    if (hasReflect(p)) {
+      // no stacking involved, fails if you already have it cast
+      false
+    } else {
+      reflectSet += p
+      true
+    }
+  }
+
+  def tryToRemoveReflect(p: Pokemon): Boolean = {
+    // Useful for Haze and switch out
+    if (hasReflect(p)) {
+      reflectSet -= p
+      true
+    } else false
+  }
+
+  /*
+   * LIGHTSCREEN
+   * 
+   */
+  private val lightScreenSet = mutable.Set[Pokemon]()
+  def hasLightScreen(p : Pokemon) : Boolean = lightScreenSet contains p
+
+  def tryToRegisterLightScreen(p: Pokemon): Boolean = {
+    if (hasLightScreen(p)) {
+      // no stacking involved, fails if you already have it cast
+      false
+    } else {
+      lightScreenSet += p
+      true
+    }
+  }
+
+  def tryToRemoveLightScreen(p: Pokemon): Boolean = {
+    // Useful for Haze and switch out
+    if (hasLightScreen(p)) {
+      lightScreenSet -= p
+      true
+    } else false
+  }
+
+  /*
    * CONVERSION
    * This is a move that only Porygon knows.
    * It changes his Types to be those of his opponent.
@@ -110,6 +159,8 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
    */
   def processSwitchOut(p: Pokemon) {
     tryToRemoveMist(p)
+    tryToRemoveLightScreen(p)
+    tryToRemoveReflect(p)
     if (usedConversion(p)) p.resetTypes()
     tryToDeregisterConversion(p)
   }

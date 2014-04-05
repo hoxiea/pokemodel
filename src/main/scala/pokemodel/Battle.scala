@@ -77,6 +77,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     // Process the status if not
 
     // TODO: Battles are responsible for printing move stuff, so that testing isn't clogged up with move-use info
+    // TODO: Draining from Leech Seed is done after continuing partial trapping damage and recurrent poison or burn damage.
 
     // Get submitted Actions from both players
     val team1Action = trainer1.getDecision(this)
@@ -179,4 +180,10 @@ object Glitch {
    * cause the user to faint. This was fixed in Stadium.
    */
   val suicideGlitchOn: Boolean = true
+
+  /*
+   * In Gen1, casting Haze doesn't actually cure the status ailment of the caster,
+   * even though it DOES cure the status ailment of the enemy.
+   */
+  val hazeNoStatusAilmentCureGlitch = true
 }

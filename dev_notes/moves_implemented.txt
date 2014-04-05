@@ -190,7 +190,17 @@ STATUS MOVES (any type, don't deal damage directly):
 
 - Custom / Weird
 = Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC
+= Haze: seems to just reset all stat changes, and status changes, and other stuff
 = LightScreen: double the user's Special when the opponent damages the user with a special move, WSSC
 = Conversion: change the user's current types(s) to the target's current types(s) (Porygon unique move)
 = Mist: protect user from future stat mods until he's switched out or faints
 = Focus Energy: multiply the user's Crit Hit ratio by 4 (except in Gen 1 it divided by 4 instead)
+*= LeechSeed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
+
+
+
+
+
+
+
+* Battle needs to spend a lot of time getting these effects right

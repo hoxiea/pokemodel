@@ -1498,7 +1498,7 @@ class Reflect extends StatusMove {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    val success = pb.statusManager.tryToRegisterReflect(attacker)
+    val success = pb.weirdMoveStatusManager.tryToRegisterReflect(attacker)
     if (success) {
       result.numTimesHit(1)
     }
@@ -1519,7 +1519,7 @@ class LightScreen extends StatusMove {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    val success = pb.statusManager.tryToRegisterLightScreen(attacker)
+    val success = pb.weirdMoveStatusManager.tryToRegisterLightScreen(attacker)
     if (success) {
       result.numTimesHit(1)
     }
@@ -1574,12 +1574,25 @@ class Mist extends StatusMove {
   }
 }
 
-class LeechSeed extends StatusMove {
+class LeechSeed extends StatusMove with VolatileStatusChange {
   override val index = 73
   override val type1 = Grass
   override val maxPP = 10
   override val accuracy = 0.9
-  // TODO: implement LeechSeed
+
+  /*
+   * LeechSeed is the only move in the game that causes the VSA SEEDED.
+   *
+   * Most of the logic is captured in BattleStatusManager (BSM).
+   * BSM.tryToSeed will fail on Grass Pokemon.
+   *
+   * Leech Seed can be removed by Haze or by switching.
+   */
+
+  override def statusAilmentToCause = new SEEDED()
+  override def chanceOfCausingAilment = 1.0
+  override def soloStatusChange = true
+  override def worksWhenSubPresent = true  // not true in Stadium, but true here
 }
 
 class Toxic extends StatusMove with NonVolatileStatusChange {
@@ -1614,13 +1627,13 @@ class Haze extends StatusMove {
   override val index = 114
   override val type1 = Ice
   override val maxPP = 30
-  // TODO: implement Haze
 
   override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
     // http://bulbapedia.bulbagarden.net/wiki/Haze_(move)
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
 
@@ -1628,27 +1641,46 @@ class Haze extends StatusMove {
     pb.statManager.resetAll(attacker)
     pb.statManager.resetAll(defender)
 
-    // TODO: fill in all the crazy stuff that Haze does
-    // remove the stat reductions due to BRN/PAR
+    /*
+     * TODO: remove stat reductions due to BRN/PAR? see comment below
+     * It seems like curing the enemy's statusAilment below should do that for
+     * the enemy. As for doing that for you, how long does it last for?  Does
+     * that last until you switch out? What if you get cured and then get
+     * another one?
+     */
 
     // negate Focus Energy for both active Pokemon
+    pb.weirdMoveStatusManager.tryToRemoveFocusEnergy(attacker)
+    pb.weirdMoveStatusManager.tryToRemoveFocusEnergy(defender)
 
     // negate Leech Seed for both active Pokemon
+    pb.statusManager.tryToRemoveSeeded(attacker)
+    pb.statusManager.tryToRemoveSeeded(defender)
 
     // negate Light Screen for both active Pokemon
+    pb.weirdMoveStatusManager.tryToRemoveLightScreen(attacker)
+    pb.weirdMoveStatusManager.tryToRemoveLightScreen(defender)
 
     // negate Mist for both active Pokemon
+    pb.weirdMoveStatusManager.tryToRemoveMist(attacker)
+    pb.weirdMoveStatusManager.tryToRemoveMist(defender)
 
     // negate Reflect for both active Pokemon
+    pb.weirdMoveStatusManager.tryToRemoveReflect(attacker)
+    pb.weirdMoveStatusManager.tryToRemoveReflect(defender)
 
     // negate confusion for both active Pokemon
-
-    // negate Leech Seed for both active Pokemon
+    pb.statusManager.tryToRemoveConfusion(attacker)
+    pb.statusManager.tryToRemoveConfusion(defender)
 
     // negate any major status ailments for THE ENEMY
+    if (Glitch.hazeNoStatusAilmentCureGlitch)
+      attacker.removeStatusAilment()
+    defender.removeStatusAilment()
 
-    // Superweird thing that happens if an opponent is trying to use Hyper
-    // Beam, then gets frozen, and then Haze unfreezes him
+    // TODO: the HyperBeam bug
+
+    result.numTimesHit(1)
     result.merge(mrb)
     super.moveSpecificStuff(attacker, defender, pb, result)
   }

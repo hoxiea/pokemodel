@@ -727,9 +727,10 @@ trait VolatileStatusChange extends Move {
 
   def statusAilmentToCause   : VolatileStatusAilment
   def chanceOfCausingAilment : Double
-  def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
   def soloStatusChange : Boolean
   def worksWhenSubPresent: Boolean
+
+  def statusAilmentCaused: Boolean = Random.nextDouble < chanceOfCausingAilment
 
   abstract override def moveSpecificStuff(
       attacker: Pokemon,

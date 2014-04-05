@@ -2,6 +2,7 @@ package pokemodel
 
 import scala.collection.mutable
 import Battle.{verbose => VERBOSE}
+import Type._
 
 /*
  * A BattleStatusManager keeps track of all of the various volatile/weird status and
@@ -49,7 +50,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   /*
    * Structures for tracking things that last a certain (random) number of turns
    */
-  private val confusionMap = mutable.Map[Pokemon, Int]()
   private val sleepMap     = mutable.Map[Pokemon, Int]()
   private val partiallyTrappedMap = mutable.Map[Pokemon, Int]()
 
@@ -68,7 +68,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
    */
   // Status Ailments
   private val flinchSet = mutable.Set[Pokemon]()
-  private val seededSet = mutable.Set[Pokemon]()
 
   // Attacking moves
   private val skyAttackSet  = mutable.Set[Pokemon]()
@@ -76,28 +75,42 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   private val flySet  = mutable.Set[Pokemon]()
   private val digSet  = mutable.Set[Pokemon]()
 
-  // Modifying moves
-  private val reflectSet     = mutable.Set[Pokemon]()
-  private val lightScreenSet = mutable.Set[Pokemon]()
 
-  /* METHODS FOR INTERACTING WITH THIS STUFF */
+  /*
+   * CONFUSION
+   */
+  private val confusionMap = mutable.Map[Pokemon, Int]()
+  def hasConfusion(p: Pokemon) = confusionMap.contains(p)
   def tryToCauseConfusion(p: Pokemon): Boolean = {
-    if (confusionMap contains p) {
+    if (hasConfusion(p)) {
       if (VERBOSE) println(s"Confusion (status) had no effect of {p.name}")
       false
     } else {
       val confusionDuration =
         Utils.intBetween(BattleStatusManager.minTurnsConfusion,
-          BattleStatusManager.maxTurnsConfusion + 1)
+                         BattleStatusManager.maxTurnsConfusion + 1)
       confusionMap(p) = confusionDuration
       if (VERBOSE)
-          println(s"{p.name} will be confused for $confusionDuration turns")  // TODO: don't actually print the number
+        // TODO: don't actually print the number
+        println(s"{p.name} will be confused for $confusionDuration turns")
       true
     }
   }
 
+  def tryToRemoveConfusion(p: Pokemon): Boolean = {
+    if (hasConfusion(p)) {
+      confusionMap -= p
+      true
+    } else false
+  }
+
+  /*
+   * SEEDED - LEECH SEED'S DOMAIN
+   */
+  private val seededSet = mutable.Set[Pokemon]()
+
   def tryToSeed(p: Pokemon): Boolean = {
-    if (seededSet contains p) {
+    if (seededSet.contains(p) || p.type1 == Grass || p.type2 == Grass) {
       if (VERBOSE) println(s"Seeding had no effect on {p.name}")
       false
     } else {
@@ -107,6 +120,20 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     }
   }
 
+  def tryToRemoveSeeded(p: Pokemon): Boolean = {
+    if (seededSet.contains(p)) {
+      seededSet -= p
+      true
+    } else false
+  }
+
+  /*
+   * BADLY POISONED (BPSN) - TOXIC'S DOMAIN
+   */
+
+  /*
+   * PARTIALLY TRAPPED
+   */
   def tryToPartiallyTrap(p: Pokemon): Boolean = {
     if (partiallyTrappedMap contains p) {
       // Do nothing - can't trap again while trapped
@@ -117,27 +144,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
       true
     }
   }
-
-  def tryToRegisterReflect(p: Pokemon): Boolean = {
-    if (reflectSet contains p) {
-      // no stacking involved, fails if you already have it cast
-      false
-    } else {
-      reflectSet += p
-      true
-    }
-  }
-
-  def tryToRegisterLightScreen(p: Pokemon): Boolean = {
-    if (lightScreenSet contains p) {
-      // no stacking involved, fails if you already have it cast
-      false
-    } else {
-      lightScreenSet += p
-      true
-    }
-  }
-
 
   def causeToFlinch(p: Pokemon): Boolean = {
     /*
@@ -151,17 +157,13 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
     true  // TODO: this could be better, but it's not far off
   }
 
-  def hasReflect(p : Pokemon) : Boolean = reflectSet contains p
-  def hasLightScreen(p : Pokemon) : Boolean = lightScreenSet contains p
-
   def canBeHit(p: Pokemon): Boolean = {
     !flySet.contains(p) && !digSet.contains(p)
   }
 
   def processSwitchOut(p : Pokemon) = {
     // TODO: take care of everything that needs to be removed, zeroed, etc. when Pokemon p switches out of battle
-    if (reflectSet.contains(p)) reflectSet -= p
-    if (lightScreenSet.contains(p)) lightScreenSet -= p
+    tryToRemoveSeeded(p)
   }
 
   def processTurnStart() = {

@@ -86,7 +86,7 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
     require(defenseStages.contains(p),
             s"${p.name} doesn't have a Defense stage in this battle")
     val startingValue = (defenseStageToFraction(defenseStages(p)) * p.defense).toInt
-    if (pb.statusManager.hasReflect(p)) (startingValue * 2) % 1024
+    if (pb.weirdMoveStatusManager.hasReflect(p)) (startingValue * 2) % 1024
     else startingValue min 999
   }
 
@@ -122,7 +122,7 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
     require(specialStages.contains(p),
             s"${p.name} doesn't have a Special stage in this battle")
     val startingValue = (specialStageToFraction(specialStages(p)) * p.special).toInt
-    if (pb.statusManager.hasLightScreen(p)) (startingValue * 2) % 1024
+    if (pb.weirdMoveStatusManager.hasLightScreen(p)) (startingValue * 2) % 1024
     else startingValue min 999
   }
 
@@ -232,6 +232,6 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
   // Can attacker change the battle stats of defender in Battle pb?
   def canChangeDefenderStats(attacker: Pokemon, defender: Pokemon, pb: Battle): Boolean = {
     // TODO: when is a Pokemon immune to stat-changing moves? Mist
-    !pb.weirdMoveStatusManager.hasMist(defender)
+    !pb.weirdMoveStatusManager.hasMist(defender) && !defender.hasSub
   }
 }

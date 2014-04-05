@@ -41,10 +41,6 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 
 STATUS MOVES (any type, don't deal damage directly):
 - CUSTOM
-= LeechSeed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
-= Focus Energy: multiply the user's Crit Hit ratio by 4 (except it was buggy in Gen 1 and divided by 4 instead)
-= Haze: seems to just reset all stat changes, and status changes, and other stuff
-= Mist: protect user from future stat mods until he's switched out or faints
 = Disable: disable one randomly selected move of the opponent's with PP > 0 for 0-6 attempts to execute an attack
 = Metronome: randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
 = Mimic: copy a randomly selected move of the opponent's
