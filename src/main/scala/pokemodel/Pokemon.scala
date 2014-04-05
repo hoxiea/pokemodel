@@ -47,10 +47,10 @@ class Pokemon(builder: PokemonBuilder) {
   val move5: Move = MoveDepot(165)
 
   // Pokemon keep track of the PP they have left for each move; start out full
-  var pp1: Option[Int] = move1.map(m => MoveDepot.maxPP(m.index))
-  var pp2: Option[Int] = move2.map(m => MoveDepot.maxPP(m.index))
-  var pp3: Option[Int] = move3.map(m => MoveDepot.maxPP(m.index))
-  var pp4: Option[Int] = move4.map(m => MoveDepot.maxPP(m.index))
+  var pp1: Option[Int] = move1.map(_.maxPP)
+  var pp2: Option[Int] = move2.map(_.maxPP)
+  var pp3: Option[Int] = move3.map(_.maxPP)
+  var pp4: Option[Int] = move4.map(_.maxPP)
   val pp5: Option[Int] = Some(1)
 
   val attack  = builder.attack
@@ -161,10 +161,10 @@ class Pokemon(builder: PokemonBuilder) {
     removeStatusAilment()
     subHP = None
     // RHS same code as pp initialization code
-    if (move1.isDefined) pp1 = move1.map(m => MoveDepot.maxPP(m.index))
-    if (move2.isDefined) pp2 = move2.map(m => MoveDepot.maxPP(m.index))
-    if (move3.isDefined) pp3 = move3.map(m => MoveDepot.maxPP(m.index))
-    if (move4.isDefined) pp4 = move4.map(m => MoveDepot.maxPP(m.index))
+    if (move1.isDefined) pp1 = move1.map(_.maxPP)
+    if (move2.isDefined) pp2 = move2.map(_.maxPP)
+    if (move3.isDefined) pp3 = move3.map(_.maxPP)
+    if (move4.isDefined) pp4 = move4.map(_.maxPP)
   }
 
   /*
@@ -223,28 +223,38 @@ class Pokemon(builder: PokemonBuilder) {
 
     // A Pokemon must have Some(Move) to be able to use it
     val moveOption = getMove(index)
-    if (moveOption.isEmpty) false
+    if (moveOption.isEmpty) {
+      println("canUseMove, fail 1")
+      false
+    }
 
     // It also has to have Some(pp)
     val ppOption = getPP(index)
-    if (ppOption.isEmpty) false
+    if (ppOption.isEmpty) {
+      println("canUseMove, fail 2")
+      false
+    }
 
     // And that Some(pp) has to feature pp > 0
-    if (ppOption.get <= 0) false
+    if (ppOption.get <= 0) {
+      println("canUseMove, fail 3")
+      false
+    }
 
     // TODO: check battle for disabled
     true
   }
 
   def useMove(index: Int, enemy: Pokemon, battle: Battle): MoveResult = {
+    println("calling Pokemon.useMove")
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
 
     index match {
       case 5 => move5.use(this, enemy, battle)  // can always use
       case i => {
-        if (canUseMove(i, battle))
+        if (canUseMove(i, battle)) {
           getMove(i).get.use(this, enemy, battle)
-        throw new Exception(s"Tried to use Move${i}, but can't!")
+        } else throw new Exception(s"Tried to use Move${i}, but can't!")
       }
     }
   }

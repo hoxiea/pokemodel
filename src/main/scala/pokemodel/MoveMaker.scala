@@ -6,8 +6,9 @@ package pokemodel
  *
  * Moves are immutable objects (Pokemon store their move PPs, which are the
  * only moving part), so it's wasteful to have each Pokemon creating separate,
- * identical instances of Moves. Instead, they just refer to the canonical
- * implementation whenever they need to.
+ * identical instances of Moves. Instead, PokemonBuilder usually hooks them up
+ * with a reference to the canonical MoveDepot version, though you can also
+ * supply a PokemonBuilder a custom move if you'd like.
  *
  * Note that it's still sometimes useful to be able to create a new copy of a
  * move and use it. Metronome, for example, takes advantage of this
@@ -18,39 +19,54 @@ package pokemodel
  */
 
 object MoveDepot {
+  // OPTION 1 FOR GETTING THE CANONICAL INSTANCE OF A MOVE
   // Access by moveIndex: Int
   // usage: MoveDepot(1) => Pound
   private val moveMap: Map[Int, Move] =
+    // This is the depot here! Map moveIndex to canonical instance of Moves
     (1 to 165).zip((1 to 165).map(MoveMaker.makeMove(_))).toMap
 
   def apply(moveIndex: Int): Move = {
     require(1 <= moveIndex && moveIndex <= 165,
-      "illegal move index for MoveDepot")
+      s"illegal move index $moveIndex passed to MoveDepot.apply(moveIndex)")
     moveMap(moveIndex)
   }
 
+  // OPTION 2 FOR GETTING THE CANONICAL INSTANCE OF A MOVE
   // Access by moveName: String
   // usage: MoveDepot("tackle") => Tackle
-  // usage: MoveDepot("dragonrage") => DragonRage
+  // usage: MoveDepot("DraGon-rAGe") => DragonRage
   private def processMoveName(s: String) = s.replaceAll("-", "").toLowerCase
 
   private val moveNameMap: Map[String, Move] = {
+    // This maps processed movename strings to canonical instance of Moves
     val moveNames = (1 to 165).map(moveMap(_)).map(m => processMoveName(m.toString))
     moveNames.zip((1 to 165).map(apply(_))).toMap
   }
 
   def apply(moveName: String): Move = {
-    require(moveNameMap contains moveName,
-      "illegal move name for MoveDepot")
-    moveNameMap(moveName)
+    val processed = processMoveName(moveName)
+    require(moveNameMap contains processed,
+      s"illegal move name $moveName for MoveDepot")
+    moveNameMap(processed)
   }
 
   // Easy way to get maxPP for a move
   def maxPP(moveIndex: Int): Int = {
-    require(1 <= moveIndex && moveIndex <= 165,
+    require(1 <= moveIndex && moveIndex <= 165 || moveIndex == 999,
       "illegal move index MoveDepot.maxPP")
     apply(moveIndex).maxPP
   }
+
+  // Another easy way to get maxPP for a move
+  def maxPP(moveName: String): Int = {
+    val m = apply(moveName)
+    val moveIndex = m.index
+    require(1 <= moveIndex && moveIndex <= 165, 
+      s"illegal moveName $moveName (MoveDepot.maxPP)")
+    apply(moveIndex).maxPP
+  }
+
 }
 
 object MoveMaker {
@@ -224,12 +240,4 @@ object MoveMaker {
       case 165 => new Struggle
     }
   }
-}
-
-object TestMoveMaker {
-  private def testMoveMap = Map(
-    "TestPhysicalSingleStrike" -> new TestPhysicalSingleStrike
-  )
-
-  def apply(moveName: String): Move = testMoveMap(moveName)
 }
