@@ -1151,11 +1151,58 @@ class NightShade extends SpecialMove with DamageEqualsUserLevel {
 }
 
 class Psywave extends SpecialMove {
+  /*
+   * Psywave inflicts a random amount of damage, varying between 0.5× and 1.5×
+   * the user's level. The damage can be calculated using the following
+   * formula, where X is a randomly generated number between 0 and 1: (X + 0.5)
+   * * level
+   *
+   * Always rounded down, but Psywave always deals at least 1 damage.
+   *
+   * Though it is a Psychic move, Psywave deals typeless damage, taking neither
+   * weakness nor resistance into account, and not being affected by STAB,
+   *
+   * This all sounds a lot like the ConstantDamage trait, except it's not
+   * actually constant. And the damageAmount function of ConstantDamage doesn't
+   * take any parameters. So I'll just copy the ConstantDamage code and modify
+   * it slightly
+   */
   override val index = 149
   override val type1 = Psychic
   override val power = 0
   override val maxPP = 15
-  // TODO: Fill in Psywave implementation
+  override val accuracy = 0.8   // increased later
+
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    // In this case, we skip DamageCalculator and build a MRB from scratch
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+
+
+    // Add the effects of hitting if necessary
+    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
+        pb.statusManager.canBeHit(defender)) {
+
+      val damageAmount = ((Random.nextDouble + .5) * attacker.level).toInt min 1
+      result.damageCalc(damageAmount)
+      val damageToDeal = damageAmount min defender.currentHP()
+      val damageResult = defender.takeDamage(damageToDeal)
+
+      result.numTimesHit(1)
+      result.damageDealt(damageToDeal)
+
+      // no crithits, STAB, moveType, typeMult, statusChange, statChange
+      result.processTakeDamageResult(defender, damageResult)
+    }
+
+    // Merge with given stuff and pass it along
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
 }
 
 

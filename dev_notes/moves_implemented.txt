@@ -99,6 +99,7 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 = Sonic Boom: Always inflict exactly 20 damage if it hits
 
 = Night Shade: deal damage equal to user's level (like SeismicToss)
+= Psywave: deal between 0.5x and 1.5x the user's level of typeless damage
 
 - Single-Strike (like all SingleStrike moves)
 = HydroPump: damage
@@ -190,7 +191,7 @@ STATUS MOVES (any type, don't deal damage directly):
 
 - Custom / Weird
 = Reflect: double the user's Defense when the opponent damages the user with a physical move, WSSC
-= Haze: seems to just reset all stat changes, and status changes, and other stuff
+**= Haze: seems to just reset all stat changes, and status changes, and other stuff
 = LightScreen: double the user's Special when the opponent damages the user with a special move, WSSC
 = Conversion: change the user's current types(s) to the target's current types(s) (Porygon unique move)
 = Mist: protect user from future stat mods until he's switched out or faints
@@ -204,3 +205,4 @@ STATUS MOVES (any type, don't deal damage directly):
 
 
 * Battle needs to spend a lot of time getting these effects right
+** Didn't quite finish

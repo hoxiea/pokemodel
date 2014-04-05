@@ -35,7 +35,6 @@ Weird stuff about missing and secondary effects
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 - CUSTOM
 = Swift: damage, unaffected by mods to accuracy and evasion; can hit Fly and Dug Pokemon
-= Psywave (stub exists, is commented): deal between 0.5x and 1.5x the user's level of typeless damage
 = Hyper Beam: deal damage, then idle for a turn, with weird stuff and bugs
 
 
