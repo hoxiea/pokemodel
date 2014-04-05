@@ -75,7 +75,6 @@ import Battle.{verbose=>VERBOSE}
  * See also MoveMaker.scala.
  */
 
-// TODO: Any move that can cause a stat change to opponent needs to make sure that the opponent's stats can change via the battle's statManager
 // TODO: Build some integrated way to figure out if a move hits that takes RNG, accuracy, attacker accuracy, evasion, statuses, Fly/Dig/Haze/etc. into account
 
 /*

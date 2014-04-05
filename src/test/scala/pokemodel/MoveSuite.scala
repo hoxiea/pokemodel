@@ -7,7 +7,7 @@ import Type._
 class MoveSuite extends FunSuite {
 
   test("Using a move should cause PP to decrease by 1") {
-    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new DragonRage)
+    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, "DragonRage")
     val dragonite = new Pokemon(pb1)
     val pb2 = PokemonBuilder.generateRandomPokemonBuilder(99)
     val p2 = new Pokemon(pb2)
@@ -143,7 +143,7 @@ class MoveSuite extends FunSuite {
   }
 
   test("Using DragonRage should cause HP to drop by 40 if opponent has >40 HP") {
-    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new DragonRage)
+    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, "DRAGONRAGE")
     val dragonite = new Pokemon(pb1)
     val pb2 = PokemonBuilder.generateRandomPokemonBuilder(99)  // full health, level 99
     val p2 = new Pokemon(pb2)
@@ -164,7 +164,7 @@ class MoveSuite extends FunSuite {
   }
 
   test("Using DragonRage should kill opponent if opponent has <=40 HP") {
-    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new DragonRage)
+    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, "DragonRage")
     val dragonite = new Pokemon(pb1)
     val pb2 = PokemonBuilder.generateRandomPokemonBuilder(99).currentHP(30)
     val p2 = new Pokemon(pb2)
@@ -179,7 +179,7 @@ class MoveSuite extends FunSuite {
   }
 
   test("Struggle: test attack damage dealt and recoil received") {
-    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new Struggle)
+    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, "Struggle")
     val dragonite = new Pokemon(pb1)
     val pb2 = PokemonBuilder.generateRandomPokemonBuilder(100)
     val p2 = new Pokemon(pb2)
@@ -200,7 +200,7 @@ class MoveSuite extends FunSuite {
     // 50% of the damage actually dealt, not the potential damage. So give the
     // opponent 11 HP and make sure we only lose 5 using Struggle (checks round-down)
     val opponentHP = 11
-    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new Struggle)
+    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, "Struggle")
     val dragonite = new Pokemon(pb1)
     val pb2 = PokemonBuilder.generateRandomPokemonBuilder(100).currentHP(opponentHP)
     val p2 = new Pokemon(pb2)
@@ -234,7 +234,7 @@ class MoveSuite extends FunSuite {
   }
 
   test("Struggle: Normal-type damage, so Rock takes half and Ghost takes none") {
-    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, new Struggle)
+    val pb1 = new PokemonBuilder("Dragonite", 100).move(1, "Struggle")
     val dragonite = new Pokemon(pb1)
     val geodude = new Pokemon(new PokemonBuilder("Geodude", 100))
     val gengar = new Pokemon(new PokemonBuilder("Gengar", 100))
@@ -258,7 +258,7 @@ class MoveSuite extends FunSuite {
   }
 
   test("Test StatusChange - BRN") {
-    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, new TestBurner)
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, "TestBurner")
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
     val venusaur = new Pokemon(pb2)
@@ -272,7 +272,7 @@ class MoveSuite extends FunSuite {
   }
 
   test("Test StatusChange - SLP") {
-    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, new TestAsleep)
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, "TestAsleep")
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
     val venusaur = new Pokemon(pb2)
@@ -287,8 +287,8 @@ class MoveSuite extends FunSuite {
 
   test("New statusAilments don't displace older statusAilments") {
     val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
-                                 .move(1, new TestBurner)
-                                 .move(2, new TestAsleep)
+                                 .move(1, "TestBurner")
+                                 .move(2, "TestAsleep")
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
     val venusaur = new Pokemon(pb2)
@@ -305,7 +305,7 @@ class MoveSuite extends FunSuite {
 
   test("Basic Multistrike attack, defender doesn't die") {
     val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
-                                 .move(1, new TestMultiStrike)
+                                 .move(1, "TestMultiStrike")
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
     val venusaur = new Pokemon(pb2)
@@ -321,7 +321,7 @@ class MoveSuite extends FunSuite {
   test("Basic Multistrike attack, defender dies on first strike") {
     val defenderHP = 10
     val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
-                                 .move(1, new TestMultiStrike)
+                                 .move(1, "TestMultiStrike")
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut().currentHP(defenderHP)
     val venusaur = new Pokemon(pb2)
@@ -356,8 +356,8 @@ class MoveSuite extends FunSuite {
 
   test("SelfStatChange: increase damage done by Physical Attack via Attack stat increase") {
     val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
-                                 .move(1, new TestIncreaseSelfAttackStat)
-                                 .move(2, new TestPhysicalSingleStrike)
+                                 .move(1, "TestIncreaseSelfAttackStat")
+                                 .move(2, "TestPhysicalSingleStrike")
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
     val venusaur = new Pokemon(pb2)
@@ -481,7 +481,7 @@ class MoveSuite extends FunSuite {
     val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m)
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
-                                 .move(1, new TestIncreaseSelfDefenseStat)
+                                 .move(1, "TestIncreaseSelfDefenseStat")
     val venusaur = new Pokemon(pb2)
     val team1 = new PokemonTeam(charizard)
     val team2 = new PokemonTeam(venusaur)
@@ -541,7 +541,7 @@ class MoveSuite extends FunSuite {
   }
 
   test("OneHitKO: kill enemy?") {
-    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, new TestOneHitKO)
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, "TestOneHitKO")
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
     val venusaur = new Pokemon(pb2)
@@ -559,7 +559,7 @@ class MoveSuite extends FunSuite {
   }
 
   test("OneHitKO: break substitute?") {
-    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, new TestOneHitKO)
+    val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, "TestOneHitKO")
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
     val venusaur = new Pokemon(pb2)

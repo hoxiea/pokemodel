@@ -18,7 +18,7 @@ class PokemonSuite extends FunSuite {
     assert(p.index == 25)
     assert(p.name == "Pikachu")
   }
-  
+
   test("create Pokemon, limited health") {
     val pb = new PokemonBuilder("Pikachu", 50).currentHP(20)
     val p = new Pokemon(pb)
@@ -39,7 +39,7 @@ class PokemonSuite extends FunSuite {
     assert(PokeData.getBaseDefense(pikachuIndex) == 30)
     assert(PokeData.getBaseSpeed(pikachuIndex) == 90)
   }
-  
+
   test("tweaking PokemonBuilder values") {
     // http://bulbapedia.bulbagarden.net/wiki/Stats#Example
     val pb = new PokemonBuilder("Pikachu", 81)
@@ -81,12 +81,12 @@ class PokemonSuite extends FunSuite {
     assert(pb.special == 128, "(Special)")
     assert(pb.speed == 190, "(Speed)")
   }
-  
+
   test("a Pokemon should be able to learn a move in its learnset") {
     val pokemonIndex = 1
-    val pb = new PokemonBuilder(pokemonIndex, 50).move(1, new Tackle)
+    val pb = new PokemonBuilder(pokemonIndex, 50).move(1, "tackle")
   }
-  
+
   // TODO: run this once all Moves implemented
 //  test("Trying out addRandomMoves... won't work, on average, until more moves implemented") {
 //    val pb = PokemonBuilder.generateRandomPokemonBuilder().addRandomMoves()

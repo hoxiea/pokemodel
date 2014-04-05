@@ -8,7 +8,7 @@ abstract class Trainer(val team: PokemonTeam) {
   def getSwitch(battle: Battle) : SwitchPokemon
   // Given the current state of the Battle, which Pokemon do you want to switch to?
   // This function will be called whenever the active Pokemon is KOed
-  
+
   def getBestAction(battle: Battle) : BattleDecision
   // Given the current state of the Battle, what do you do?
 
@@ -18,7 +18,7 @@ abstract class Trainer(val team: PokemonTeam) {
     if (!(team.hasSomeoneAlive)) {
       throw new Exception("getDecision called on a team with no living Pokemon")
     }
-    
+
     if (team.switchNeeded) getSwitch(battle)
     else getBestAction(battle)
   }
@@ -27,14 +27,14 @@ abstract class Trainer(val team: PokemonTeam) {
 class UseFirstAvailableMove(override val team: PokemonTeam) extends Trainer(team: PokemonTeam) {
   // This AI switches to the first living Pokemon on his team if he needs to, but prefers to use
   // the first Move with PP > 0 of his active Pokemon if he can
-  
+
   def getSwitch(battle: Battle) : SwitchPokemon = new SwitchPokemon(team.firstPokemonAliveIndex)
-  
+
   def getBestAction(battle : Battle) : UseMove = {
     // Always just use the first move with PP > 0
     val activePokemon = team.activePokemon
-    
-    val moveIndex: Int = 
+
+    val moveIndex: Int =
       if (!activePokemon.pp1.isEmpty && activePokemon.pp1.get > 0) 1
       else if (!activePokemon.pp2.isEmpty && activePokemon.pp2.get > 0) 2
       else if (!activePokemon.pp3.isEmpty && activePokemon.pp3.get > 0) 3
@@ -56,7 +56,7 @@ class HumanPlayer(override val team: PokemonTeam) extends Trainer(team: PokemonT
       getSwitch(battle)
     }
   }
-  
+
   override def getBestAction(battle : Battle) : BattleDecision = {
     println("""|I need a BattleDecision from you!
                |Enter m{#} to use Move #, or enter s{#} to switch to Pokemon #.
@@ -75,7 +75,7 @@ class HumanPlayer(override val team: PokemonTeam) extends Trainer(team: PokemonT
         if (1 <= switchEntry && switchEntry <= 6 && team.team(switchEntry).isAlive) return SwitchPokemon(switchEntry)
         else { println("Invalid switch index entered; please try again."); getBestAction(battle) }
       }
-      case _ => println("Input not recognized; please try again."); getBestAction(battle) 
+      case _ => println("Input not recognized; please try again."); getBestAction(battle)
     }
   }
 }

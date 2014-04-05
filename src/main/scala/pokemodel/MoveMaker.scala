@@ -1,7 +1,60 @@
 package pokemodel
 
+/*
+ * This file handles the creation of move instances (MoveMaker), and provides
+ * access to a canonical implementation of each Move (MoveDepot).
+ *
+ * Moves are immutable objects (Pokemon store their move PPs, which are the
+ * only moving part), so it's wasteful to have each Pokemon creating separate,
+ * identical instances of Moves. Instead, they just refer to the canonical
+ * implementation whenever they need to.
+ *
+ * Note that it's still sometimes useful to be able to create a new copy of a
+ * move and use it. Metronome, for example, takes advantage of this
+ * functionality. But 99% of the time, the Move in MoveDepot should be what
+ * you're looking for.
+ *
+ * TODO: Only instantiate Moves you need? Could be nice, and even less memory.
+ */
+
+object MoveDepot {
+  // Access by moveIndex: Int
+  // usage: MoveDepot(1) => Pound
+  private val moveMap: Map[Int, Move] =
+    (1 to 165).zip((1 to 165).map(MoveMaker.makeMove(_))).toMap
+
+  def apply(moveIndex: Int): Move = {
+    require(1 <= moveIndex && moveIndex <= 165,
+      "illegal move index for MoveDepot")
+    moveMap(moveIndex)
+  }
+
+  // Access by moveName: String
+  // usage: MoveDepot("tackle") => Tackle
+  // usage: MoveDepot("dragonrage") => DragonRage
+  private def processMoveName(s: String) = s.replaceAll("-", "").toLowerCase
+
+  private val moveNameMap: Map[String, Move] = {
+    val moveNames = (1 to 165).map(moveMap(_)).map(m => processMoveName(m.toString))
+    moveNames.zip((1 to 165).map(apply(_))).toMap
+  }
+
+  def apply(moveName: String): Move = {
+    require(moveNameMap contains moveName,
+      "illegal move name for MoveDepot")
+    moveNameMap(moveName)
+  }
+
+  // Easy way to get maxPP for a move
+  def maxPP(moveIndex: Int): Int = {
+    require(1 <= moveIndex && moveIndex <= 165,
+      "illegal move index MoveDepot.maxPP")
+    apply(moveIndex).maxPP
+  }
+}
+
 object MoveMaker {
-  def makeMove(moveIndex : Int) : Move = {
+  def makeMove(moveIndex: Int): Move = {
     require(1 <= moveIndex && moveIndex <= 165, "illegal move index passed to makeMove")
     moveIndex match {
       case 1 => new Pound
@@ -173,22 +226,10 @@ object MoveMaker {
   }
 }
 
-object MoveDepot {
-  /*
-   * Moves are immutable objects, and now that Pokemon store their move PPs instead of
-   * bundling it up in its own member variable of a move, it makes sense for Pokemon
-   * to store move indices instead of Moves to reduce the memory footprint. The MoveDepot
-   * will hold the canonical implementation of each Move in the game.
-   *
-   * Note that it's still sometimes useful to be able to create a new copy of a move and
-   * use it. Metronome, for example, takes advantage of this functionality. But 99% of
-   * the time, the Move in MoveDepot should be what you're looking for.
-   */
-  private val moveMap: Map[Int, Move] =
-    (1 to 165).zip((1 to 165).map(MoveMaker.makeMove(_))).toMap
+object TestMoveMaker {
+  private def testMoveMap = Map(
+    "TestPhysicalSingleStrike" -> new TestPhysicalSingleStrike
+  )
 
-  def apply(moveIndex : Int) = {
-    require(1 <= moveIndex && moveIndex <= 165, "illegal move index passed to makeMove")
-    moveMap(moveIndex)
-  }
+  def apply(moveName: String): Move = testMoveMap(moveName)
 }

@@ -17,7 +17,7 @@ class BattleStatManagerSuite extends FunSuite {
                    .speedEV(24795)
                    .specialEV(19625)
                    .hpEV(22850)
-                   .move(1, new Thunder)
+                   .move(1, "Thunder")
       assert(pb.maxHP == 189, "(HP)")
       assert(pb.attack == 137, "(Attack)")
       assert(pb.defense == 101, "(Defense)")
@@ -25,7 +25,7 @@ class BattleStatManagerSuite extends FunSuite {
       assert(pb.speed == 190, "(Speed)")
       val pikachu = new Pokemon(pb)
 
-      val venusaur = new Pokemon(new PokemonBuilder("Venusaur", 50).maxOut().move(1, new Tackle))
+      val venusaur = new Pokemon(new PokemonBuilder("Venusaur", 50).maxOut().move(1, "Tackle"))
       val team1 = new PokemonTeam(pikachu)
       val team2 = new PokemonTeam(venusaur)
       val trainer1 = new UseFirstAvailableMove(team1)

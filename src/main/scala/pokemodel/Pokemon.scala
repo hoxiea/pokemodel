@@ -13,7 +13,7 @@ import TakeDamageResult._
  * damage until it "breaks."
  */
 
-class Pokemon(builder : PokemonBuilder) {
+class Pokemon(builder: PokemonBuilder) {
   private val attackIV  = builder.attackIV
   private val defenseIV = builder.defenseIV
   private val speedIV   = builder.speedIV
@@ -37,21 +37,21 @@ class Pokemon(builder : PokemonBuilder) {
   var type2 = builder.type2
 
   // Moves can change in battle too, believe it or not
-  var move1 : Option[Move] = builder.move1
-  var move2 : Option[Move] = builder.move2
-  var move3 : Option[Move] = builder.move3
-  var move4 : Option[Move] = builder.move4
+  private var move1: Option[Move] = builder.move1
+  private var move2: Option[Move] = builder.move2
+  private var move3: Option[Move] = builder.move3
+  private var move4: Option[Move] = builder.move4
 
   // Every Pokemon knows how to Struggle, but can only do so if
   // they're out of PP / disabled with every other move
-  val move5 : Move = new Struggle()
+  val move5: Move = MoveDepot(165)
 
   // Pokemon keep track of the PP they have left for each move; start out full
-  var pp1 : Option[Int] = move1.map(_.maxPP)
-  var pp2 : Option[Int] = move2.map(_.maxPP)
-  var pp3 : Option[Int] = move3.map(_.maxPP)
-  var pp4 : Option[Int] = move4.map(_.maxPP)
-  val pp5 : Option[Int] = Some(1)
+  var pp1: Option[Int] = move1.map(m => MoveDepot.maxPP(m.index))
+  var pp2: Option[Int] = move2.map(m => MoveDepot.maxPP(m.index))
+  var pp3: Option[Int] = move3.map(m => MoveDepot.maxPP(m.index))
+  var pp4: Option[Int] = move4.map(m => MoveDepot.maxPP(m.index))
+  val pp5: Option[Int] = Some(1)
 
   val attack  = builder.attack
   val defense = builder.defense
@@ -60,37 +60,59 @@ class Pokemon(builder : PokemonBuilder) {
   val maxHP   = builder.maxHP
 
   private var currHP = builder.currentHP
-  var statusAilment : Option[StatusAilment] = builder.statusAilment
+  var statusAilment: Option[StatusAilment] = builder.statusAilment
 
-  // Now we add substitute stuff
+
+  /*
+   * SUBSTITUTE
+   * Using the move Substitute, a Pokemon can pour some of its own HP into
+   * creating a punching bag-esque thing called a Substitute. See Substitute
+   * in ActualMoves.scala for more information and details.
+   *
+   * What concerns us here is the implementation of Substitute. I basically
+   * strapped an extra Option[Int] to Pokemon, called subHP, with
+   * None    -> no substitute created
+   * Some(i) -> the substitute has i health
+   *
+   * That's fine, but it complicated other things.
+   * - currentHP used to be a member var; now it's a function that returns the
+   *   HP of the sub if it exists, the HP of the underlying Pokemon if a sub
+   *   doesn't exist, and can bypass the existence of a sub if it needs to
+   * - takeDamage is equally complicated, and allows you to hurt either the
+   *   underlying Pokemon if there's no sub or if you want to bypass the sub,
+   *   or to hurt the sub if it exists
+   */
   private var subHP: Option[Int] = None
-  def tryToMakeSub(): Boolean = {
-    if (subHP.isDefined) {
-      throw new Exception(s"$name tried to create a sub, but it already has one!")
-    }
-
-    val success =
-      if (currentHP() < maxHP / 4)
-        false  // not enough HP to make Substitute
-      else if (currentHP() == maxHP / 4) {
-        // In Gen 1, you faint if you make a Sub with exactly 25% of HP
-        currHP = 0
-        false
-      } else {
-      val hpToLose =
-        if (maxHP <= 3) 0
-        else maxHP / 4
-
-      val hpToGain = hpToLose + 1
-      subHP = Some(hpToGain)
-      true
-      }
-    success
-  }
-  def hasSub : Boolean = subHP.isDefined
   private def resetSub() = { subHP = None }
+  def hasSub: Boolean = subHP.isDefined
 
-  /* METHODS */
+  def canMakeSub: Boolean = {
+    if (subHP.isDefined) false                  // a sub already exists
+    else if (currentHP() < maxHP / 4) false     // not enough HP
+    else if (currentHP() == maxHP / 4) true     // you can, but it'll KO you
+    else true
+  }
+
+  def makeSub() = {
+    if (!canMakeSub)
+      throw new Exception("Check with canMakeSub before trying to make one")
+    val hpToLose =
+      if (maxHP <= 3) 0
+      else maxHP / 4
+
+    // If you have exactly maxHP/4 health, making a sub will KO you
+    // Check for this, and just process the faint if it happens
+    if (currentHP() == hpToLose) faint()
+    else {
+      val hpSubGains = hpToLose + 1
+      subHP = Some(hpSubGains)
+      currHP -= hpToLose
+      assert (currHP > 0)
+    }
+  }
+
+
+  /* GENERAL POKEMON METHODS */
   def isAlive: Boolean = currHP > 0
   def currentHP(bypassSub: Boolean = false): Int = {
     if (bypassSub) currHP
@@ -100,6 +122,59 @@ class Pokemon(builder : PokemonBuilder) {
     }
   }
 
+  def faint() = {}   // TODO: implement Pokemon.faint
+
+  def takeDamage(damage: Int, bypassSub: Boolean = false): TakeDamageResult = {
+    // If you have a substitute, it should absorb damage
+    require(0 <= damage && damage <= currentHP(bypassSub),
+        "Don't expect Pokemon.takeDamage to truncate for you!")
+
+    if (bypassSub) {
+      // CASE 1: No substitute, just take the hit
+      currHP = currHP - damage
+      if (currHP > 0) ALIVE else KO
+    } else subHP match {
+      case Some(sHP) => {
+        if (sHP > damage) {
+          // CASE 2: SUB HAS ENOUGH HEALTH TO SURVIVE ATTACK; ABSORB HIT
+          subHP = Some(sHP - damage)
+          ALIVE
+        } else {
+          // CASE 3: SUB BREAKS
+          resetSub()
+          SUBKO
+        }
+      }
+      case None => {
+        // CASE 1 again: No substitute, just take the hit
+        currHP = currHP - damage
+        if (currHP > 0) ALIVE else KO
+      }
+    }
+  }
+
+  def gainHP(amount: Int) { currHP = maxHP min (currHP + amount) }
+  def toFullHealth() = { currHP = maxHP }
+
+  def heal() {
+    toFullHealth()
+    removeStatusAilment()
+    subHP = None
+    // RHS same code as pp initialization code
+    if (move1.isDefined) pp1 = move1.map(m => MoveDepot.maxPP(m.index))
+    if (move2.isDefined) pp2 = move2.map(m => MoveDepot.maxPP(m.index))
+    if (move3.isDefined) pp3 = move3.map(m => MoveDepot.maxPP(m.index))
+    if (move4.isDefined) pp4 = move4.map(m => MoveDepot.maxPP(m.index))
+  }
+
+  /*
+   * TYPES
+   * A Pokemon's type(s) seems like it should be immutable, but unfortunately,
+   * Porygon had to come along and mess that up. The move Conversion changes
+   * Porygon's types to be those of his opponent. But this is the only way to
+   * change types, so I add setters that can ensure that Conversion is the only
+   * thing trying to make this happen.
+   */
   def changeType1(newType: Type, m: Move) {
     if (m.index != 160) // 160 => Conversion
       throw new Exception("something other than Conversion changing type1")
@@ -117,46 +192,11 @@ class Pokemon(builder : PokemonBuilder) {
     type2 = PokeData.getType2(index)
   }
 
-  def takeDamage(damage: Int, bypassSub: Boolean = false): TakeDamageResult = {
-    // If you have a substitute, it should absorb damage
-    require(0 <= damage && damage <= currentHP(),
-        "Don't expect Pokemon.takeDamage to truncate for you!")
-
-    // TODO: doesn't actually bypass Sub!
-
-    subHP match {
-      case Some(sHP) => {
-        if (sHP > damage) {
-          // CASE 1: SUB HAS ENOUGH HEALTH TO SURVIVE ATTACK; ABSORB HIT
-          subHP = Some(sHP - damage)
-          ALIVE
-        } else {
-          // CASE 2: SUB BREAKS
-          resetSub()
-          SUBKO
-        }
-      }
-      case None => {
-        // CASE 3: No substitute, just take the hit
-        currHP = currHP - damage
-        if (currHP > 0) ALIVE else KO
-      }
-    }
-  }
-
-  def gainHP(amount : Int) { currHP = maxHP min (currHP + amount) }
-  def toFullHealth() = { currHP = maxHP }
-  def removeStatusAilment() = { statusAilment = None }
-
-  def heal() {
-    toFullHealth()
-    removeStatusAilment()
-    subHP = None
-    if (move1.isDefined) pp1 = Some(move1.get.maxPP)
-    if (move2.isDefined) pp2 = Some(move2.get.maxPP)
-    if (move3.isDefined) pp3 = Some(move3.get.maxPP)
-    if (move4.isDefined) pp4 = Some(move4.get.maxPP)
-  }
+  /*
+   * MOVES
+   * Pokemon moves are implemented as Option[Int]s, where the Int refers to the
+   * move index of the Move, between 1 and 165. See MoveMaker for the mapping.
+   */
 
   def getMove(index: Int): Option[Move] = {
     require(1 <= index && index <= 4, s"illegal index $index passed to getMove - $name($level)")
@@ -183,83 +223,69 @@ class Pokemon(builder : PokemonBuilder) {
 
     // A Pokemon must have Some(Move) to be able to use it
     val moveOption = getMove(index)
-    if (moveOption.isEmpty)
-      throw new Exception(s"$name tried to use Move${index}, but it doesn't have a Move!")
+    if (moveOption.isEmpty) false
 
     // It also has to have Some(pp)
     val ppOption = getPP(index)
-    if (ppOption.isEmpty)
-      throw new Exception(s"$name tried to use Move${index} and it has a Move${index}, but pp${index} = None!")
+    if (ppOption.isEmpty) false
 
     // And that Some(pp) has to feature pp > 0
-    if (ppOption.get <= 0)
-      throw new Exception(s"$name tried to use Move${index} but pp${index} = 0!")
+    if (ppOption.get <= 0) false
 
     // TODO: check battle for disabled
     true
   }
 
-  def useMove(index : Int, enemy : Pokemon, battle : Battle): MoveResult = {
+  def useMove(index: Int, enemy: Pokemon, battle: Battle): MoveResult = {
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
 
     index match {
-      case 1 => {
-        canUseMove(index, battle)
-        pp1 = Some(pp1.get - 1)
-        move1.get.use(this, enemy, battle)
+      case 5 => move5.use(this, enemy, battle)  // can always use
+      case i => {
+        if (canUseMove(i, battle))
+          getMove(i).get.use(this, enemy, battle)
+        throw new Exception(s"Tried to use Move${i}, but can't!")
       }
-      case 2 => {
-        canUseMove(index, battle)
-        pp2 = Some(pp2.get - 1)
-        move2.get.use(this, enemy, battle)
-      }
-      case 3 => {
-        canUseMove(index, battle)
-        pp3 = Some(pp3.get - 1)
-        move3.get.use(this, enemy, battle)
-      }
-      case 4 => {
-        canUseMove(index, battle)
-        pp4 = Some(pp4.get - 1)
-        move4.get.use(this, enemy, battle)
-      }
-      case 5 => move5.use(this, enemy, battle)  // can always use, don't deduct PP
     }
   }
 
-  def takeStatusAilmentDamage() : Unit = statusAilment match {
-    case Some(_ : PSN) => takeDamage(maxHP / 16)
-    case Some(_ : BRN) => takeDamage(maxHP / 16)
+  /*
+   * STATUS AILMENT LOGIC
+   */
+  def removeStatusAilment() = { statusAilment = None }
+  def takeStatusAilmentDamage(): Unit = statusAilment match {
+    case Some(_: PSN) => takeDamage(maxHP / 16)
+    case Some(_: BRN) => takeDamage(maxHP / 16)
     case _ => {}
   }
 
   def isBurned: Boolean = statusAilment match {
-    case Some(_ : BRN) => true
+    case Some(_: BRN) => true
     case _ => false
   }
 
   def isFrozen: Boolean = statusAilment match {
-    case Some(_ : FRZ) => true
+    case Some(_: FRZ) => true
     case _ => false
   }
 
   def isPoisoned: Boolean = statusAilment match {
-    case Some(_ : PSN) => true
+    case Some(_: PSN) => true
     case _ => false
   }
 
   def isBadlyPoisoned: Boolean = statusAilment match {
-    case Some(_ : BPSN) => true
+    case Some(_: BPSN) => true
     case _ => false
   }
 
   def isParalyzed: Boolean = statusAilment match {
-    case Some(_ : PAR) => true
+    case Some(_: PAR) => true
     case _ => false
   }
 
   def isAsleep: Boolean = statusAilment match {
-    case Some(_ : SLP) => true
+    case Some(_: SLP) => true
     case _ => false
   }
 
@@ -279,7 +305,7 @@ class Pokemon(builder : PokemonBuilder) {
     if (move4.isDefined) assert(pp4.isDefined)
   }
 
-  private def allInfoString : String = {
+  private def allInfoString: String = {
     val repr = new StringBuilder()
     repr.append(s"$name, level $level\n")
     repr.append(s"Type1 = $type1, Type2 = $type2\n")
@@ -291,7 +317,7 @@ class Pokemon(builder : PokemonBuilder) {
     repr.toString()
   }
 
-  private def basicInfoString : String = {
+  private def basicInfoString: String = {
     val repr = new StringBuilder()
     repr.append(s"$name, level $level\n")
     if (hasSub) repr.append(s"subHP = ${currentHP()}\n")
@@ -299,7 +325,7 @@ class Pokemon(builder : PokemonBuilder) {
     repr.toString()
   }
 
-  override def toString : String = {
+  override def toString: String = {
     allInfoString
   }
 }

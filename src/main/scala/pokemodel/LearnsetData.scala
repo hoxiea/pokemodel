@@ -14,27 +14,27 @@ import scala.util.Random
  */
 
 object LearnsetData {
-  var learnsets : Map[Int, mutable.Set[Int]] = Map()
+  var learnsets: Map[Int, mutable.Set[Int]] = Map()
   val learnsetsPath = "/Users/hha/Dropbox/pokemodel/game_data/learnsets.csv"
   val learnsetsFile = new File(learnsetsPath)
 
   for (line <- Source.fromFile(learnsetsFile).getLines) {
-    val Array(pokemonIndex : String, moveList : String) = line.split(": ")
+    val Array(pokemonIndex: String, moveList: String) = line.split(": ")
     val moveIndices = mutable.Set[Int]()
-    val moves : Array[String] = moveList.split(", ")
-    for (move : String <- moves) {
-      val Array(name : String, moveIndex : String) = move.split('|')
+    val moves: Array[String] = moveList.split(", ")
+    for (move: String <- moves) {
+      val Array(name: String, moveIndex: String) = move.split('|')
       moveIndices += moveIndex.toInt
     }
     learnsets += (pokemonIndex.toInt -> moveIndices)
   }
 
-  def getLearnset(index : Int) : mutable.Set[Int] = {
+  def getLearnset(index: Int): mutable.Set[Int] = {
     require(1 <= index && index <= 151)
     learnsets(index)
   }
 
-  def getFourRandomMoveIndices(index : Int) : List[Int] = {
+  def getFourRandomMoveIndices(index: Int): List[Int] = {
     require(1 <= index && index <= 151)
     val potentials = getLearnset(index).toList
     Random.shuffle(potentials).take(4)

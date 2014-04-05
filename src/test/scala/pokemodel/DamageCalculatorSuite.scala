@@ -15,8 +15,8 @@ class DamageCalculatorSuite extends FunSuite {
 
       // Multiple types, especially unique combinations
       val venusaur = new Pokemon(new PokemonBuilder("Venusaur", 50)
-                                   .maxOut().
-                                   move(1, new TestPhysicalSingleStrike))
+                                   .maxOut()
+                                   .move(1, "TestPhysicalSingleStrike"))
       val golbat = new Pokemon(new PokemonBuilder("Golbat", 50))  // Poison/Flying
       val haunter = new Pokemon(new PokemonBuilder("Haunter", 50))  // Ghost/Poison
       val aero = new Pokemon(new PokemonBuilder("Aerodactyl", 50))  // Rock/Flying
@@ -35,7 +35,7 @@ class DamageCalculatorSuite extends FunSuite {
   test("STAB Bonus for Pokemon with only one type") {
     val f = fixture
     import f._
-    assert(battle.dc.stabBonus(pikachu, new TestPhysicalSingleStrike) == 1.0)
+    assert(battle.dc.stabBonus(pikachu, TestMoveMaker("TestPhysicalSingleStrike")) == 1.0)
     assert(battle.dc.stabBonus(pikachu, new TestPhysicalSingleStrike with PsychicT) == 1.0)
     assert(battle.dc.stabBonus(pikachu, new TestPhysicalSingleStrike with Ice) == 1.0)
     assert(battle.dc.stabBonus(pikachu, new TestPhysicalSingleStrike with Electric) == 1.5)
@@ -44,7 +44,7 @@ class DamageCalculatorSuite extends FunSuite {
   test("STAB Bonus for Pokemon with two types") {
     val f = fixture
     import f._
-    assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike) == 1.0)
+    assert(battle.dc.stabBonus(venusaur, TestMoveMaker("TestPhysicalSingleStrike")) == 1.0)
     assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike with PsychicT) == 1.0)
     assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike with Ice) == 1.0)
     assert(battle.dc.stabBonus(venusaur, new TestPhysicalSingleStrike with Electric) == 1.0)
