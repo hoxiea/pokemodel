@@ -115,7 +115,12 @@ abstract class Move {
     accuracy * attackerAccuracy / defenderEvasion
   }
 
-  def startUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
+  def startUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle) {
+
     // Function called before move-specific stuff happens
   }
 
@@ -127,15 +132,26 @@ abstract class Move {
     pb: Battle,
     mrb: MoveResultBuilder): MoveResult
 
-  def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) {
+  def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle) {
+
     // Function called after move-specific stuff happens
     pb.moveManager.updateLastMoveIndex(attacker, index)
+    attacker.deductPP(attackerMoveSlot)
   }
 
-  final def use(attacker: Pokemon, defender: Pokemon, pb: Battle): MoveResult = {
-    startUsingMove(attacker, defender, pb)
+  final def use(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle): MoveResult = {
+
+    startUsingMove(attacker, attackerMoveSlot, defender, pb)
     val result = moveSpecificStuff(attacker, defender, pb, mrb)
-    finishUsingMove(attacker, defender, pb)
+    finishUsingMove(attacker, attackerMoveSlot, defender, pb)
     result
   }
 

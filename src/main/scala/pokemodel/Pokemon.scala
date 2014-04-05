@@ -199,7 +199,8 @@ class Pokemon(builder: PokemonBuilder) {
    */
 
   def getMove(index: Int): Option[Move] = {
-    require(1 <= index && index <= 4, s"illegal index $index passed to getMove - $name($level)")
+    require(1 <= index && index <= 4,
+      s"illegal index $index passed to getMove - $name($level)")
     index match {
       case 1 => move1
       case 2 => move2
@@ -209,12 +210,25 @@ class Pokemon(builder: PokemonBuilder) {
   }
 
   def getPP(index: Int): Option[Int] = {
-    require(1 <= index && index <= 4, s"illegal index $index passed to getPP - $name($level)")
+    require(1 <= index && index <= 4,
+      s"illegal index $index passed to getPP - $name($level)")
     index match {
       case 1 => pp1
       case 2 => pp2
       case 3 => pp3
       case 4 => pp4
+    }
+  }
+
+  def deductPP(index: Int) = {
+    require(1 <= index && index <= 5,
+      s"illegal index $index passed to deductPP - $name($level)")
+    index match {
+      case 1 => pp1 = pp1.map(pp => pp - 1)
+      case 2 => pp2 = pp2.map(pp => pp - 1)
+      case 3 => pp3 = pp3.map(pp => pp - 1)
+      case 4 => pp4 = pp4.map(pp => pp - 1)
+      case 5 => {}
     }
   }
 
@@ -246,14 +260,13 @@ class Pokemon(builder: PokemonBuilder) {
   }
 
   def useMove(index: Int, enemy: Pokemon, battle: Battle): MoveResult = {
-    println("calling Pokemon.useMove")
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
 
     index match {
-      case 5 => move5.use(this, enemy, battle)  // can always use
+      case 5 => move5.use(this, 5, enemy, battle)  // can always use
       case i => {
         if (canUseMove(i, battle)) {
-          getMove(i).get.use(this, enemy, battle)
+          getMove(i).get.use(this, i, enemy, battle)
         } else throw new Exception(s"Tried to use Move${i}, but can't!")
       }
     }

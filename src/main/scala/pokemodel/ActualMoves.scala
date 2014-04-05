@@ -22,7 +22,11 @@ class Struggle extends PhysicalMove with Recoil with SingleStrike {
   override val maxPP = 999
   override val recoilProportion = 0.5   // different from others!
 
-  override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle) = {
     // Don't deduct a PP! Just log it
     pb.moveManager.updateLastMoveIndex(attacker, index)
   }
