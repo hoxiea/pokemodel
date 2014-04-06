@@ -111,6 +111,10 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
       }
     }
 
+    // TODO: Pokemon who attacks second needs to make sure that the move it
+    // picked wasn't disabled by the Pokemon who attacked first. If it was
+    // disabled, then it just fails.
+
     // Process any status ailments that take effect at the end of the round,
     // assuming the opponent didn't faint, in which case status ailments don't
     // kick in

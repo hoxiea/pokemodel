@@ -179,10 +179,11 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
   // For example, if Pokemon p had two copies of some move to be disabled for 5 turns, 
   // in moveSlots 2 and 4, then disabledMoveMap would be (p -> (2 -> 5, 4 -> 5))
   val disabledMoveMap = mutable.Map[Pokemon, mutable.Map[Int, Int]]()  // TODO: make private after testing
-
   def canBeDisabled(p: Pokemon) = !disabledMoveMap.contains(p)
+  def hasMoveDisabled(p: Pokemon) = disabledMoveMap.contains(p)
 
   def isDisabled(p: Pokemon, moveslot: Int) =
+    // used by Pokemon.canUseMove
     disabledMoveMap.contains(p) && disabledMoveMap(p).contains(moveslot)
 
   private def addToDisabledMoveMap(p: Pokemon, moveslot: Int, numTurns: Int) {
@@ -193,8 +194,23 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
       disabledMoveMap(p) = mutable.Map(moveslot -> numTurns)
   }
 
+  private def allMoveslotsMatchingGivenMoveslot(p: Pokemon, ms: Int): List[Int] = {
+    /* Pokemon have up to 4 moves, in moveslots 1, 2, 3, 4.
+     * Rarely, a Pokemon will have the same move in multiple moveslots.
+     * This function returns the list of all moveslots that contain the same
+     * Move as the one at the given moveIndex
+     */
+    require(p.getMove(ms).isDefined, "allMoveslotsMatchingGivenMoveslot fail")
+    val moveIndex = p.getMove(ms).get.index
+    val result = List(1, 2, 3, 4).filter(
+      i => p.getMove(i).isDefined && p.getMove(i).get.index == moveIndex
+    )
+    result
+  }
+
   def tryToDisableAMove(p: Pokemon, battle: Battle): Boolean = {
-    // Returns whether or not a random disable-able move was disabled
+    // Attempt to disable a random usable move of Pokemon $p in Battle $battle
+    // Returns whether or not the disable succeeded
     if (!canBeDisabled(p)) return false
 
     val slotOptions = p.moveslotsCanUse(battle)
@@ -202,14 +218,28 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
       if (slotOptions.isEmpty) false
       else {
         val turnsDisabled = Utils.intBetween(0, 7)
+
+        // Pick a valid moveslot, then find all instances of the chosen move
         val targetMoveslot = Utils.intBetween(0, slotOptions.length)
-        val allMoveslotsToDisable = List(1, 2, 3)    // TODO: get the moveslots of every instance of Pokemon.getMove(targetMoveslot); it'll probably have length 1, but do it anyway
+        val allMoveslotsToDisable = allMoveslotsMatchingGivenMoveslot(p, targetMoveslot)
+
+        // Add them all to disabledMoveMap
         for (ms <- allMoveslotsToDisable) {
           addToDisabledMoveMap(p, ms, turnsDisabled)
         }
         true
       }
     result
+  }
+
+  def processPokemonAttackAttempt(p: Pokemon) {
+    if(hasMoveDisabled(p)) {
+      // TODO: decrement everything in disabledMoveMap(p) by 1
+    }
+  }
+
+  private def removeAllDisables(p: Pokemon) {
+    if (disabledMoveMap.contains(p)) disabledMoveMap -= p
   }
 
 
@@ -222,5 +252,6 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
     tryToRemoveReflect(p)
     tryToRemoveFocusEnergy(p)
     tryToDeregisterConversion(p)
+    removeAllDisables(p)  // TODO: do disables actually clear when you switch out?
   }
 }

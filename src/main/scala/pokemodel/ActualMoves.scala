@@ -1633,7 +1633,7 @@ class Disable extends StatusMove {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    val success = tryToDisableAMove(defender, pb)
+    val success = pb.weirdMoveStatusManager.tryToDisableAMove(defender, pb)
     if (success) {
       result.numTimesHit(1)
     }
