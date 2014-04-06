@@ -198,10 +198,10 @@ class Pokemon(builder: PokemonBuilder) {
    * move index of the Move, between 1 and 165. See MoveMaker for the mapping.
    */
 
-  def getMove(index: Int): Option[Move] = {
-    require(1 <= index && index <= 4,
-      s"illegal index $index passed to getMove - $name($level)")
-    index match {
+  def getMove(moveslot: Int): Option[Move] = {
+    require(1 <= moveslot && moveslot <= 4,
+      s"illegal moveslot $moveslot passed to getMove - $name($level)")
+    moveslot match {
       case 1 => move1
       case 2 => move2
       case 3 => move3
@@ -209,10 +209,10 @@ class Pokemon(builder: PokemonBuilder) {
     }
   }
 
-  def getPP(index: Int): Option[Int] = {
-    require(1 <= index && index <= 4,
-      s"illegal index $index passed to getPP - $name($level)")
-    index match {
+  def getPP(moveslot: Int): Option[Int] = {
+    require(1 <= moveslot && moveslot <= 4,
+      s"illegal moveslot $moveslot passed to getPP - $name($level)")
+    moveslot match {
       case 1 => pp1
       case 2 => pp2
       case 3 => pp3
@@ -220,10 +220,10 @@ class Pokemon(builder: PokemonBuilder) {
     }
   }
 
-  def deductPP(index: Int) = {
-    require(1 <= index && index <= 5,
-      s"illegal index $index passed to deductPP - $name($level)")
-    index match {
+  def deductPP(moveslot: Int) = {
+    require(1 <= moveslot && moveslot <= 5,
+      s"illegal moveslot $moveslot passed to deductPP - $name($level)")
+    moveslot match {
       case 1 => pp1 = pp1.map(pp => pp - 1)
       case 2 => pp2 = pp2.map(pp => pp - 1)
       case 3 => pp3 = pp3.map(pp => pp - 1)
@@ -232,32 +232,39 @@ class Pokemon(builder: PokemonBuilder) {
     }
   }
 
-  private def canUseMove(index: Int, battle: Battle): Boolean = {
-    require(1 <= index && index <= 4, s"illegal index $index passed to canUseMove - $name($level)")
+  def canUseMove(moveslot: Int, battle: Battle): Boolean = {
+    require(1 <= moveslot && moveslot <= 4,
+      s"illegal moveslot $moveslot passed to canUseMove - $name($level)")
 
     // A Pokemon must have Some(Move) to be able to use it
-    val moveOption = getMove(index)
+    val moveOption = getMove(moveslot)
     if (moveOption.isEmpty) {
       println("canUseMove, fail 1")
-      false
+      return false
     }
 
     // It also has to have Some(pp)
-    val ppOption = getPP(index)
+    val ppOption = getPP(moveslot)
     if (ppOption.isEmpty) {
       println("canUseMove, fail 2")
-      false
+      return false
     }
 
     // And that Some(pp) has to feature pp > 0
     if (ppOption.get <= 0) {
       println("canUseMove, fail 3")
-      false
+      return false
     }
 
-    // TODO: check battle for disabled
+    if (battle.weirdMoveStatusManager.isDisabled(this, index))
+      return false
     true
   }
+
+  def moveslotsCanUse(battle: Battle): List[Int] = {
+    (1 to 4).filter(i => canUseMove(i, battle)).toList
+  }
+
 
   def useMove(index: Int, enemy: Pokemon, battle: Battle): MoveResult = {
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")

@@ -3,15 +3,8 @@ GENERAL
 - randomized testing? could be so nice and useful
 - process all TODOs in code
 
-
 POKEMON/MOVES
-- HOW TO TEACH POKEMON TEST MOVES, NOW THAT YOU LEARN VIA MOVE INDEX?
-- Clean up the Pokemon API in general... seems really crowded
-- Define a Pokemon.faint(battle) method that removes Pokemon from all data structures and wraps up Pokemon's existence?
-
-- PP deduction should be moved from Pokemon.useMove to Move.finishUsingMove, and will almost surely require a deductPP method in Pokemon. This allows weird/multi-turn moves to deduct when they want to, which the current system doesn't support
 - Continue implementing weird Moves
-
 
 BATTLES
 - Define a Battle.canBeHit(p: Pokemon) method that checks all of its various data structures for all conditions that would prohibit connecting (Dig, Fly, etc.)

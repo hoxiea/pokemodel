@@ -108,6 +108,7 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 = Waterfall: damage
 = VineWhip: damage
 = RazorLeaf: damage, high crit hit rate
+= Swift: damage, always hits and deals damage-calculated damage
 
 - SingleStrike + StatusChange (Like Thunder)
 = Thunder: damage, 10% chance PAR

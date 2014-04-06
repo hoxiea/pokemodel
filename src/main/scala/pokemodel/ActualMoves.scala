@@ -821,6 +821,29 @@ class Swift extends PhysicalMove {
   override val index = 129
   override val maxPP = 20
   override val power = 60
+
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    // Swift ignores accuracy and evasion
+    // It always just does a damage calculation and deals it out
+    // This is the "hit" logic from SingleStrike:
+    val result = pb.dc.calc(attacker, defender, this, pb)
+    val damageResult = defender.takeDamage(result.damageDealt)
+
+    // Update result values
+    // numTimesHit == 1, no hpGained, no statusAilments, no stat changes
+    result.processTakeDamageResult(defender, damageResult)
+
+    // Combine anything passed in from traits further to the right
+    result.merge(mrb)
+
+    // Pass at all along to the next trait/class
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
 }
 
 /******** SPECIAL MOVES ********/
@@ -1601,7 +1624,22 @@ class Conversion extends StatusMove {
 class Disable extends StatusMove {
   override val index = 50
   override val maxPP = 20
-  // TODO: Fill in Disable
+  override val accuracy = 0.55
+
+  // Most of the Disable logic is handled in WeirdMoveStatusManager
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    val success = tryToDisableAMove(defender, pb)
+    if (success) {
+      result.numTimesHit(1)
+    }
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
 }
 
 class Mist extends StatusMove {

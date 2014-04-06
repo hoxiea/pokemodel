@@ -153,6 +153,65 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
     } else false
   }
 
+  /*
+   * RAGE
+   * Rage is a move that lasts until the end of the battle, locking you into the
+   * raging Pokemon. Every time you get hit, 
+   */
+
+  /*
+   * DISABLE
+   * Disable, as the name suggests, disables one of the enemy's usable moves.
+   * - Only moves with PP > 0 that aren't already disabled can be targeted.
+   * - Disable will fail if the target has no PP for any of its moves.
+   * - Only one move per Pokemon can be disabled at any one point in time
+   * 
+   * Once disable has picked a move, it actually needs to disable every instance
+   * of that move that the target knows. Having multiple copies of a Move is
+   * rare but possible through such moves as Mimic. So pick a Move, then
+   * disable Moves with that moveIndex.
+   *
+   * - All instances of the Move are disabled for the same 0-6 turns, random
+   * - This count is decremented every time the target attempts to execute an attack. (Move.startUsingMove?)
+   */
+
+  // Each Pokemon has a Map moveIndex -> number of turns it's disabled for
+  // For example, if Pokemon p had two copies of some move to be disabled for 5 turns, 
+  // in moveSlots 2 and 4, then disabledMoveMap would be (p -> (2 -> 5, 4 -> 5))
+  val disabledMoveMap = mutable.Map[Pokemon, mutable.Map[Int, Int]]()  // TODO: make private after testing
+
+  def canBeDisabled(p: Pokemon) = !disabledMoveMap.contains(p)
+
+  def isDisabled(p: Pokemon, moveslot: Int) =
+    disabledMoveMap.contains(p) && disabledMoveMap(p).contains(moveslot)
+
+  private def addToDisabledMoveMap(p: Pokemon, moveslot: Int, numTurns: Int) {
+    require(0 <= numTurns && numTurns <= 6, "illegal numTurns to disable")
+    if (disabledMoveMap contains p)
+      disabledMoveMap(p) += (moveslot -> numTurns)
+    else
+      disabledMoveMap(p) = mutable.Map(moveslot -> numTurns)
+  }
+
+  def tryToDisableAMove(p: Pokemon, battle: Battle): Boolean = {
+    // Returns whether or not a random disable-able move was disabled
+    if (!canBeDisabled(p)) return false
+
+    val slotOptions = p.moveslotsCanUse(battle)
+    val result = 
+      if (slotOptions.isEmpty) false
+      else {
+        val turnsDisabled = Utils.intBetween(0, 7)
+        val targetMoveslot = Utils.intBetween(0, slotOptions.length)
+        val allMoveslotsToDisable = List(1, 2, 3)    // TODO: get the moveslots of every instance of Pokemon.getMove(targetMoveslot); it'll probably have length 1, but do it anyway
+        for (ms <- allMoveslotsToDisable) {
+          addToDisabledMoveMap(p, ms, turnsDisabled)
+        }
+        true
+      }
+    result
+  }
+
 
   /*
    * Useful general methods
@@ -161,7 +220,7 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
     tryToRemoveMist(p)
     tryToRemoveLightScreen(p)
     tryToRemoveReflect(p)
-    if (usedConversion(p)) p.resetTypes()
+    tryToRemoveFocusEnergy(p)
     tryToDeregisterConversion(p)
   }
 }

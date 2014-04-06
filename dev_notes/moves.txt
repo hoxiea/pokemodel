@@ -3,27 +3,29 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 Bide
 For 2-3 turns (chosen 50=50), your options are to switch (negating everything) or to stay in a holding pattern
 Then deal twice the damage you received during that waiting period. 
-Text: "${pokemon.name} unleashed energy!"
 No STAB or type effectiveness. 
 Unaffected by accuracy/evasion, can hit Fly/Dug opponents, can hit Ghosts
+Text: "${pokemon.name} unleashed energy!"
 
 Rage
 Lose control of your Pokemon
 Deals damage, user can't do anything except Rage until faint or battle ends. Every time user is damaged by Attack or targeted by Disable, Attack stat increases one stage (multiple times for multi-strike attacks). Stops increasing Attack stage at +6, and doesn't boost Attack stat past 999
 Weird stuff about missing and secondary effects
 
+
 - Deal damage for a while, then suffer from confusion
 = Thrash: deal damage for 3-4 turns, user can't do anything else, then become confused
 = Petal Dance: like Thrash, but Special
+
 
 - Multi-turn moves
 = Sky Attack: do nothing on turn it's used, then deal damage on next turn
 = Skull Bash: like Sky Attack
 = Solar Beam: like SkyAttack but SpecialMove
 = Razor Wind: like SkyAttack but SpecialMove
-
 = Fly: disappear for a turn (affected by Bide, Swift, and Transform), then deal damage
 = Dig: like Fly
+
 
 - Partially Trapping moves
 = Bind: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
@@ -34,13 +36,13 @@ Weird stuff about missing and secondary effects
 
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 - CUSTOM
-= Swift: damage, unaffected by mods to accuracy and evasion; can hit Fly and Dug Pokemon
 = Hyper Beam: deal damage, then idle for a turn, with weird stuff and bugs
 
+= Disable: disable one randomly selected move of the opponent's with PP > 0 for 0-6 attempts to execute an attack
+ALMOST DONE - JUST FINISH UP THE TODO IN WEIRDMOVESTATUSMANAGER, DISABLE SECTION
 
 STATUS MOVES (any type, don't deal damage directly):
 - CUSTOM
-= Disable: disable one randomly selected move of the opponent's with PP > 0 for 0-6 attempts to execute an attack
 = Metronome: randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
 = Mimic: copy a randomly selected move of the opponent's
 = Substitute: use 25% of maxHP to create a substitute with 1 HP more than the amount of HP lost by the user.  Duplicate the user's current stat modifiers, allow self-modification of stats, but disallow any stat-modifying attacks and side effects of opponent's moves.  Other weird stuff too
