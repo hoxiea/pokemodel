@@ -38,8 +38,7 @@ SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 - CUSTOM
 = Hyper Beam: deal damage, then idle for a turn, with weird stuff and bugs
 
-= Disable: disable one randomly selected move of the opponent's with PP > 0 for 0-6 attempts to execute an attack
-ALMOST DONE - JUST FINISH UP THE TODO IN WEIRDMOVESTATUSMANAGER, DISABLE SECTION
+= Disable: almost done, a couple TODOs to fill in
 
 STATUS MOVES (any type, don't deal damage directly):
 - CUSTOM
