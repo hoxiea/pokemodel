@@ -6,15 +6,16 @@ import MoveType._
 import BattleStat._
 import CritHitType._
 import TakeDamageResult._
+import ViolentStruggleType._
 import scala.util.Random
 import Battle.{verbose=>VERBOSE}
 
 /*
  * The Move hierarchy is as follows:
- *                       Move
- *                     /   |   \
- *                    /    |    \
- *                   /     |     \
+ *                      __Move__
+ *                     /   |    \
+ *                    /    |     \
+ *                   /     |      \
  *           Physical   Special   Status
  *
  * Physical moves use the Attack stat of attacker and Defense stat of defender
@@ -239,6 +240,8 @@ trait Dragon extends Move   { override val type1 = Dragon }
 trait Power40 extends Move  { override val power = 40 }
 trait Power80 extends Move  { override val power = 80 }
 trait Power120 extends Move { override val power = 120 }
+trait Power160 extends Move { override val power = 160 }
+trait Power200 extends Move { override val power = 200 }
 
 // Quick way to get more critical hits, for testing purposes
 trait NeverCritHit extends Move  { override val critHitRate = NEVER }
@@ -291,12 +294,6 @@ trait SingleStrike extends Move {
       super.moveSpecificStuff(attacker, defender, pb, missResult)
     }
   }
-}
-
-class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
-  override val index = 999
-  override val power = 40
-  override val maxPP = 20
 }
 
 
@@ -423,16 +420,9 @@ trait MultiStrike extends Move {
   }
 }
 
-class TestMultiStrike extends PhysicalMove with MultiStrike {
-  override val index = 999
-  override val power = 40
-  override val maxPP = 20
-  override val accuracy = 1.0
-}
-
 
 trait DoubleStrike extends Move {
-  // Very similar to MultiStrike, except it always hits exactly twice
+  // Very similar to MultiStrike, except it always hits exactly twice if it hits
   // Unless it breaks a substitute, in which case it stops immediately
   // Bide and Counter only acknowledge the last strike
   abstract override def moveSpecificStuff(
@@ -516,21 +506,6 @@ trait SelfStatChange extends Move {
   }
 }
 
-class TestIncreaseSelfAttackStat extends StatusMove with SelfStatChange {
-  override val index = 999
-  override val maxPP = 20
-  def statToChange = ATTACK
-  def amountToChangeBy = 3
-}
-
-
-class TestIncreaseSelfDefenseStat extends StatusMove with SelfStatChange {
-  override val index = 999
-  override val maxPP = 20
-  def statToChange = DEFENSE
-  def amountToChangeBy = 3
-}
-
 
 trait EnemyStatChange extends Move {
   /*
@@ -602,25 +577,6 @@ trait EnemyStatChange extends Move {
   }
 }
 
-class TestDecreaseEnemyDefense extends StatusMove with EnemyStatChange {
-  override val index = 999
-  override val maxPP = 20
-  def statToChange = DEFENSE
-  def amountToChangeBy = -3
-  def chanceOfStatChange = 1.0
-  def soloStatChange = true
-}
-
-
-class TestDecreaseEnemyAttack extends StatusMove with EnemyStatChange {
-  override val index = 999
-  override val maxPP = 20
-  def statToChange = ATTACK
-  def amountToChangeBy = -3
-  def chanceOfStatChange = 1.0
-  def soloStatChange = true
-}
-
 
 trait NonVolatileStatusChange extends Move {
   /*
@@ -681,32 +637,6 @@ trait NonVolatileStatusChange extends Move {
   }
 }
 
-
-class TestBurner extends SpecialMove with NonVolatileStatusChange {
-  override val index = 999
-  override val type1 = Fire  // shouldn't be used
-  override val power = 40    // shouldn't be used
-  override val maxPP = 10
-  override val accuracy = 1.0
-
-  override def statusAilmentToCause = new BRN
-  override def chanceOfCausingAilment = 1.0
-  override def soloStatusChange = true
-  override val worksWhenSubPresent = true
-}
-
-class TestAsleep extends SpecialMove with NonVolatileStatusChange {
-  override val index = 999
-  override val type1 = Normal  // shouldn't be used
-  override val power = 40      // shouldn't be used
-  override val maxPP = 10
-  override val accuracy = 1.0  // always hit, for test purposes
-
-  override def statusAilmentToCause = new SLP
-  override def chanceOfCausingAilment = 1.0  // always cause, for test purposes
-  override def soloStatusChange = true
-  override val worksWhenSubPresent = true
-}
 
 
 trait VolatileStatusChange extends Move {
@@ -998,12 +928,13 @@ trait GainPropDamageDealt extends Move {
   }
 }
 
-
-trait ViolentStruggle extends Move {
+trait RegisterViolentStruggle extends Move {
   /*
    * This trait captures the behavior of Thrash and PetalDance in Gen 1
    * TODO: Fill this in
    */
+
+  def vsType: ViolentStruggleType
 
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
@@ -1059,6 +990,7 @@ trait PartiallyTrapping extends Move {
     super.moveSpecificStuff(attacker, defender, pb, result)
   }
 }
+
 
 trait RestoreHP extends Move {
   /*
