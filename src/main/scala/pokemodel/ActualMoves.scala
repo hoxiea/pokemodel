@@ -4,6 +4,7 @@ import Type._
 import MoveType._
 import BattleStat._
 import TakeDamageResult._
+import ViolentStruggleType._
 import CritHitType._
 import scala.util.Random
 
@@ -369,7 +370,7 @@ class Bite extends PhysicalMove with VolatileStatusChange with SingleStrike {
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.10
   def soloStatusChange = false
-  def worksWhenSubPresent = true
+  def worksWhenSubPresent = false
 }
 
 class HyperFang extends PhysicalMove with VolatileStatusChange with SingleStrike {
@@ -380,7 +381,7 @@ class HyperFang extends PhysicalMove with VolatileStatusChange with SingleStrike
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.10
   def soloStatusChange = false
-  def worksWhenSubPresent = true
+  def worksWhenSubPresent = false
 }
 
 class Headbutt extends PhysicalMove with VolatileStatusChange with SingleStrike {
@@ -390,7 +391,7 @@ class Headbutt extends PhysicalMove with VolatileStatusChange with SingleStrike 
   override val statusAilmentToCause = new FLINCH
   override val chanceOfCausingAilment = 0.30
   def soloStatusChange = false
-  def worksWhenSubPresent = true
+  def worksWhenSubPresent = false
 }
 
 class LowKick extends PhysicalMove with VolatileStatusChange with SingleStrike {
@@ -710,18 +711,88 @@ class Rage extends PhysicalMove {
   }
 }
 
-class Thrash extends PhysicalMove with ViolentStruggle {
+/*
+ * Thrash actually requires 2 different moves to capture its behavior, based
+ * on how I implemented things:
+ * 1. RegisterThrash gets that Pokemon registered to use Thrash with the
+ *    battle's WeirdMoveStatusManager. This takes care of figuring out how
+ *    the thrashing will last, decrementing things as it thrashes, causing
+ *    confusion once things run out, etc. It's also where the Battle will
+ *    look to see if the trainer whose Pokemon used Thrash has control of
+ *    his Pokemon (hint: he doesn't).
+ * 2. Once Thrash is registered, we need an actual damage-causing move.
+ *    The damage-causing comes from essentially a SingleStrike move with a
+ *    type, accuracy, the ability to miss, etc.
+ */
+class RegisterThrash extends PhysicalMove with RegisterViolentStruggle {
   override val index = 37
   override val maxPP = 10
-  override val power = 120
   // Normal, 100 accuracy
+  override def vsType = THRASH
+
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle) = {
+    // Don't log the register part!
+    // Instead, use Thrash, decrement PP, and let Thrash log itself
+    attacker.deductPP(attackerMoveSlot)
+    (new Thrash).use(attacker, attackerMoveSlot, defender, pb)
+  }
 }
 
-class PetalDance extends SpecialMove with ViolentStruggle {
+class Thrash extends PhysicalMove with SingleStrike {
+  override val index = 37
+  override val maxPP = 999
+  override val power = 120
+  // Normal, 100 accuracy
+
+  override def startUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle) {
+
+    // Make sure that attacker is actually registered to Thrash
+  }
+
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle) = {
+    // Don't decrement PP - this is the attack part, which is free once you register
+    // TODO: log yourself
+    // TODO: decrement the number of turns left in WeirdMoveStatMan
+  }
+}
+
+class RegisterPetalDance extends SpecialMove with RegisterViolentStruggle {
   // TODO: Move to SpecialMove section
   override val index = 80
   override val type1 = Grass
   override val maxPP = 10
+  // 100 accuracy
+  override def vsType = PETALDANCE
+}
+
+class PetalDance extends SpecialMove {
+  // TODO: Move to SpecialMove section
+  override val index = 80
+  override val type1 = Grass
+  override val maxPP = 999
   override val power = 120
   // 100 accuracy
 }
