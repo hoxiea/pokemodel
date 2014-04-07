@@ -35,7 +35,7 @@ object MoveDepot {
 
   // OPTION 2 FOR GETTING THE CANONICAL INSTANCE OF A MOVE
   // Access by moveName: String
-  // usage: MoveDepot("tackle") => Tackle
+  // usage: MoveDepot("bubble   beam") => Bubblebeam
   // usage: MoveDepot("DraGon-rAGe") => DragonRage
   private def processMoveName(s: String) =
     s.replaceAll("-", "").replaceAll(" ", "").toLowerCase

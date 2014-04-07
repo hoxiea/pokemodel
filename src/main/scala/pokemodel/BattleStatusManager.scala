@@ -183,7 +183,7 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
    * Non-Volatile Status Stuff
    */
   def canCauseMajorStatusAilment(p: Pokemon): Boolean = p.statusAilment == None
-  def changeMajorStatusAilment(p: Pokemon, newStatus : StatusAilment): Boolean = {
+  def changeMajorStatusAilment(p: Pokemon, newStatus: NonVolatileStatusAilment): Boolean = {
     p.statusAilment match {
       case None => { p.statusAilment = Some(newStatus); true }
       case _ => false

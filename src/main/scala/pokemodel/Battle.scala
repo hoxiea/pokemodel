@@ -99,8 +99,9 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
       }
       case (UseMove(i), UseMove(j)) => {
         /*
-         * Both Pokemon chose to use a Move. Higher-priority moves go first, though there aren't many moves
-         * with varying priorities in Gen1. Speed is used next to determine who goes first.
+         * Both Pokemon chose to use a Move. Higher-priority moves go first,
+         * though there aren't many moves with varying priorities in Gen1.
+         * Speed is used next to determine who goes first.
          * TODO: flesh out all the battle details
          */
           team1.activePokemon.useMove(i, team2.activePokemon, this)
@@ -110,6 +111,10 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
 
       }
     }
+
+    // TODO: make sure that the Pokemon who moved first is still alive
+    // If not, then the trainer needs to send someone else out and a new turn
+    // begins
 
     // TODO: Pokemon who attacks second needs to make sure that the move it
     // picked wasn't disabled by the Pokemon who attacked first. If it was

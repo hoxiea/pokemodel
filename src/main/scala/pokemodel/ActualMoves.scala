@@ -1235,7 +1235,7 @@ class DreamEater extends SpecialMove with GainPropDamageDealt with SingleStrike 
   override val type1 = Psychic
   override val power = 100
   override val maxPP = 15
-  override def requiredStatusAilments: Set[StatusAilment] = Set(SLP())
+  override def requiredNVSAs = Set(SLP())
   // 100% accuracy
 }
 

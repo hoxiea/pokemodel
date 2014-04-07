@@ -102,3 +102,40 @@ class TestDEUL extends PhysicalMove with DamageEqualsUserLevel {
   override val maxPP = 10
 }
 
+
+// SUICIDE DAMAGE
+class TestSD extends PhysicalMove with SuicideDamage {
+  override val index = 999
+  override val power = 350
+  override val maxPP = 10
+}
+
+// GAIN PROPORTION DAMAGE DEALT
+class TestGPDDWRONG extends PhysicalMove with GainPropDamageDealt {
+  // This is WRONG! If there's no trait to the right of GPDD that can deal
+  // damage, then it doesn't really make sense to think about gaining a
+  // proportion of the damage dealt
+  override val index = 999
+  override val power = 35
+  override val maxPP = 10
+}
+
+class TestGPDD extends PhysicalMove with GainPropDamageDealt with SingleStrike {
+  // This is right! SingleStrike can deal damage, GPDD can restore some HP
+  override val index = 999
+  override val power = 50
+  override val maxPP = 10
+}
+
+
+class TestGPDDConstant extends PhysicalMove with GainPropDamageDealt with ConstantDamage {
+  // This is right! ConstantDamage can deal damage, GPDD can restore some HP
+  override val index = 999
+  override val power = 50
+  override val maxPP = 10
+  override def damageAmount = 1
+}
+
+
+
+

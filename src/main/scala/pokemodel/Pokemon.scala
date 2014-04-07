@@ -60,7 +60,7 @@ class Pokemon(builder: PokemonBuilder) {
   val maxHP   = builder.maxHP
 
   private var currHP = builder.currentHP
-  var statusAilment: Option[StatusAilment] = builder.statusAilment
+  var statusAilment: Option[NonVolatileStatusAilment] = builder.statusAilment
 
 
   /*
@@ -153,7 +153,12 @@ class Pokemon(builder: PokemonBuilder) {
     }
   }
 
-  def gainHP(amount: Int) { currHP = maxHP min (currHP + amount) }
+  def gainHP(amount: Int) {
+    // restore HP straight to the Pokemon, ignoring substitute
+    require(0 <= amount && amount <= maxHP - currentHP(true),
+        "Don't expect Pokemon.gainHP to truncate for you!")
+    currHP = currHP + amount
+  }
   def toFullHealth() = { currHP = maxHP }
 
   def heal() {

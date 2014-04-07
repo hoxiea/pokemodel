@@ -263,7 +263,7 @@ trait SingleStrike extends Move {
    * Any move that strikes once and uses DamageCalculator to figure out the
    * appropriate damage should extend SingleStrike
    */
-  def requiredStatusAilments: Set[StatusAilment] = Set()
+  def requiredNVSAs: Set[NonVolatileStatusAilment] = Set()
 
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
@@ -271,9 +271,13 @@ trait SingleStrike extends Move {
     pb: Battle,
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    // TODO: Make sure that any requiredStatusAilments are present
+    def statusAilmentSituationOK: Boolean =
+      requiredNVSAs.isEmpty ||
+      defender.statusAilment.isDefined && requiredNVSAs.contains(defender.statusAilment.get)
+
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
+        pb.statusManager.canBeHit(defender) &&
+        statusAilmentSituationOK) {
       val result = pb.dc.calc(attacker, defender, this, pb)
       val damageResult = defender.takeDamage(result.damageDealt)
 
@@ -853,15 +857,17 @@ trait SuicideDamage extends Move {
     pb: Battle,
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
+    // result contains correct info for a miss
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+
+    // If you hit, process the hit and update result
     if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
         pb.statusManager.canBeHit(defender)) {
-      val result = pb.dc.calc(attacker, defender, this, pb)
+      val dcResult = pb.dc.calc(attacker, defender, this, pb)
+      result.merge(dcResult)
       val damageResult = defender.takeDamage(result.damageDealt)
-
-      // Update result values
-      // numTimesHit == 1, no hpGained, no statusAilments, no stat changes
       result.processTakeDamageResult(defender, damageResult)
+      // numTimesHit == 1, no hpGained, no statusAilments, no stat changes
     }
 
     // Faint unless you KOed a sub AND Glitch.suicideGlitchOn
@@ -881,11 +887,11 @@ trait GainPropDamageDealt extends Move {
   /*
    * This trait captures the property of LeechLife, Absorb, MegaDrain, and
    * DreamEater, whereby up to 50% of the damage dealt by a single strike
-   * attack is restored to the attacker. These moves should extend SingleStrike
+   * attack is restored to the attacker. These moves should extend some Strike
    * on the right so that GainPropDamageDealt has access to mrb.damageDealt.
    *
    * This trait is never used on its own: you transfer HP to yourself
-   * iff a SingleStrike succeeded first.
+   * iff a Strike succeeded first.
    *
    * No HP is restored if the move BREAKS a substitute.
    *
@@ -894,6 +900,9 @@ trait GainPropDamageDealt extends Move {
    * GainPropDamageDealt without worrying about whether the defender is asleep:
    * SingleStrike will take care of that, and DreamEater just checking for
    * damage dealt is good enough.
+   *
+   * NOTE: These moves always restore health to the underlying Pokemon, even if
+   * that Pokemon has a substitute active.
    */
 
   def propToRestore = 0.5
@@ -909,18 +918,20 @@ trait GainPropDamageDealt extends Move {
     result.merge(mrb)
 
     if (result.moveIndex == -1)
-      throw new Exception("GainPropDamageDealt called without a former move")
+      throw new Exception("GainPropDamageDealt called without a former trait")
 
     // The SingleStrike should have filled in most of the MRB details already
     // We just worry about gaining HP here
     val shouldTransferHP = mrb.numTimesHit == 1 && !mrb.subKO
     if (shouldTransferHP) {
-      val hpToGain = result.damageDealt match {
+      val potentialGain = result.damageDealt match {
         case 1 => 1
         case n => n / 2
       }
-      attacker.gainHP(hpToGain)
-      result.hpGained(hpToGain)
+      val actualGain =
+        potentialGain min (attacker.maxHP - attacker.currentHP(true))
+      attacker.gainHP(actualGain)
+      result.hpGained(actualGain)
     }
 
     // Already merged, just pass things along
