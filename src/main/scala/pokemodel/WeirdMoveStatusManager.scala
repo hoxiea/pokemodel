@@ -1,6 +1,7 @@
 package pokemodel
 
 import scala.collection.mutable
+import ViolentStruggleType._
 
 /*
  * A WeirdMoveStatusManager handles all of the strange moves that require data structures
@@ -242,6 +243,29 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
     if (disabledMoveMap.contains(p)) disabledMoveMap -= p
   }
 
+  /*
+   * VIOLENT STRUGGLE: THRASH AND PETAL DANCE
+   * These two moves cause the Pokemon using them to go into a temporary
+   * Rage-like state where they attack for either 3 or 4 moves.
+   * While struggling, you can't switch out or do anything other than struggle.
+   * Each strike does a damage calculation and can miss.
+   * 
+   * If the Pokemon reaches the end of its 3-4 turns, it becomes CONFUSED.
+   * However, it can be interrupted by (full paralysis, hurt self due to
+   * pre-existing CONFUSED), in which case you stop and no CONFUSED.
+   * Sleep, freeze, partial trapping, and flinching pause but don't stop struggle.
+   *
+   * Since it's impossible to be using both moves simultaneously, it's enough
+   * to track all Violent Struggles in one data structure, used by the trait
+   * ViolentStruggle. However, the two moves have different powers and different
+   * types, so we'll encode which move the Pokemon is using with a simple enum.
+   */
+  private val vsMap: mutable.Map[Pokemon, (ViolentStruggleType, Int)] = mutable.Map()
+  def isThrashing(p: Pokemon): Boolean = false
+  def isPetalDancing(p: Pokemon): Boolean = false
+  def isViolentStruggling(p: Pokemon): Boolean = isThrashing(p) || isPetalDancing(p)
+
+
 
   /*
    * Useful general methods
@@ -255,3 +279,7 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
     removeAllDisables(p)  // TODO: do disables actually clear when you switch out?
   }
 }
+
+  
+
+

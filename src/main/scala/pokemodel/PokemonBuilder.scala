@@ -192,6 +192,15 @@ class PokemonBuilder (val index: Int, val level: Int) {
     this
   }
 
+  def learnMoves(moveList: List[Move]): PokemonBuilder = {
+    // Fast way to learn moves. Overwrites existing moves
+    require (moveList.length <= 4, "too many moves to learn")
+    moveList.view.zipWithIndex foreach {
+      case (m, index) => move(index+1, m)
+    }
+    this
+  }
+
 
   def addRandomMoves(): PokemonBuilder = {
     // Overwrite the moves currently present with up to 4 random moves

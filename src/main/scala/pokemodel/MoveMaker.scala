@@ -16,6 +16,7 @@ package pokemodel
  * you're looking for.
  *
  * TODO: Only instantiate Moves you need? Could be nice, and even less memory.
+ * TODO: The moves with a Register* and an Attack should have the Register part below (Thrash, etc.)
  */
 
 object MoveDepot {
@@ -36,7 +37,8 @@ object MoveDepot {
   // Access by moveName: String
   // usage: MoveDepot("tackle") => Tackle
   // usage: MoveDepot("DraGon-rAGe") => DragonRage
-  private def processMoveName(s: String) = s.replaceAll("-", "").toLowerCase
+  private def processMoveName(s: String) =
+    s.replaceAll("-", "").replaceAll(" ", "").toLowerCase
 
   private val moveNameMap: Map[String, Move] = {
     // This maps processed movename strings to canonical instance of Moves
@@ -62,7 +64,7 @@ object MoveDepot {
   def maxPP(moveName: String): Int = {
     val m = apply(moveName)
     val moveIndex = m.index
-    require(1 <= moveIndex && moveIndex <= 165, 
+    require(1 <= moveIndex && moveIndex <= 165,
       s"illegal moveName $moveName (MoveDepot.maxPP)")
     apply(moveIndex).maxPP
   }

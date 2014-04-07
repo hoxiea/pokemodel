@@ -15,12 +15,12 @@ class MoveMakerSuite extends FunSuite {
     assert (m1 == m2)
   }
 
-  test("MoveDepot recognizes strings!") {
+  test("MoveDepot recognizes strings: capitalization, hyphenation, and spacing ignored") {
     assert (MoveDepot("tackle").index == 33)
-    assert (MoveDepot("karatechop").index == 2)
-    assert (MoveDepot("pinmissile").index == 42)
+    assert (MoveDepot("karate    CHOP").index == 2)
+    assert (MoveDepot("PinMissile").index == 42)
     assert (MoveDepot("absorb").index == 71)
-    assert (MoveDepot("softboiled").index == 135)
-    assert (MoveDepot("bubblebeam").index == 61)
+    assert (MoveDepot("Soft-Boiled").index == 135)
+    assert (MoveDepot("Bubble Beam").index == 61)
   }
 }

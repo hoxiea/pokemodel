@@ -305,7 +305,7 @@ class MoveSuite extends FunSuite {
 
   test("Basic Multistrike attack, defender doesn't die") {
     val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
-                                 .move(1, new TestMultiStrike)
+                                 .move(1, new TestPhysicalMultiStrike)
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
     val venusaur = new Pokemon(pb2)
@@ -321,7 +321,7 @@ class MoveSuite extends FunSuite {
   test("Basic Multistrike attack, defender dies on first strike") {
     val defenderHP = 10
     val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
-                                 .move(1, new TestMultiStrike)
+                                 .move(1, new TestPhysicalMultiStrike)
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut().currentHP(defenderHP)
     val venusaur = new Pokemon(pb2)
@@ -338,7 +338,7 @@ class MoveSuite extends FunSuite {
 
   test("Multistrike attack with STAB and type effectiveness") {
     val pb1 = new PokemonBuilder("Charizard", 100).maxOut()
-                                 .move(1, new TestMultiStrike with Fire)  //
+                                 .move(1, new TestPhysicalMultiStrike with Fire)  //
     val charizard = new Pokemon(pb1)
     val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
     val venusaur = new Pokemon(pb2)
