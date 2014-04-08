@@ -164,7 +164,7 @@ class MoveResultBuilder {
 
   // You'll never have one without the other, so combine these two
   def addSelfStat(stat: BattleStat, amount: Int): MoveResultBuilder = {
-    require (-3 <= amount && amount <= 3)
+    require (-2 <= amount && amount <= 2)   // moves only change things 1 or 2 levels in Gen 1
     selfStat = Some(stat)
     selfStatAmount = Some(amount)
     this

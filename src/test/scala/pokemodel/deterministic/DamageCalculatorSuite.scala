@@ -2,6 +2,7 @@ package pokemodel
 
 import org.scalatest.FunSuite
 import Type._
+import TestingInfrastructure._
 
 class DamageCalculatorSuite extends FunSuite {
 
@@ -215,4 +216,19 @@ class DamageCalculatorSuite extends FunSuite {
     assert(battle.dc.damageFormula(50, 133, 101, 40, 1.0, 1, 0.85) == 21)
     assert(battle.dc.damageFormula(50, 133, 101, 40, 1.0, 1, 1.0) == 25)
   }
+
+  test("AlwaysCritHit should always result in a CritHit") {
+    val f = singleMoveFixture(new TestPhysicalSingleStrike with AlwaysCritHit)
+    import f._
+    val result = charizard.useMove(1, venusaur, battle)
+    assert(result.critHit)
+  }
+
+  test("NeverCritHit should never result in a CritHit") {
+    val f = singleMoveFixture(new TestPhysicalSingleStrike with NeverCritHit)
+    import f._
+    val result = charizard.useMove(1, venusaur, battle)
+    assert(!result.critHit)
+  }
+
 }

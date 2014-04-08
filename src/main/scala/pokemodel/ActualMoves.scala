@@ -570,16 +570,19 @@ class Fissure extends PhysicalMove with OneHitKO {
   override val index = 90
   override val type1 = Ground
   override val maxPP = 5
+  override val accuracy = 0.3
 }
 
 class Guillotine extends PhysicalMove with OneHitKO {
   override val index = 12
   override val maxPP = 5
+  override val accuracy = 0.3
 }
 
 class HornDrill extends PhysicalMove with OneHitKO {
   override val index = 32
   override val maxPP = 5
+  override val accuracy = 0.3
 }
 
 
@@ -846,12 +849,27 @@ class Dig extends PhysicalMove with WaitThenAttack {
   // 100 accuracy
 }
 
-class HyperBeam extends PhysicalMove {
+class HyperBeam extends PhysicalMove with SingleStrike{
+  /*
+   * HyperBeam is basically a SingleStrike move, except that there's a delay
+   * turn afterwards.
+   */
   override val index = 63
   override val maxPP = 5
   override val power = 150
   override val accuracy = 0.9
-  // TODO: Implement HyperBeam
+
+  override def finishUsingMove(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+
 }
 
 class Bind extends PhysicalMove with PartiallyTrapping {

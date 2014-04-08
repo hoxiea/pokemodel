@@ -47,10 +47,10 @@ class Pokemon(builder: PokemonBuilder) {
   val move5: Move = MoveDepot(165)
 
   // Pokemon keep track of the PP they have left for each move; start out full
-  var pp1: Option[Int] = move1.map(_.maxPP)
-  var pp2: Option[Int] = move2.map(_.maxPP)
-  var pp3: Option[Int] = move3.map(_.maxPP)
-  var pp4: Option[Int] = move4.map(_.maxPP)
+  private var pp1: Option[Int] = move1.map(_.maxPP)
+  private var pp2: Option[Int] = move2.map(_.maxPP)
+  private var pp3: Option[Int] = move3.map(_.maxPP)
+  private var pp4: Option[Int] = move4.map(_.maxPP)
   val pp5: Option[Int] = Some(1)
 
   val attack  = builder.attack

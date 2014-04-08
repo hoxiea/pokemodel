@@ -46,14 +46,7 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
    */
   val flinch = mutable.Set[Pokemon]()
 
-  /* THIRD KIND
-   * Sky Attack -> glowing
-   * Hyper Beam -> recharging
-   * Solar Beam -> taking in sunlight
-   * Substitute -> substituted
-   * Skull Bash -> withdrawing
-   * Razor Wind -> whipping up a whirlwind
-   */
+
   val weirdStatuses = Map()
 
   if (Battle.healBefore) {

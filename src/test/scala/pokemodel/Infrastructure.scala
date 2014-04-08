@@ -4,6 +4,11 @@ import org.scalacheck._
 import Prop.{forAll, BooleanOperators}
 
 object TestingInfrastructure {
+  trait Accuracy80 extends Move {override val accuracy = 0.80}
+  trait Accuracy50 extends Move {override val accuracy = 0.50}
+  trait Accuracy30 extends Move {override val accuracy = 0.30}
+  trait Accuracy10 extends Move {override val accuracy = 0.10}
+  
   def singleMoveFixture(m: Move) =
     new {
       val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m)

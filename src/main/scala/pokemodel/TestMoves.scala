@@ -34,7 +34,7 @@ class TestIncreaseSelfAttackStat extends StatusMove with SelfStatChange {
   override val index = 999
   override val maxPP = 20
   def statToChange = ATTACK
-  def amountToChangeBy = 3
+  def amountToChangeBy = 1
 }
 
 
@@ -42,32 +42,96 @@ class TestIncreaseSelfDefenseStat extends StatusMove with SelfStatChange {
   override val index = 999
   override val maxPP = 20
   def statToChange = DEFENSE
-  def amountToChangeBy = 3
+  def amountToChangeBy = 2
 }
 
-// ENEMY STAT CHANGE
-class TestDecreaseEnemyDefense extends StatusMove with EnemyStatChange {
+class TestIncreaseSelfSpeedStat extends StatusMove with SelfStatChange {
   override val index = 999
   override val maxPP = 20
-  def statToChange = DEFENSE
-  def amountToChangeBy = -3
-  def chanceOfStatChange = 1.0
-  def soloStatChange = true
+  def statToChange = SPEED
+  def amountToChangeBy = 1
+}
+
+class TestIncreaseSelfSpecialStat extends StatusMove with SelfStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = SPECIAL
+  def amountToChangeBy = 2
+}
+
+class TestIncreaseSelfAccuracyStat extends StatusMove with SelfStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = ACCURACY
+  def amountToChangeBy = 1
+}
+
+class TestIncreaseSelfEvasionStat extends StatusMove with SelfStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = EVASION
+  def amountToChangeBy = 2
 }
 
 
+// ENEMY STAT CHANGE
 class TestDecreaseEnemyAttack extends StatusMove with EnemyStatChange {
   override val index = 999
   override val maxPP = 20
   def statToChange = ATTACK
-  def amountToChangeBy = -3
+  def amountToChangeBy = -1
+  def chanceOfStatChange = 1.0
+  def soloStatChange = true
+}
+
+class TestDecreaseEnemyDefense extends StatusMove with EnemyStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = DEFENSE
+  def amountToChangeBy = -2
+  def chanceOfStatChange = 1.0
+  def soloStatChange = true
+}
+
+class TestDecreaseEnemySpeed extends StatusMove with EnemyStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = SPEED
+  def amountToChangeBy = -1
+  def chanceOfStatChange = 1.0
+  def soloStatChange = true
+}
+
+class TestDecreaseEnemySpecial extends StatusMove with EnemyStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = SPECIAL
+  def amountToChangeBy = -2
+  def chanceOfStatChange = 1.0
+  def soloStatChange = true
+}
+
+class TestDecreaseEnemyAccuracy extends StatusMove with EnemyStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = ACCURACY
+  def amountToChangeBy = -1
+  def chanceOfStatChange = 1.0
+  def soloStatChange = true
+}
+
+class TestDecreaseEnemyEvasion extends StatusMove with EnemyStatChange {
+  override val index = 999
+  override val maxPP = 20
+  def statToChange = EVASION
+  def amountToChangeBy = -2
   def chanceOfStatChange = 1.0
   def soloStatChange = true
 }
 
 
 // NON VOLATILE STATUS CHANGE
-class TestBurner extends SpecialMove with NonVolatileStatusChange {
+class TestAlwaysBurn extends SpecialMove with NonVolatileStatusChange {
   override val index = 999
   override val type1 = Fire  // shouldn't be used
   override val power = 40    // shouldn't be used
@@ -80,7 +144,7 @@ class TestBurner extends SpecialMove with NonVolatileStatusChange {
   override val worksWhenSubPresent = true
 }
 
-class TestAsleep extends SpecialMove with NonVolatileStatusChange {
+class TestSometimesSleep extends SpecialMove with NonVolatileStatusChange {
   override val index = 999
   override val type1 = Normal  // shouldn't be used
   override val power = 40      // shouldn't be used
@@ -88,7 +152,7 @@ class TestAsleep extends SpecialMove with NonVolatileStatusChange {
   override val accuracy = 1.0  // always hit, for test purposes
 
   override def statusAilmentToCause = new SLP
-  override def chanceOfCausingAilment = 1.0  // always cause, for test purposes
+  override def chanceOfCausingAilment = 0.5
   override def soloStatusChange = true
   override val worksWhenSubPresent = true
 }

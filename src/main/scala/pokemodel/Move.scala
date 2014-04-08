@@ -131,17 +131,25 @@ abstract class Move {
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
-    mrb: MoveResultBuilder): MoveResult
+    mrb: MoveResultBuilder): MoveResultBuilder
 
+
+  /* Function called after move-specific stuff happens
+   * This is nice because it gets the MRB from moveSpecificStuff and can
+   * piggyback onto it even further if it wants to.
+   * But by default, it just passed along what it received, to be converted
+   * into a MoveResult and returned by 'use' below
+   */
   def finishUsingMove(
       attacker: Pokemon,
       attackerMoveSlot: Int,
       defender: Pokemon,
-      pb: Battle) {
+      pb: Battle,
+      mrb: MoveResultBuilder): MoveResultBuilder = {
 
-    // Function called after move-specific stuff happens
     pb.moveManager.updateLastMoveIndex(attacker, index)
     attacker.deductPP(attackerMoveSlot)
+    mrb
   }
 
   final def use(
@@ -151,9 +159,9 @@ abstract class Move {
       pb: Battle): MoveResult = {
 
     startUsingMove(attacker, attackerMoveSlot, defender, pb)
-    val result = moveSpecificStuff(attacker, defender, pb, mrb)
-    finishUsingMove(attacker, attackerMoveSlot, defender, pb)
-    result
+    val mssMRB = moveSpecificStuff(attacker, defender, pb, mrb)
+    val fumMRB = finishUsingMove(attacker, attackerMoveSlot, defender, pb, mssMRB)
+    fumMRB.toMoveResult
   }
 
   override def toString() = {
@@ -184,7 +192,7 @@ class PhysicalMove extends Move {
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
-    mrb: MoveResultBuilder) = mrb.toMoveResult
+    mrb: MoveResultBuilder) = mrb
 }
 
 class SpecialMove extends Move {
@@ -197,7 +205,7 @@ class SpecialMove extends Move {
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
-    mrb: MoveResultBuilder) = mrb.toMoveResult
+    mrb: MoveResultBuilder) = mrb
 }
 
 class StatusMove extends Move {
@@ -210,7 +218,7 @@ class StatusMove extends Move {
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
-    mrb: MoveResultBuilder) = mrb.toMoveResult
+    mrb: MoveResultBuilder) = mrb
 }
 
 
@@ -734,15 +742,28 @@ trait VolatileStatusChange extends Move {
 
 /** Less Commonly-Used (but still code-saving) Traits **/
 trait OneHitKO extends Move {
+  /*
+   * There are few OneHitKO moves in the game: Fissure, HornDrill, and Guillotine
+   * As their name suggests, they kill their opponent if they connect.
+   * More specifically, if they connect, then they'll either break a substitute if one exists,
+   * or KO the enemy if a substitute doesn't exist.
+   *
+   * In Gen 1, these never succeeded against enemies with larger effective Speeds,
+   * so we check for that when determining if the move strikes.
+   */
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
+    def attackerFastEnough: Boolean =
+      pb.statManager.getEffectiveSpeed(attacker) >= pb.statManager.getEffectiveSpeed(defender)
+
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
+    if (Random.nextDouble < chanceHit(attacker, defender, pb)
+        && pb.statusManager.canBeHit(defender)
+        && attackerFastEnough) {
       val damageToDeal = defender.currentHP()
       val damageResult = defender.takeDamage(damageToDeal)
 

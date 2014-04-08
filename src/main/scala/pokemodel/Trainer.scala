@@ -34,12 +34,12 @@ class UseFirstAvailableMove(override val team: PokemonTeam) extends Trainer(team
     // Always just use the first move with PP > 0
     val activePokemon = team.activePokemon
 
-    val moveIndex: Int =
-      if (!activePokemon.pp1.isEmpty && activePokemon.pp1.get > 0) 1
-      else if (!activePokemon.pp2.isEmpty && activePokemon.pp2.get > 0) 2
-      else if (!activePokemon.pp3.isEmpty && activePokemon.pp3.get > 0) 3
-      else if (!activePokemon.pp4.isEmpty && activePokemon.pp4.get > 0) 4
-      else 5
+    def getFirstWinningMoveslot(i: Int): Int =
+      if (i >= 5) 5
+      else if (activePokemon.getPP(i).getOrElse(-1) > 0) i
+      else getFirstWinningMoveslot(i + 1)
+
+    val moveIndex: Int = getFirstWinningMoveslot(1)
     return UseMove(moveIndex)
   }
 }
