@@ -27,9 +27,11 @@ class Struggle extends PhysicalMove with Recoil with SingleStrike {
       attacker: Pokemon,
       attackerMoveSlot: Int,
       defender: Pokemon,
-      pb: Battle) = {
+      pb: Battle,
+      mrb: MoveResultBuilder) = {
     // Don't deduct a PP! Just log it
     pb.moveManager.updateLastMoveIndex(attacker, index)
+    mrb
   }
 }
 
@@ -748,11 +750,13 @@ class RegisterThrash extends PhysicalMove with RegisterViolentStruggle {
       attacker: Pokemon,
       attackerMoveSlot: Int,
       defender: Pokemon,
-      pb: Battle) = {
+      pb: Battle,
+      mrb: MoveResultBuilder) = {
     // Don't log the register part!
     // Instead, use Thrash, decrement PP, and let Thrash log itself
     attacker.deductPP(attackerMoveSlot)
     (new Thrash).use(attacker, attackerMoveSlot, defender, pb)
+    mrb
   }
 }
 
@@ -775,10 +779,12 @@ class Thrash extends PhysicalMove with SingleStrike {
       attacker: Pokemon,
       attackerMoveSlot: Int,
       defender: Pokemon,
-      pb: Battle) = {
+      pb: Battle,
+      mrb: MoveResultBuilder) = {
     // Don't decrement PP - this is the attack part, which is free once you register
     // TODO: log yourself
     // TODO: decrement the number of turns left in WeirdMoveStatMan
+    mrb
   }
 }
 
@@ -851,23 +857,47 @@ class Dig extends PhysicalMove with WaitThenAttack {
 
 class HyperBeam extends PhysicalMove with SingleStrike{
   /*
-   * HyperBeam is basically a SingleStrike move, except that there's a delay
-   * turn afterwards.
+   * HyperBeam is basically a SingleStrike move, except that there's sometimes
+   * a delay turn afterwards. So we extend SingleStrike to get the
+   * damage-dealing part and then override finishUsingMove to register the
+   * potential delay.
+   *
+   * HyperBeam doesn't require a recharge turn if:
+   * - it misses
+   * - breaks a substitute
+   * - KOs the opponent
+   * - TODO: weird glitchy stuff
+   *
+   * This skip-recharge stuff was all eliminated in Gen 2, so there's a
+   * flag, Glitch.hyperbeamRechargeGlitch
    */
+
   override val index = 63
   override val maxPP = 5
   override val power = 150
   override val accuracy = 0.9
 
   override def finishUsingMove(
-    attacker: Pokemon,
-    defender: Pokemon,
-    pb: Battle,
-    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder) = {
+    // Standard stuff
+    pb.moveManager.updateLastMoveIndex(attacker, index)
+    attacker.deductPP(attackerMoveSlot)
 
-    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    result.merge(mrb)
-    super.moveSpecificStuff(attacker, defender, pb, result)
+    // Register delay
+    def delayNotNeeded =
+      Glitch.hyperbeamRechargeGlitch &&
+      (mrb.numTimesHit == 0 || mrb.subKO || mrb.KO)
+
+    if (!delayNotNeeded) {
+
+    }
+
+    // Pay it forward
+    mrb
   }
 
 }

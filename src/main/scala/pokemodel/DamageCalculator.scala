@@ -195,8 +195,8 @@ class DamageCalculator {
     }
 
     if (battle.weirdMoveStatusManager.hasFocusEnergy(attacker)) {
-      if (Glitch.focusEnergyHelps) criticalChance * 4
-      else criticalChance / 4
+      if (Glitch.focusEnergyGlitch) criticalChance / 4
+      else criticalChance * 4
     } else criticalChance
   }
 }

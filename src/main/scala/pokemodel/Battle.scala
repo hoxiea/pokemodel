@@ -168,14 +168,14 @@ object Glitch {
    * The move Focus Energy is supposed to quadruple the user's critical hit
    * rate.  In Gen 1, however, it divides it by 4 instead.
    */
-  val focusEnergyHelps: Boolean = false
+  val focusEnergyGlitch: Boolean = true
 
   /*
    * In Gen 1, Recover and Softboiled fail if (user's maximum HP - user's
    * current HP) is one less than a multiple of 256.  Which is stupid. This was
    * fixed in later generations. You can fix it here if you'd like.
    */
-  val recoverBugEnabled: Boolean = true
+  val recoverGlitch: Boolean = true
 
   /*
    * Using Explosion or Selfdestruct to break a substitute doesn't actually
@@ -188,4 +188,11 @@ object Glitch {
    * even though it DOES cure the status ailment of the enemy.
    */
   val hazeNoStatusAilmentCureGlitch = true
+
+  /*
+   * In Gen 2 and afterwards, HyperBeam always required a recharge turn.
+   * However, in Gen 1, the recharge is skipped in certain instances, as
+   * detailed in ActualMoves.scala#HyperBeam.
+   */
+  val hyperbeamRechargeGlitch = true
 }

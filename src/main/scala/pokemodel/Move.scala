@@ -642,6 +642,9 @@ trait NonVolatileStatusChange extends Move {
       pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
       result.nvsa(statusAilmentToCause)
       result.numTimesHit(1)  // for Type1 situations
+
+      // TODO: if defender has HyperBeam delay, then getting put to SLP will
+      // negate that delay
     }
 
     result.merge(mrb)
@@ -716,6 +719,8 @@ trait VolatileStatusChange extends Move {
         }
         case (_ : FLINCH) => {
           if (pb.statusManager.causeToFlinch(defender)) {
+            // TODO: if defender has HyperBeam delay, then getting hit with a flinching
+            // move will negate that delay
             result.vsa(statusAilmentToCause)
             result.numTimesHit(1)
           }
@@ -1019,6 +1024,9 @@ trait PartiallyTrapping extends Move {
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     result.merge(mrb)
+    // TODO: A partially trapping move, even if it misses, relieves the opponent
+    // of HyperBeam recharge. So check to see if pb.weirdMoveMan.hasHBDelay(defender),
+    // and if so, negate the delay
     super.moveSpecificStuff(attacker, defender, pb, result)
   }
 }
@@ -1050,8 +1058,8 @@ trait RestoreHP extends Move {
       attacker.toFullHealth()
     } else if (currentHP == maxHP) {
       // no recovering necessary
-    } else if (Glitch.recoverBugEnabled && ((maxHP - currentHP) + 1) % 256 == 0) {
-      // bug - do nothing!
+    } else if (Glitch.recoverGlitch && ((maxHP - currentHP) + 1) % 256 == 0) {
+      // glitch - do nothing!
     } else {
       // let the healing begin
       val hpToHeal = (maxHP * proportionToRestore).toInt
