@@ -893,7 +893,7 @@ class HyperBeam extends PhysicalMove with SingleStrike {
       (mrb.numTimesHit == 0 || mrb.subKO || mrb.KO)
 
     if (!delayNotNeeded) {
-      val success = pb.weirdMoveStatusManager.tryToRegisterHyperBeam(attacker)
+      val success = pb.weirdMoveStatusManager.tryToRegisterHyperBeamDelay(attacker)
       if (!success)
         throw new Exception("tried to register HyperBeam, but registration failed")
       assert(pb.weirdMoveStatusManager.hasHyperBeamDelay(attacker))
@@ -2060,7 +2060,30 @@ class Transform extends StatusMove {
 class Substitute extends StatusMove {
   override val index = 164
   override val maxPP = 10
-  // TODO: call Pokemon methods that create a substitute
+
+  /*
+   * Substitute has a many conditions and many interactions with other moves
+   * Much of the logic: in the Pokemon class, under the Substitute section
+   * No stat-modifying attacks work: handled by BattleStatManager.canChangeDefenderStats
+   * No major statusAilments inflicted: handled by BattleStatusManager.canCauseMajorStatusAilment
+   */
+
+  override def moveSpecificStuff(
+    // numTimesHit == 1  =>  Substitute created successfully
+    // else numTimesHit == 0
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    if (attacker.canMakeSub) {
+      attacker.makeSub()
+      result.numTimesHit(1)
+    }
+    result.merge(mrb)
+    result
+  }
 }
 
 // STATUS: USELESS STUFF
