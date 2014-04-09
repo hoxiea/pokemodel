@@ -109,8 +109,8 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
    */
   private val hyperbeamTracker = new YesNoTracker
   def hasHyperBeamDelay(p : Pokemon): Boolean = hyperbeamTracker.hasProperty(p)
-  def tryToRegisterHyperBeam(p: Pokemon): Boolean = hyperbeamTracker.tryToRegister(p)
-  def tryToRemoveHyperBeam(p: Pokemon): Boolean = hyperbeamTracker.tryToRemove(p)
+  def tryToRegisterHyperBeamDelay(p: Pokemon): Boolean = hyperbeamTracker.tryToRegister(p)
+  def tryToRemoveHyperBeamDelay(p: Pokemon): Boolean = hyperbeamTracker.tryToRemove(p)
 
 
   /*
