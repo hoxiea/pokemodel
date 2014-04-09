@@ -855,21 +855,21 @@ class Dig extends PhysicalMove with WaitThenAttack {
   // 100 accuracy
 }
 
-class HyperBeam extends PhysicalMove with SingleStrike{
+class HyperBeam extends PhysicalMove with SingleStrike {
   /*
-   * HyperBeam is basically a SingleStrike move, except that there's sometimes
-   * a delay turn afterwards. So we extend SingleStrike to get the
-   * damage-dealing part and then override finishUsingMove to register the
-   * potential delay.
+   * HyperBeam is essentially a Normal-type SingleStrike move, except that
+   * there's sometimes a delay turn afterwards. So we extend SingleStrike to
+   * get the damage-dealing part and then override finishUsingMove to register
+   * the potential delay.
    *
-   * HyperBeam doesn't require a recharge turn if:
+   * In Gen1, HyperBeam doesn't require a recharge turn if:
    * - it misses
    * - breaks a substitute
    * - KOs the opponent
    * - TODO: weird glitchy stuff
    *
    * This skip-recharge stuff was all eliminated in Gen 2, so there's a
-   * flag, Glitch.hyperbeamRechargeGlitch
+   * flag, Glitch.hyperbeamRechargeGlitch to switch this on/off
    */
 
   override val index = 63
@@ -893,7 +893,10 @@ class HyperBeam extends PhysicalMove with SingleStrike{
       (mrb.numTimesHit == 0 || mrb.subKO || mrb.KO)
 
     if (!delayNotNeeded) {
-
+      val success = pb.weirdMoveStatusManager.tryToRegisterHyperBeam(attacker)
+      if (!success)
+        throw new Exception("tried to register HyperBeam, but registration failed")
+      assert(pb.weirdMoveStatusManager.hasHyperBeamDelay(attacker))
     }
 
     // Pay it forward
@@ -1712,7 +1715,7 @@ class LightScreen extends StatusMove {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    val success = pb.weirdMoveStatusManager.tryToRegisterLightScreen(attacker)
+    val success = pb.weirdMoveStatusManager.tryToRegisterLightscreen(attacker)
     if (success) {
       result.numTimesHit(1)
     }
@@ -1866,8 +1869,8 @@ class Haze extends StatusMove {
     pb.statusManager.tryToRemoveSeeded(defender)
 
     // negate Light Screen for both active Pokemon
-    pb.weirdMoveStatusManager.tryToRemoveLightScreen(attacker)
-    pb.weirdMoveStatusManager.tryToRemoveLightScreen(defender)
+    pb.weirdMoveStatusManager.tryToRemoveLightscreen(attacker)
+    pb.weirdMoveStatusManager.tryToRemoveLightscreen(defender)
 
     // negate Mist for both active Pokemon
     pb.weirdMoveStatusManager.tryToRemoveMist(attacker)
@@ -1916,11 +1919,44 @@ class Metronome extends StatusMove {
   override val index = 118
   override val maxPP = 20
 
-  // TODO: implement Metronome
-  private def getValidIndex() : Int = {
+    /* Bulbapedia makes a big deal out of the fact that Metronome moves are
+     * used with priority=0, such that you can see, for example, a QuickAttack
+     * used as the second Move of the turn. But as long as the move is used
+     * when Metronome is called, it'll have priority=0, since Metronome has
+     * priority=0. So nothing special needed.
+     */
+
+  private def getValidMoveIndex: Int = {
+    // Metronome never picks itself or Struggle
       val potentialIndex = Utils.intBetween(1, 165 + 1)
       if (potentialIndex != index && potentialIndex != 165) potentialIndex
-      else getValidIndex()
+      else getValidMoveIndex
+  }
+
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val moveIndex  = getValidMoveIndex
+    val moveToUse  = MoveDepot(moveIndex)
+    val moveResult = moveToUse.use(attacker, 5, defender, pb)
+    val result = new MoveResultBuilder()
+    result.merge(moveResult)
+    result
+  }
+
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder) = {
+    // TODO: Don't log metronome, whatever logging system you end up using
+    // Let moveToUse log itself, though, since that should count as last move used
+    attacker.deductPP(attackerMoveSlot)  // this is Metronome PP, should be decremented
+    mrb
   }
 }
 
@@ -1961,6 +1997,7 @@ class Transform extends StatusMove {
   override val index = 144
   override val maxPP = 10
   // TODO: implement Transform
+  // TODO: Transform wears off if you switch
   // override def moveSpecificStuff(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
   //   // http://bulbapedia.bulbagarden.net/wiki/Transform_(move)
   //   // http://www.smogon.com/rb/moves/Transform
