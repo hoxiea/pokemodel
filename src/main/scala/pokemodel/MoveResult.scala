@@ -69,7 +69,7 @@ class MoveResult (
 
   override def toString: String = {
     val repr = new StringBuilder()
-    repr.append(s"moveIndex = $moveIndex\n")
+    repr.append(s"moveIndex = $moveIndex (${MoveDepot(moveIndex)})\n")
     repr.append(s"damageCalc = $damageCalc\n")
     repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
@@ -225,7 +225,7 @@ class MoveResultBuilder {
   }
 
   /* merge is a crucial method here, as described in the top comment */
-  def merge(other: MoveResultBuilder) {
+  def merge(other: MoveResult): MoveResultBuilder = {
     moveIndex(moveIndex     max other.moveIndex)
     damageCalc(damageCalc   max other.damageCalc)
     numTimesHit(numTimesHit max other.numTimesHit)
@@ -293,9 +293,13 @@ class MoveResultBuilder {
     selfKO(selfKO || other.selfKO)
   }
 
+  def merge(mrb: MoveResultBuilder): MoveResultBuilder = {
+    merge(mrb.toMoveResult)
+  }
+
   override def toString: String = {
     val repr = new StringBuilder()
-    repr.append(s"moveIndex = $moveIndex\n")
+    repr.append(s"moveIndex = $moveIndex (${MoveDepot(moveIndex)})\n")
     repr.append(s"damageCalc = $damageCalc\n")
     repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
