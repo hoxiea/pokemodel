@@ -1,0 +1,7 @@
+There are a few moves in the game that use past actions to figure out what to
+do.  In this document, I list these moves and describe their precise reliance
+on the past.
+
+MirrorMove
+
+Counter
