@@ -639,12 +639,20 @@ trait NonVolatileStatusChange extends Move {
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if ((proceedType1 || proceedType2) &&
-      pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)) {
+        pb.statusManager.canChangeMajorStatusAilment(defender)) {
+      pb.statusManager.changeMajorStatusAilment(defender, statusAilmentToCause)
       result.nvsa(statusAilmentToCause)
       result.numTimesHit(1)  // for Type1 situations
 
-      // TODO: if defender has HyperBeam delay, then getting put to SLP will
-      // negate that delay
+      // Fun fact: if defender has HyperBeam delay and gets puts to SLP,
+      // then he won't have the delay when he wakes up
+      statusAilmentToCause match {
+        case (_ : SLP) => {
+          if (Glitch.hyperbeamRechargeGlitch)
+            pb.weirdMoveStatusManager.tryToRemoveHyperBeamDelay(defender)
+        }
+        case _ => {}
+      }
     }
 
     result.merge(mrb)
