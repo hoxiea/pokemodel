@@ -56,6 +56,7 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 
 - Weird Stuff
 = Counter: wait until opponent attacks (low priority), then return twice damage dealt from certain types, WSSC
+= Hyper Beam: deal damage, then idle for a turn, with weird stuff and bugs
 
 - Single-strike + potential status change
 = Bite: damage and 10% chance of causing a flinch
@@ -198,6 +199,7 @@ STATUS MOVES (any type, don't deal damage directly):
 = Mist: protect user from future stat mods until he's switched out or faints
 = Focus Energy: multiply the user's Crit Hit ratio by 4 (except in Gen 1 it divided by 4 instead)
 *= LeechSeed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
+= Metronome: randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
 
 
 

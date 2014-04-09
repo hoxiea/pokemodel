@@ -36,13 +36,10 @@ Weird stuff about missing and secondary effects
 
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
 - CUSTOM
-= Hyper Beam: deal damage, then idle for a turn, with weird stuff and bugs
-
 = Disable: almost done, a couple TODOs to fill in
 
 STATUS MOVES (any type, don't deal damage directly):
 - CUSTOM
-= Metronome: randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
 = Mimic: copy a randomly selected move of the opponent's
 = Substitute: use 25% of maxHP to create a substitute with 1 HP more than the amount of HP lost by the user.  Duplicate the user's current stat modifiers, allow self-modification of stats, but disallow any stat-modifying attacks and side effects of opponent's moves.  Other weird stuff too
 = Transform: change the user's type, stats, stat mods, current moves, and species to that of the target, WSSC
