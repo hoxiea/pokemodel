@@ -122,7 +122,7 @@ class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
     require(specialStages.contains(p),
             s"${p.name} doesn't have a Special stage in this battle")
     val startingValue = (specialStageToFraction(specialStages(p)) * p.special).toInt
-    if (pb.weirdMoveStatusManager.hasLightScreen(p)) (startingValue * 2) % 1024
+    if (pb.weirdMoveStatusManager.hasLightscreen(p)) (startingValue * 2) % 1024
     else startingValue min 999
   }
 
