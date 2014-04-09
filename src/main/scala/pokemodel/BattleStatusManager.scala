@@ -182,8 +182,13 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   /*
    * Non-Volatile Status Stuff
    */
-  def canCauseMajorStatusAilment(p: Pokemon): Boolean = p.statusAilment == None
+  def canChangeMajorStatusAilment(p: Pokemon): Boolean = 
+      p.statusAilment == None && !p.hasSub
+
   def changeMajorStatusAilment(p: Pokemon, newStatus: NonVolatileStatusAilment): Boolean = {
+    if (!canChangeMajorStatusAilment(p))
+      throw new Exception("Tried to change NVSA but you're not allowed!")
+
     p.statusAilment match {
       case None => { p.statusAilment = Some(newStatus); true }
       case _ => false
