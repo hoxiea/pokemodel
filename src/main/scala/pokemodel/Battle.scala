@@ -61,6 +61,15 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     var team1Fainted = false
     var team2Fainted = false
 
+  /*
+   * There are three states that you as a Trainer can face at the beginning of
+   * a turn:
+   * 1. No choice at all. (Rage)
+   * 2. Limited choice. You can switch, or you can do things like continue a
+   *    Move in progress, try to attack if your Asleep, etc.
+   * 3. Full control. Use any of your available moves, or switch.
+   */
+
     // Process any status ailments that take effect at the beginning of the round: SLP, PAR
 
     // Check volativeStatuses and weirdStatuses to see if player1 gets to select a BattleAction
