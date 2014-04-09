@@ -12,6 +12,33 @@ import ViolentStruggleType._
  // TODO: finish the above comment
  */
 
+class YesNoTracker {
+  /*
+   * After noticing a bunch of moves that create some state that a Pokemon
+   * is either in or not-in, I encapsulated the logic here.
+   */
+  private val members = mutable.Set[Pokemon]()
+  def hasProperty(p : Pokemon) : Boolean = members contains p
+
+  def tryToRegister(p: Pokemon): Boolean = {
+    // Returns whether or not p was added successfully
+    if (members contains p) {
+      false
+    } else {
+      members += p
+      true
+    }
+  }
+
+  def tryToRemove(p: Pokemon): Boolean = {
+    // Returns whether or not p was removed successfully
+    if (members contains p) {
+      members -= p
+      true
+    } else false
+  }
+}
+
 class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
   private val allPokemon = team1.team ++ team2.team
 
@@ -28,78 +55,63 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
    *
    * The logic that actually puts Mist to work is in
    * StatManager.canChangeDefenderStats: the attacker can change the defender's
-   * stats iff the defender doesn't have Mist cast. And EnemyStatChange checks for
-   * this before trying anything.
+   * stats iff the defender doesn't have Mist cast. And EnemyStatChange checks
+   * for this before trying anything.
    */
-  private val mistSet = mutable.Set[Pokemon]()
-  def hasMist(p : Pokemon) : Boolean = mistSet contains p
-
-  def tryToRegisterMist(p: Pokemon): Boolean = {
-    if (mistSet contains p) {
-      // no stacking involved, fails if you already have it cast
-      false
-    } else {
-      mistSet += p
-      true
-    }
-  }
-
-  def tryToRemoveMist(p: Pokemon): Boolean = {
-    // Useful for Haze
-    if (mistSet contains p) {
-      mistSet -= p
-      true
-    } else false
-  }
+  private val mistTracker = new YesNoTracker
+  def hasMist(p : Pokemon): Boolean = mistTracker.hasProperty(p)
+  def tryToRegisterMist(p: Pokemon): Boolean = mistTracker.tryToRegister(p)
+  def tryToRemoveMist(p: Pokemon): Boolean = mistTracker.tryToRemove(p)
 
   /*
    * REFLECT
+   * Cute little move that doubles the user's Defense stat (against Physical
+   * attacks) until it's switched out. It's taken into account in the Stat
+   * Manager's getEffectiveDefense.
    */
-  private val reflectSet = mutable.Set[Pokemon]()
-  def hasReflect(p : Pokemon) : Boolean = reflectSet contains p
-
-  def tryToRegisterReflect(p: Pokemon): Boolean = {
-    if (hasReflect(p)) {
-      // no stacking involved, fails if you already have it cast
-      false
-    } else {
-      reflectSet += p
-      true
-    }
-  }
-
-  def tryToRemoveReflect(p: Pokemon): Boolean = {
-    // Useful for Haze and switch out
-    if (hasReflect(p)) {
-      reflectSet -= p
-      true
-    } else false
-  }
+  private val reflectTracker = new YesNoTracker
+  def hasReflect(p : Pokemon): Boolean = reflectTracker.hasProperty(p)
+  def tryToRegisterReflect(p: Pokemon): Boolean = reflectTracker.tryToRegister(p)
+  def tryToRemoveReflect(p: Pokemon): Boolean = reflectTracker.tryToRemove(p)
 
   /*
    * LIGHTSCREEN
-   * 
+   * Cute little move that doubles the user's Special when it's used as a
+   * defensive value until it's switched out. This move inspired me to
+   * implement separate getSpecialAttack() and getSpecialDefense() methods in
+   * the Stat Manager; getSpecialDefense() takes LightScreen into the account,
+   * so that the DamageCalculator gets the correct value.
    */
-  private val lightScreenSet = mutable.Set[Pokemon]()
-  def hasLightScreen(p : Pokemon) : Boolean = lightScreenSet contains p
+  private val lightscreenTracker = new YesNoTracker
+  def hasLightscreen(p : Pokemon): Boolean = lightscreenTracker.hasProperty(p)
+  def tryToRegisterLightscreen(p: Pokemon): Boolean = lightscreenTracker.tryToRegister(p)
+  def tryToRemoveLightscreen(p: Pokemon): Boolean = lightscreenTracker.tryToRemove(p)
 
-  def tryToRegisterLightScreen(p: Pokemon): Boolean = {
-    if (hasLightScreen(p)) {
-      // no stacking involved, fails if you already have it cast
-      false
-    } else {
-      lightScreenSet += p
-      true
-    }
-  }
+  /*
+   * FOCUSENERGY
+   * This move is supposed to increase your critical hit rate by a factor of 4.
+   * An unfortunate Gen1 bug means that it actually decreased your critical hit
+   * by a factor of 4. Oops. See Glitch.focusEnergyGlitch
+   *
+   * The effect of Focus Energy cannot stack, and it will fail if the user is
+   * already under its effect. So we just need to keep track of who has it cast.
+   */
+  private val focusEnergyTracker = new YesNoTracker
+  def hasFocusEnergy(p : Pokemon): Boolean = focusEnergyTracker.hasProperty(p)
+  def tryToRegisterFocusEnergy(p: Pokemon): Boolean = focusEnergyTracker.tryToRegister(p)
+  def tryToRemoveFocusEnergy(p: Pokemon): Boolean = focusEnergyTracker.tryToRemove(p)
 
-  def tryToRemoveLightScreen(p: Pokemon): Boolean = {
-    // Useful for Haze and switch out
-    if (hasLightScreen(p)) {
-      lightScreenSet -= p
-      true
-    } else false
-  }
+  /*
+   * HYPERBEAM (DELAY)
+   * This is technically a 1-turn delay, so I could use a countdown tracker, except
+   * the starting value would always be 1 and then it would just decrement and expire.
+   * Instead, we'll treat it as a YesNo thing.
+   */
+  private val hyperbeamTracker = new YesNoTracker
+  def hasHyperBeamDelay(p : Pokemon): Boolean = hyperbeamTracker.hasProperty(p)
+  def tryToRegisterHyperBeam(p: Pokemon): Boolean = hyperbeamTracker.tryToRegister(p)
+  def tryToRemoveHyperBeam(p: Pokemon): Boolean = hyperbeamTracker.tryToRemove(p)
+
 
   /*
    * CONVERSION
@@ -121,35 +133,6 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
       throw new Exception("someone other than Porygon dereg Conversion")
     if (conversionSet.contains(p)) {
       conversionSet -= p
-      true
-    } else false
-  }
-
-  /*
-   * FOCUSENERGY
-   * This move is supposed to increase your critical hit rate by a factor of 4.
-   * An unfortunate Gen1 bug means that it actually decreased your critical hit
-   * by a factor of 4. Oops.
-   *
-   * The effect of Focus Energy cannot stack, and it will fail if the user is
-   * already under its effect. So we just need to keep track of who has it cast.
-   */
-  private val focusEnergySet = mutable.Set[Pokemon]()
-  def hasFocusEnergy(p : Pokemon): Boolean = focusEnergySet contains p
-
-  def tryToRegisterFocusEnergy(p: Pokemon): Boolean = {
-    if (focusEnergySet contains p) {
-      // no stacking involved, fails if you already have it cast
-      false
-    } else {
-      focusEnergySet += p
-      true
-    }
-  }
-
-  def tryToRemoveFocusEnergy(p: Pokemon): Boolean = {
-    if (focusEnergySet contains p) {
-      focusEnergySet -= p
       true
     } else false
   }
@@ -272,7 +255,7 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
    */
   def processSwitchOut(p: Pokemon) {
     tryToRemoveMist(p)
-    tryToRemoveLightScreen(p)
+    tryToRemoveLightscreen(p)
     tryToRemoveReflect(p)
     tryToRemoveFocusEnergy(p)
     tryToDeregisterConversion(p)
