@@ -324,6 +324,33 @@ class Pokemon(builder: PokemonBuilder) {
     case _ => false
   }
 
+  /* ANNOYING STUFF */
+  def makeTransformCopy(transformUser: Pokemon): Pokemon = {
+    /*
+     * There's a move called Transform that changes the user's:
+     * - current species (DONE)
+     * - current type (DONE)
+     * - current stats
+     * - current stat modifications
+     * - current moves
+     * to that of the target.
+     *
+     * Not copied over: statusAilment, level, currentHP, maxHP, 
+     *
+     * Stat mods are handled by the statManager
+     * TODO: BattleStatManager needs Transform method: copy current statmods of one P to another P
+     *
+     * This method takes care of everything else.
+     */
+    val pb = new PokemonBuilder(index, transformUser.level)
+    // TODO: finish decking out pb in Pokemon.makeTransformCopy
+    val clone = new Pokemon(pb)
+    // Set all PP to 5
+    // Get the current types, since these technically could differ from PBuilder values
+
+    clone
+  }
+
   /* NICETIES */
   private def checkConsistency {
     assert(1 <= index && index <= 165)
