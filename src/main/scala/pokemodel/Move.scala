@@ -192,7 +192,7 @@ class PhysicalMove extends Move {
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
-    mrb: MoveResultBuilder) = mrb
+    mrb: MoveResultBuilder) = mrb.moveIndex(index).moveType(type1)
 }
 
 class SpecialMove extends Move {
@@ -205,7 +205,7 @@ class SpecialMove extends Move {
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
-    mrb: MoveResultBuilder) = mrb
+    mrb: MoveResultBuilder) = mrb.moveIndex(index).moveType(type1)
 }
 
 class StatusMove extends Move {
@@ -218,7 +218,7 @@ class StatusMove extends Move {
     attacker: Pokemon,
     defender: Pokemon,
     pb: Battle,
-    mrb: MoveResultBuilder) = mrb
+    mrb: MoveResultBuilder) = mrb.moveIndex(index).moveType(type1)
 }
 
 
@@ -260,7 +260,7 @@ trait AlwaysCritHit extends Move { override val critHitRate = ALWAYS }
 trait Priority1 extends Move  { override val priority = 1 }
 trait Priority2 extends Move  { override val priority = 2 }
 
-// Super useful for metronome
+// Super useful for Metronome
 trait PriorityNormal extends Move  { override val priority = 0 }
 
 
@@ -992,6 +992,9 @@ trait WaitThenAttack extends Move {
    * miss.
    * TODO: Fill this in. These are mostly registration moves, so find some way
    *       to sign them up to the correct data structure
+   * TODO: Once you've used Dig (and presumably others), you're in the "no control"
+   *       setting. But having full PAR kick in will actually pull you out of Dig
+   *       without any attacks happening.
    */
 
   abstract override def moveSpecificStuff(
