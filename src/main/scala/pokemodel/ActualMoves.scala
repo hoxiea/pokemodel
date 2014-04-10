@@ -249,9 +249,7 @@ class Counter extends PhysicalMove {
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
-
+    if (pb.moveHits(attacker, defender, this)) {
       // Get the last MoveResult from the battle
       val mr: MoveResult = pb.moveHistory.mostRecent
       if (mr.moveType == Normal || mr.moveType == Fighting) {
@@ -527,8 +525,7 @@ class Twineedle extends PhysicalMove {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
+    if (pb.moveHits(attacker, defender, this)) {
       val numStrikes = 2
 
       // In Gen 1, damage was calculated once and then used for each blow
@@ -636,8 +633,7 @@ class SuperFang extends PhysicalMove {
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
+    if (pb.moveHits(attacker, defender, this)) {
       // The damage is not altered by weakness, resistance, or immunity.
       // Doesn't receive STAB.
       val damageToDeal = (defender.currentHP() / 2) max 1
@@ -847,13 +843,36 @@ class Fly extends PhysicalMove with WaitThenAttack {
   override val accuracy = 0.95
 }
 
-class Dig extends PhysicalMove with WaitThenAttack {
+// DIG
+class RegisterDig extends PhysicalMove {
+  // TODO: refactor logic into WaitThenAttack trait?
+  // The damage-dealing part of Dig (turn 1)
+  // Responsible for registering the attacker as digging in
+  // WeirdMoveStatusManager.
+  override val index = -1
+  override val maxPP = 10
+
+  override def moveSpecificStuff(
+    attacker: Pokemon,
+    defender: Pokemon,
+    pb: Battle,
+    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+    pb.weirdMoveStatusManager.tryToRegisterDig(attacker)
+    mrb
+  }
+}
+
+class Dig extends PhysicalMove with SingleStrike {
+  // The damage-dealing part of Dig (turn 2)
+  // Responsible for damaging, deducting PP, registering Dig as last move
+  // used, and de-registering Dig for the attacker.
   override val index = 91
   override val type1 = Ground
   override val maxPP = 10
   override val power = 100  // lower in later games
   // 100 accuracy
 }
+
 
 class HyperBeam extends PhysicalMove with SingleStrike {
   /*
@@ -1333,9 +1352,7 @@ class Psywave extends SpecialMove {
 
 
     // Add the effects of hitting if necessary
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
-
+    if (pb.moveHits(attacker, defender, this)) {
       val damageAmount = ((Random.nextDouble + .5) * attacker.level).toInt min 1
       result.damageCalc(damageAmount)
       val damageToDeal = damageAmount min defender.currentHP()
