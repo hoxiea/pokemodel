@@ -158,6 +158,14 @@ class TestSometimesSleep extends SpecialMove with NonVolatileStatusChange {
 }
 
 
+// ONE HIT KO
+class TestOneHitKO extends PhysicalMove with OneHitKO {
+  override val index = 999
+  override val maxPP = 5
+  override val accuracy = 1.0
+}
+
+
 // DAMAGE EQUALS USER LEVEL
 class TestDEUL extends PhysicalMove with DamageEqualsUserLevel {
   override val index = 999
