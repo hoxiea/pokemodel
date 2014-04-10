@@ -998,6 +998,16 @@ trait WaitThenAttack extends Move {
    *       without any attacks happening.
    */
 
+  // def whichMove: WaitThenAttackMove
+
+  override def startUsingMove(
+      attacker: Pokemon,
+      attackerMoveslot: Int,
+      defender: Pokemon,
+      pb: Battle) = this match {
+        case (_ : Dig) => pb.weirdMoveStatusManager.tryToRegisterDig(attacker, attackerMoveslot)
+      }
+
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
@@ -1007,6 +1017,18 @@ trait WaitThenAttack extends Move {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     result.merge(mrb)
     super.moveSpecificStuff(attacker, defender, pb, result)
+  }
+
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder): MoveResultBuilder = {
+
+    // PP isn't deducted until the move is successfully executed
+    // RegisterDig doesn't get registered as the last move used
+    mrb  // just pass things along... the magic is in startUsingMove
   }
 }
 

@@ -39,6 +39,41 @@ class YesNoTracker {
   }
 }
 
+class IntTracker {
+  /*
+   * This tracker provides a mapping of Pokemon to Ints, and lets you
+   * - check for membership
+   * - add to the map
+   * - get the Int in the map, given a Pokemon
+   * - remove from the mapping
+   */
+
+  private val members = mutable.Map[Pokemon, Int]()
+
+  def hasProperty(p : Pokemon) : Boolean = members contains p
+
+  def getInt(p : Pokemon) : Option[Int] = 
+    if (hasProperty(p)) Some(members(p)) else None
+
+  def tryToRegister(p: Pokemon, i: Int): Boolean = {
+    // Returns whether or not p was added successfully
+    if (members contains p) {
+      false
+    } else {
+      members(p) = i
+      true
+    }
+  }
+
+  def tryToRemove(p: Pokemon): Boolean = {
+    // Returns whether or not p was removed successfully
+    if (members contains p) {
+      members -= p
+      true
+    } else false
+  }
+}
+
 class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
   private val allPokemon = team1.team ++ team2.team
 
@@ -130,36 +165,26 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
    * Unfortunately, we can't implement this as a YesNoTracker, since we also
    * need to store the attackerMoveslot of RegisterDig.
    */
-  private val digSet = mutable.Map[Pokemon, Int]()
-  def isDug(p : Pokemon) : Boolean = digSet contains p
-
+  private val digSet = new IntTracker()
+  def isDug(p : Pokemon) : Boolean = digSet.hasProperty(p)
+  def getRegisteredDigMoveslot(p : Pokemon) : Option[Int] = digSet.getInt(p)
   def tryToRegisterDig(p: Pokemon, moveslot: Int): Boolean = {
-    // Returns whether or not p was added successfully
     require(1 <= moveslot && moveslot <= 4)
-    if (digSet contains p) {
-      false
-    } else {
-      digSet(p) = moveslot
-      true
-    }
+    digSet.tryToRegister(p, moveslot)
   }
-
-  def tryToRemoveDig(p: Pokemon): Boolean = {
-    // Returns whether or not p was removed successfully
-    if (digSet contains p) {
-      digSet -= p
-      true
-    } else false
-  }
+  def tryToRemoveDig(p: Pokemon): Boolean = digSet.tryToRemove(p)
 
   /*
    * FLY
    * Exactly the same dynamics as Dig.
    */
-  private val flySet = new YesNoTracker
-  def isFlying(p : Pokemon): Boolean = flySet.hasProperty(p)
-  def tryToRegisterFly(p: Pokemon): Boolean = flySet.tryToRegister(p)
-  def tryToRemoveFly(p: Pokemon): Boolean = flySet.tryToRemove(p)
+  private val flySet = new IntTracker()
+  def isFlying(p : Pokemon) : Boolean = flySet.hasProperty(p)
+  def getRegisteredFlyMoveslot(p : Pokemon) : Option[Int] = flySet.getInt(p)
+  def tryToRegisterFly(p: Pokemon, moveslot: Int): Boolean = {
+    require(1 <= moveslot && moveslot <= 4)
+    flySet.tryToRegister(p, moveslot)
+  }
 
 
   /******** NON-STANDARD BINARY STUFF **********/

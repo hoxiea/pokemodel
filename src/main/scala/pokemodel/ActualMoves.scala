@@ -849,7 +849,7 @@ class RegisterDig extends PhysicalMove {
   // The damage-dealing part of Dig (turn 1)
   // Responsible for registering the attacker as digging in
   // WeirdMoveStatusManager.
-  override val index = -1
+  override val index = 91   // so that canLearnMove still works
   override val maxPP = 10
 
   // Ideally, we could register in moveSpecificStuff.
@@ -906,9 +906,13 @@ class Dig extends PhysicalMove with SingleStrike {
       pb: Battle,
       mrb: MoveResultBuilder): MoveResultBuilder = {
     // deduct PP
-    attacker.deductPP(attackerMoveSlot)
+    val correctMoveslot =
+      pb.weirdMoveStatusManager.getRegisteredDigMoveslot(attacker).get
+    attacker.deductPP(correctMoveslot)
+
     // register as last Move used
     pb.moveManager.updateLastMoveIndex(attacker, index)
+
     // remove Dug status for attacker
     val removed = pb.weirdMoveStatusManager.tryToRemoveDig(attacker)
     if (!removed)
