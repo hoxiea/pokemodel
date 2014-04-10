@@ -1,0 +1,33 @@
+There are three different amounts of control that a Trainer can have at the
+beginning of his/her turn:
+
+1. Full control. You can select any viable Move your active Pokemon knows, or
+you can switch to a different Pokemon. This is the most common case.
+
+2. Partial control. You can switch to a different Pokemon, but if you choose to
+Attack instead, then you don't have a choice because something is in motion
+from a previous turn.
+
+3. No control. You don't even get the option to Attack or Switch; it just does
+something based on something in motion from a previous turn.
+
+This document describes the moves that put you into Case 2 or Case 3; anything
+not mentioned in a Case 1 move.
+
+
+----------------------------------
+
+CASE 3: NO CONTROL
+Rage
+Thrash
+PetalDance
+Dig  (disappear on the turn it's used, then use it automatically on the next turn)
+Fly  (disappear on the turn it's used, then use it automatically on the next turn)
+
+
+CASE 2: LIMITED CONTROL
+Bide
+
+
+
+
