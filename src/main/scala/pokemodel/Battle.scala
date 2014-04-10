@@ -1,7 +1,9 @@
 package pokemodel
 
 import Type._
+
 import scala.collection.mutable
+import scala.util.Random
 
 // TODO: If OneHitKO succeeds, print "One hit KO!"
 
@@ -19,12 +21,27 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
 
   var time: Int = 0
 
+  /* Central method for determining if a Move hits or not */
+  private def chanceHit(attacker: Pokemon, defender: Pokemon, m: Move) = {
+    val attackerAccuracy = statManager.getEffectiveAccuracy(attacker)
+    val defenderEvasion = statManager.getEffectiveEvasion(defender)
+    m.accuracy * attackerAccuracy / defenderEvasion
+  }
+
+  def moveHits(attacker: Pokemon, defender: Pokemon, m: Move): Boolean = {
+    // A single method that takes all stats, statuses, weird moves,
+    // the move accuracy, and a random number in account
+    Random.nextDouble < chanceHit(attacker, defender, m) &&
+    !weirdMoveStatusManager.isDug(defender) &&
+    !weirdMoveStatusManager.isFlying(defender)
+  }
+
   /* NON-VOLATIVE STATUS EFFECTS
    * Burn, Freeze, Paralysis, Poison, Badly Poison, and Sleep
-   * These remain until the Pokemon is healed at a Pokecenter (which can't happen in this simulation),
-   * or after a certain number of turns in battle (Sleep)
-   * Only one at a time can affect a Pokemon
-   * 
+   * These remain until the Pokemon is healed at a Pokecenter (which can't
+   * happen in this simulation), or after a certain number of turns in battle
+   * (Sleep). Only one at a time can affect a Pokemon
+   *
    * The Pokemon data structure stores this type of status effect in "statusAilment".
    * And yet we need to keep track of how long a Pokemon has been asleep for.
    * When the battle starts, register sleeping Pokemon with some number of turns to rest
@@ -34,20 +51,6 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
        if p.statusAilment == Some(SLP)) {
     sleep(p) = Utils.intBetween(1, 8)
   }
-
-  /* VOLATIVE STATUS EFFECTS
-   * These wear off when a Pokemon is switched out, or after a certain number of turns
-   * Multiple of these can affect a Pokemon simultaneously
-   * Confusion (wears off after 1-4 attacking turns)
-   * Flinch (one-turn, can only flinch if opponent attacks first)
-   * Partially trapped (caused by Wrap, Clamp, and Fire Spin, lasts 2-5 turns)
-   * Seeded (leech seed, damage transfered from target to opponent's active Pokemon)
-   * Mist (user is protected from all of opponent's stat mod changes; wears off when Pokemon switched out)
-   */
-  val flinch = mutable.Set[Pokemon]()
-
-
-  val weirdStatuses = Map()
 
   if (Battle.healBefore) {
     trainer1.healAll()
