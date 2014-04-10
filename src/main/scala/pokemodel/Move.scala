@@ -283,9 +283,7 @@ trait SingleStrike extends Move {
       requiredNVSAs.isEmpty ||
       defender.statusAilment.isDefined && requiredNVSAs.contains(defender.statusAilment.get)
 
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender) &&
-        statusAilmentSituationOK) {
+    if (pb.moveHits(attacker, defender, this) && statusAilmentSituationOK) {
       val result = pb.dc.calc(attacker, defender, this, pb)
       val damageResult = defender.takeDamage(result.damageDealt)
 
@@ -323,8 +321,7 @@ trait ConstantDamage extends Move {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
 
     // Add the effects of hitting if necessary
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
+    if (pb.moveHits(attacker, defender, this)) {
 
       result.damageCalc(damageAmount)
       val damageToDeal = damageAmount min defender.currentHP()
@@ -393,8 +390,7 @@ trait MultiStrike extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
+    if (pb.moveHits(attacker, defender, this)) {
       val r = Random.nextDouble
       val numStrikes = if (r <= 0.375) 2
                        else if (r <= (0.375 + 0.375)) 3
@@ -443,9 +439,7 @@ trait DoubleStrike extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
-
+    if (pb.moveHits(attacker, defender, this)) {
       val numStrikes = 2
       val result = pb.dc.calc(attacker, defender, this, pb)
       val damageEachStrike = result.damageDealt
@@ -727,10 +721,10 @@ trait VolatileStatusChange extends Move {
         }
         case (_ : FLINCH) => {
           if (pb.statusManager.causeToFlinch(defender)) {
-            // TODO: if defender has HyperBeam delay, then getting hit with a flinching
-            // move will negate that delay
             result.vsa(statusAilmentToCause)
             result.numTimesHit(1)
+            if (Glitch.hyperbeamRechargeGlitch)
+              pb.weirdMoveStatusManager.tryToRemoveHyperBeamDelay(defender)
           }
         }
         case (_ : PARTIALLYTRAPPED) => {
@@ -774,9 +768,7 @@ trait OneHitKO extends Move {
       pb.statManager.getEffectiveSpeed(attacker) >= pb.statManager.getEffectiveSpeed(defender)
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    if (Random.nextDouble < chanceHit(attacker, defender, pb)
-        && pb.statusManager.canBeHit(defender)
-        && attackerFastEnough) {
+    if (pb.moveHits(attacker, defender, this) && attackerFastEnough) {
       val damageToDeal = defender.currentHP()
       val damageResult = defender.takeDamage(damageToDeal)
 
@@ -790,18 +782,21 @@ trait OneHitKO extends Move {
   }
 }
 
-class TestOneHitKO extends PhysicalMove with OneHitKO {
-  override val index = 999
-  override val maxPP = 5
-  override val accuracy = 1.0
-}
-
 
 trait SingleStrikeLoseHPOnMiss extends Move {
+  /*
+   * As the name suggests, Moves with this behavior are SingleStrike, unless
+   * they miss, in which case the attacker loses a constant amount of HP.
+   *
+   * There are two moves in Gen 1 like this: HiJumpKick and JumpKick.
+   *
+   * Both moves always miss against type Ghost; this functionality is supported
+   * by the typesMissAgainst def below.
+   */
+
   def hpToLoseOnMiss: Int
   def typesMissAgainst: Set[Type]
 
-  // TODO: Does the Pokemon or the substitute take the HP hit if you miss?
   abstract override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
@@ -812,8 +807,7 @@ trait SingleStrikeLoseHPOnMiss extends Move {
     def moveHits: Boolean = {
       if (typesMissAgainst.contains(defender.type1)) false
       else if (typesMissAgainst.contains(defender.type2)) false
-      else if (!pb.statusManager.canBeHit(defender)) false
-      else Random.nextDouble < chanceHit(attacker, defender, pb)
+      else pb.moveHits(attacker, defender, this)
     }
 
     if (moveHits) {
@@ -830,7 +824,8 @@ trait SingleStrikeLoseHPOnMiss extends Move {
       // deal yourself damage, then record the result
       val missResult = new MoveResultBuilder().moveIndex(index).moveType(type1)
 
-      val damageResult = attacker.takeDamage(hpToLoseOnMiss min attacker.currentHP())
+      // Arbitrary choice: substitutes DO NOT absorb miss damage if they exist
+      val damageResult = attacker.takeDamage(hpToLoseOnMiss min attacker.currentHP(), true)
       // DIFFERENT - all defaults are correct, except you need to check for selfKO
       damageResult match {
         case KO => { missResult.selfKO(true); assert(!(attacker.isAlive)) }
@@ -854,8 +849,7 @@ trait DamageEqualsUserLevel extends Move {
     mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
+    if (pb.moveHits(attacker, defender, this)) {
       val damageToDeal = attacker.level min defender.currentHP()
       val damageResult = defender.takeDamage(damageToDeal)
 
@@ -895,8 +889,7 @@ trait SuicideDamage extends Move {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
 
     // If you hit, process the hit and update result
-    if (Random.nextDouble < chanceHit(attacker, defender, pb) &&
-        pb.statusManager.canBeHit(defender)) {
+    if (pb.moveHits(attacker, defender, this)) {
       val dcResult = pb.dc.calc(attacker, defender, this, pb)
       result.merge(dcResult)
       val damageResult = defender.takeDamage(result.damageDealt)
