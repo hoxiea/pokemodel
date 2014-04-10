@@ -114,6 +114,36 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
 
 
   /*
+   * DIG
+   * On the turn it's selected, the user digs a hole underground.
+   * He then can't be hit by anything except for Swift, Bide, and Transform.
+   *
+   * On the following turn, the Trainer has no control over his Pokemon.
+   * The 'dug' Pokemon surfaces, deals damage, has a PP deducted, and it counts
+   * as the last move used.
+   *
+   * In terms of implementing this, there are actually two moves: RegisterDig
+   * and Dig. RegisterDig updates the data structure below. The Dig attack will
+   * be responsible for dealing damage, deducting PP, registering move use,
+   * etc.
+   */
+  private val digSet = new YesNoTracker
+  def isDug(p : Pokemon): Boolean = digSet.hasProperty(p)
+  def tryToRegisterDig(p: Pokemon): Boolean = digSet.tryToRegister(p)
+  def tryToRemoveDig(p: Pokemon): Boolean = digSet.tryToRemove(p)
+
+  /*
+   * FLY
+   * Exactly the same dynamics as Dig.
+   */
+  private val flySet = new YesNoTracker
+  def isFlying(p : Pokemon): Boolean = flySet.hasProperty(p)
+  def tryToRegisterFly(p: Pokemon): Boolean = flySet.tryToRegister(p)
+  def tryToRemoveFly(p: Pokemon): Boolean = flySet.tryToRemove(p)
+
+
+  /******** NON-STANDARD BINARY STUFF **********/
+  /*
    * CONVERSION
    * This is a move that only Porygon knows.
    * It changes his Types to be those of his opponent.
@@ -136,6 +166,10 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
       true
     } else false
   }
+
+
+
+  /****** MULTI-TURN STUFF *******/
 
   /*
    * RAGE
