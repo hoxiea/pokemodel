@@ -18,6 +18,6 @@ class SpecificMoveSuite extends FlatSpec {
     import f._
 
     val result = p1.useMove(1, p2, battle)
-    println(result)
+    // println(result)
   }
 }

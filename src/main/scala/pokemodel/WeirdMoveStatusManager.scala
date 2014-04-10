@@ -126,11 +126,31 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
    * and Dig. RegisterDig updates the data structure below. The Dig attack will
    * be responsible for dealing damage, deducting PP, registering move use,
    * etc.
+   *
+   * Unfortunately, we can't implement this as a YesNoTracker, since we also
+   * need to store the attackerMoveslot of RegisterDig.
    */
-  private val digSet = new YesNoTracker
-  def isDug(p : Pokemon): Boolean = digSet.hasProperty(p)
-  def tryToRegisterDig(p: Pokemon): Boolean = digSet.tryToRegister(p)
-  def tryToRemoveDig(p: Pokemon): Boolean = digSet.tryToRemove(p)
+  private val digSet = mutable.Map[Pokemon, Int]()
+  def isDug(p : Pokemon) : Boolean = digSet contains p
+
+  def tryToRegisterDig(p: Pokemon, moveslot: Int): Boolean = {
+    // Returns whether or not p was added successfully
+    require(1 <= moveslot && moveslot <= 4)
+    if (digSet contains p) {
+      false
+    } else {
+      digSet(p) = moveslot
+      true
+    }
+  }
+
+  def tryToRemoveDig(p: Pokemon): Boolean = {
+    // Returns whether or not p was removed successfully
+    if (digSet contains p) {
+      digSet -= p
+      true
+    } else false
+  }
 
   /*
    * FLY

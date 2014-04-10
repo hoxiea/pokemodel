@@ -165,7 +165,7 @@ object MoveMaker {
       case 88 => new RockThrow
       case 89 => new Earthquake
       case 90 => new Fissure
-      case 91 => new Dig
+      case 91 => new RegisterDig
       case 92 => new Toxic
       case 93 => new Confusion
       case 94 => new Psychic

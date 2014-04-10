@@ -852,13 +852,28 @@ class RegisterDig extends PhysicalMove {
   override val index = -1
   override val maxPP = 10
 
-  override def moveSpecificStuff(
-    attacker: Pokemon,
-    defender: Pokemon,
-    pb: Battle,
-    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-    pb.weirdMoveStatusManager.tryToRegisterDig(attacker)
-    mrb
+  // Ideally, we could register in moveSpecificStuff.
+  // But as of this writing, moveSpecificStuff isn't passed the
+  // attackerMoveslot as a parameter. So we'll register in
+  // startUsingMove instead, which DOES get the moveslot
+  override def startUsingMove(
+      attacker: Pokemon,
+      attackerMoveslot: Int,
+      defender: Pokemon,
+      pb: Battle) = {
+    pb.weirdMoveStatusManager.tryToRegisterDig(attacker, attackerMoveslot)
+  }
+
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder): MoveResultBuilder = {
+
+    // PP isn't deducted until the move is successfully executed
+    // RegisterDig doesn't get registered as the last move used
+    mrb  // just pass things along... the magic is in startUsingMove
   }
 }
 
@@ -871,6 +886,35 @@ class Dig extends PhysicalMove with SingleStrike {
   override val maxPP = 10
   override val power = 100  // lower in later games
   // 100 accuracy
+
+  // Make sure actually dug
+  override def startUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle) {
+    require(pb.weirdMoveStatusManager.isDug(attacker),
+      "using Dig attack without having been Dug!")
+  }
+
+  // SINGLESTRIKE logic kicks in here, dealing damage
+
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder): MoveResultBuilder = {
+    // deduct PP
+    attacker.deductPP(attackerMoveSlot)
+    // register as last Move used
+    pb.moveManager.updateLastMoveIndex(attacker, index)
+    // remove Dug status for attacker
+    val removed = pb.weirdMoveStatusManager.tryToRemoveDig(attacker)
+    if (!removed)
+      throw new Exception(s"tried to unDig ${attacker.name}; no dice")
+    mrb
+  }
 }
 
 
