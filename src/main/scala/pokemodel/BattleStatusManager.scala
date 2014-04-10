@@ -66,12 +66,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
   // Status Ailments
   private val flinchSet = mutable.Set[Pokemon]()
 
-  // Attacking moves
-  private val skyAttackSet  = mutable.Set[Pokemon]()
-  private val skullBashSet  = mutable.Set[Pokemon]()
-  private val flySet  = mutable.Set[Pokemon]()
-  private val digSet  = mutable.Set[Pokemon]()
-
 
   /*
    * CONFUSION
@@ -152,10 +146,6 @@ class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
      */
     flinchSet += p
     true  // TODO: this could be better, but it's not far off
-  }
-
-  def canBeHit(p: Pokemon): Boolean = {
-    !flySet.contains(p) && !digSet.contains(p)
   }
 
   def processSwitchOut(p : Pokemon) = {
