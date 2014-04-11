@@ -185,6 +185,59 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
     require(1 <= moveslot && moveslot <= 4)
     flySet.tryToRegister(p, moveslot)
   }
+  def tryToRemoveFly(p: Pokemon): Boolean = flySet.tryToRemove(p)
+
+  /*
+   * SKY ATTACK
+   * Exactly the same dynamics as Dig (except can take damage while charging)
+   */
+  private val skyAttackSet = new IntTracker()
+  def isSkyAttacking(p : Pokemon) : Boolean = skyAttackSet.hasProperty(p)
+  def getRegisteredSkyAttackMoveslot(p : Pokemon) : Option[Int] = skyAttackSet.getInt(p)
+  def tryToRegisterSkyAttack(p: Pokemon, moveslot: Int): Boolean = {
+    require(1 <= moveslot && moveslot <= 4)
+    skyAttackSet.tryToRegister(p, moveslot)
+  }
+  def tryToRemoveSkyAttack(p: Pokemon): Boolean = skyAttackSet.tryToRemove(p)
+
+  /*
+   * SKULL BASH
+   * Exactly the same dynamics as Dig (except can take damage while charging)
+   */
+  private val skullBashSet = new IntTracker()
+  def isSkullBashing(p : Pokemon) : Boolean = skullBashSet.hasProperty(p)
+  def getRegisteredSkullBashMoveslot(p : Pokemon) : Option[Int] = skullBashSet.getInt(p)
+  def tryToRegisterSkullBash(p: Pokemon, moveslot: Int): Boolean = {
+    require(1 <= moveslot && moveslot <= 4)
+    skullBashSet.tryToRegister(p, moveslot)
+  }
+  def tryToRemoveSkullBash(p: Pokemon): Boolean = skullBashSet.tryToRemove(p)
+
+  /*
+   * SOLAR BEAM
+   * Exactly the same dynamics as Dig (except can take damage while charging)
+   */
+  private val solarBeamSet = new IntTracker()
+  def isSolarBeaming(p : Pokemon) : Boolean = solarBeamSet.hasProperty(p)
+  def getRegisteredSolarBeamMoveslot(p : Pokemon) : Option[Int] = solarBeamSet.getInt(p)
+  def tryToRegisterSolarBeam(p: Pokemon, moveslot: Int): Boolean = {
+    require(1 <= moveslot && moveslot <= 4)
+    solarBeamSet.tryToRegister(p, moveslot)
+  }
+  def tryToRemoveSolarBeam(p: Pokemon): Boolean = solarBeamSet.tryToRemove(p)
+
+  /*
+   * RAZOR WIND
+   * Exactly the same dynamics as Dig (except can take damage while charging)
+   */
+  private val razorWindSet = new IntTracker()
+  def isRazorWinding(p : Pokemon) : Boolean = razorWindSet.hasProperty(p)
+  def getRegisteredRazorWindMoveslot(p : Pokemon) : Option[Int] = razorWindSet.getInt(p)
+  def tryToRegisterRazorWind(p: Pokemon, moveslot: Int): Boolean = {
+    require(1 <= moveslot && moveslot <= 4)
+    razorWindSet.tryToRegister(p, moveslot)
+  }
+  def tryToRemoveRazorWind(p: Pokemon): Boolean = razorWindSet.tryToRemove(p)
 
 
   /******** NON-STANDARD BINARY STUFF **********/

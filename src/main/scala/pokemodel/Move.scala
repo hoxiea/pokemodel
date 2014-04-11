@@ -986,38 +986,33 @@ trait RegisterViolentStruggle extends Move {
   }
 }
 
-trait WaitThenAttack extends Move {
+trait RegisterWaitThenAttack extends Move {
   /*
-   * This trait captures the behavior of SkyAttack, SkullBash, SolarBeam, and
-   * RazorWind in Gen1. Also Fly and Dig, though those two make most Moves
-   * miss.
-   * TODO: Fill this in. These are mostly registration moves, so find some way
-   *       to sign them up to the correct data structure
+   * This trait captures the registration behavior of SkyAttack, SkullBash,
+   * SolarBeam, RazorWind, Dig, and Fly in Gen1.
+   *
+   * The WeirdMoveStatusManager has a separate data structure for each of these
+   * moves. This trait registers the Pokemon to use the appropriate move on the
+   * following turn in a no-control setting. The Battle will take care of that.
+   *
    * TODO: Once you've used Dig (and presumably others), you're in the "no control"
    *       setting. But having full PAR kick in will actually pull you out of Dig
    *       without any attacks happening.
    */
 
-  // def whichMove: WaitThenAttackMove
-
+  // Ideally, we could register in moveSpecificStuff.
+  // But as of this writing, moveSpecificStuff isn't passed the
+  // attackerMoveslot as a parameter. So we'll register in
+  // startUsingMove instead, which DOES get the moveslot
   override def startUsingMove(
       attacker: Pokemon,
       attackerMoveslot: Int,
       defender: Pokemon,
       pb: Battle) = this match {
-        case (_ : Dig) => pb.weirdMoveStatusManager.tryToRegisterDig(attacker, attackerMoveslot)
+        case (_ : RegisterDig) => pb.weirdMoveStatusManager.tryToRegisterDig(attacker, attackerMoveslot)
+        case (_ : RegisterFly) => pb.weirdMoveStatusManager.tryToRegisterFly(attacker, attackerMoveslot)
+        // TODO: all 6 cases here
       }
-
-  abstract override def moveSpecificStuff(
-    attacker: Pokemon,
-    defender: Pokemon,
-    pb: Battle,
-    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-
-    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    result.merge(mrb)
-    super.moveSpecificStuff(attacker, defender, pb, result)
-  }
 
   override def finishUsingMove(
       attacker: Pokemon,
@@ -1027,8 +1022,95 @@ trait WaitThenAttack extends Move {
       mrb: MoveResultBuilder): MoveResultBuilder = {
 
     // PP isn't deducted until the move is successfully executed
-    // RegisterDig doesn't get registered as the last move used
+    // RegisterXYZ doesn't get registered as the last move used
     mrb  // just pass things along... the magic is in startUsingMove
+  }
+}
+
+trait AttackAfterWaiting extends Move {
+  /*
+   * This trait captures the damage-dealing behavior of SkyAttack, SkullBash,
+   * SolarBeam, RazorWind, Dig, and Fly in Gen1. See the RegisterWaitThenAttack
+   * trait for part 1 of these Moves.
+   *
+   * These moves are all single-damage-dealing, DamageCalculating, hit/miss moves,
+   * so they inherit their moveSpecificStuff from SingleStrike.
+   *
+   * The damage-dealing part is also responsible for:
+   * - making sure that the Pokemon using it is registered with the appropriate
+   *   weirdMoveStatusManager data structure
+   * - deducting a PP from the RegisterXYZ Move that the attacker has
+   * - registering the Register move as the last move used by that Pokemon
+   * - removing the attacker from the appropriate registration data structure
+   *
+   * Because we don't want to interfere with SingleStrike's moveSpecificStuff,
+   * , we accomplish these tasks in startUsingMove and finishUsingMove.
+   */
+
+  override def startUsingMove(
+      attacker: Pokemon,
+      attackerMoveslot: Int,
+      defender: Pokemon,
+      pb: Battle) = this match {
+        case (_: Dig) => require(pb.weirdMoveStatusManager.isDug(attacker))
+        case (_: Fly) => require(pb.weirdMoveStatusManager.isFlying(attacker))
+        case (_: SkyAttack) => require(pb.weirdMoveStatusManager.isSkyAttacking(attacker))
+        case (_: SkullBash) => require(pb.weirdMoveStatusManager.isSkullBashing(attacker))
+        case (_: SolarBeam) => require(pb.weirdMoveStatusManager.isSolarBeaming(attacker))
+        case (_: RazorWind) => require(pb.weirdMoveStatusManager.isRazorWinding(attacker))
+      }
+
+  // moveSpecificStuff attack provided by SingleStrike
+
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder): MoveResultBuilder = {
+    // deduct PP
+    val correctMoveslot = this match {
+        case (_: Dig) =>
+          pb.weirdMoveStatusManager.getRegisteredDigMoveslot(attacker).get
+        case (_: Fly) =>
+          pb.weirdMoveStatusManager.getRegisteredFlyMoveslot(attacker).get
+        case (_: SkyAttack) =>
+          pb.weirdMoveStatusManager.getRegisteredSkyAttackMoveslot(attacker).get
+        case (_: SkullBash) =>
+          pb.weirdMoveStatusManager.getRegisteredSkullBashMoveslot(attacker).get
+        case (_: SolarBeam) =>
+          pb.weirdMoveStatusManager.getRegisteredSolarBeamMoveslot(attacker).get
+        case (_: RazorWind) =>
+          pb.weirdMoveStatusManager.getRegisteredRazorWindMoveslot(attacker).get
+      }
+    attacker.deductPP(correctMoveslot)
+
+    // register as last Move used
+    // Note that both the Registration and Attack Moves have the same value for
+    // index, but MoveDepot points to the registration move, so if someone
+    // MirrorMoves this, then they'll register to use the move, which is the
+    // correct behavior.
+    pb.moveManager.updateLastMoveIndex(attacker, index)
+
+    // remove Dug status for attacker
+    val removed = this match {
+        case (_: Dig) =>
+          pb.weirdMoveStatusManager.tryToRemoveDig(attacker)
+        case (_: Fly) =>
+          pb.weirdMoveStatusManager.tryToRemoveFly(attacker)
+        case (_: SkyAttack) =>
+          pb.weirdMoveStatusManager.tryToRemoveSkyAttack(attacker)
+        case (_: SkullBash) =>
+          pb.weirdMoveStatusManager.tryToRemoveSkullBash(attacker)
+        case (_: SolarBeam) =>
+          pb.weirdMoveStatusManager.tryToRemoveSolarBeam(attacker)
+        case (_: RazorWind) =>
+          pb.weirdMoveStatusManager.tryToRemoveRazorWind(attacker)
+      }
+
+    if (!removed)
+      throw new Exception(s"tried to unregister ${attacker.name} for $this; no dice")
+    mrb
   }
 }
 

@@ -87,13 +87,13 @@ object MoveMaker {
       case 10 => new Scratch
       case 11 => new ViceGrip
       case 12 => new Guillotine
-      case 13 => new RazorWind
+      case 13 => new RegisterRazorWind
       case 14 => new SwordsDance
       case 15 => new Cut
       case 16 => new Gust
       case 17 => new WingAttack
       case 18 => new Whirlwind
-      case 19 => new Fly
+      case 19 => new RegisterFly
       case 20 => new Bind
       case 21 => new Slam
       case 22 => new VineWhip
@@ -150,7 +150,7 @@ object MoveMaker {
       case 73 => new LeechSeed
       case 74 => new Growth
       case 75 => new RazorLeaf
-      case 76 => new SolarBeam
+      case 76 => new RegisterSolarBeam
       case 77 => new PoisonPowder
       case 78 => new StunSpore
       case 79 => new SleepPowder
@@ -204,7 +204,7 @@ object MoveMaker {
       case 127 => new Waterfall
       case 128 => new Clamp
       case 129 => new Swift
-      case 130 => new SkullBash
+      case 130 => new RegisterSkullBash
       case 131 => new SpikeCannon
       case 132 => new Constrict
       case 133 => new Amnesia
@@ -217,7 +217,7 @@ object MoveMaker {
       case 140 => new Barrage
       case 141 => new LeechLife
       case 142 => new LovelyKiss
-      case 143 => new SkyAttack
+      case 143 => new RegisterSkyAttack
       case 144 => new Transform
       case 145 => new Bubble
       case 146 => new DizzyPunch

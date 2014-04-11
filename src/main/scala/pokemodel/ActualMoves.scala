@@ -802,85 +802,46 @@ class PetalDance extends SpecialMove {
   // 100 accuracy
 }
 
-class SkyAttack extends PhysicalMove with WaitThenAttack {
-  override val index = 143
-  override val type1 = Flying
-  override val maxPP = 5
-  override val power = 140
-  override val accuracy = 0.95
-}
-
-class SkullBash extends PhysicalMove with WaitThenAttack {
-  override val index = 130
-  override val maxPP = 10
-  override val power = 130
-  // Normal, accuracy 100
-}
-
-class SolarBeam extends SpecialMove with WaitThenAttack {
-  // TODO: Move into SpecialMove section
-  override val index = 76
-  override val type1 = Grass
-  override val maxPP = 10
-  override val power = 120
-  // accuracy 100
-}
-
-class RazorWind extends PhysicalMove with WaitThenAttack {
-  // What an awful move, compared to the other WaitThenAttacks
-  override val index = 13
-  override val maxPP = 10
-  override val power = 80
-  override val accuracy = 0.75   // much higher later
-  // Normal
-}
-
-class Fly extends PhysicalMove with WaitThenAttack {
-  override val index = 19
-  override val type1 = Flying
-  override val maxPP = 15
-  override val power = 90
-  override val accuracy = 0.95
-}
-
-// DIG
-class RegisterDig extends PhysicalMove {
-  // TODO: refactor logic into WaitThenAttack trait?
-  // The damage-dealing part of Dig (turn 1)
-  // Responsible for registering the attacker as digging in
-  // WeirdMoveStatusManager.
+/* WAIT/CHARGE/DIG/FLY/ETC, THEN ATTACK */
+// Registrations: the maxPP matters, as you can only register if you have PP,
+// even though PP is deducted upon successfully completing the Move
+class RegisterDig extends PhysicalMove with RegisterWaitThenAttack {
   override val index = 91   // so that canLearnMove still works
   override val maxPP = 10
-
-  // Ideally, we could register in moveSpecificStuff.
-  // But as of this writing, moveSpecificStuff isn't passed the
-  // attackerMoveslot as a parameter. So we'll register in
-  // startUsingMove instead, which DOES get the moveslot
-  override def startUsingMove(
-      attacker: Pokemon,
-      attackerMoveslot: Int,
-      defender: Pokemon,
-      pb: Battle) = {
-    pb.weirdMoveStatusManager.tryToRegisterDig(attacker, attackerMoveslot)
-  }
-
-  override def finishUsingMove(
-      attacker: Pokemon,
-      attackerMoveSlot: Int,
-      defender: Pokemon,
-      pb: Battle,
-      mrb: MoveResultBuilder): MoveResultBuilder = {
-
-    // PP isn't deducted until the move is successfully executed
-    // RegisterDig doesn't get registered as the last move used
-    mrb  // just pass things along... the magic is in startUsingMove
-  }
 }
 
-class Dig extends PhysicalMove with SingleStrike {
+class RegisterFly extends PhysicalMove with RegisterWaitThenAttack {
+  override val index = 19
+  override val maxPP = 15
+}
+
+class RegisterSkyAttack extends PhysicalMove with RegisterWaitThenAttack {
+  override val index = 143
+  override val maxPP = 5
+}
+
+class RegisterSkullBash extends PhysicalMove with RegisterWaitThenAttack {
+  override val index = 130
+  override val maxPP = 10
+}
+
+class RegisterSolarBeam extends SpecialMove with RegisterWaitThenAttack {
+  // TODO: Move into SpecialMove section
+  override val index = 76
+  override val maxPP = 10
+}
+
+class RegisterRazorWind extends PhysicalMove with RegisterWaitThenAttack {
+  override val index = 13
+  override val maxPP = 10
+}
+
+
+// Attacks: assuming that registration succeeded using the appropriate move
+// above, and assuming the sequence wasn't interrupted, this is the attack
+// that gets used
+class Dig extends PhysicalMove with SingleStrike with AttackAfterWaiting {
   // The damage-dealing part of Dig (turn 2)
-  // Responsible for damaging, deducting PP, registering Dig as last move
-  // used, and de-registering Dig for the attacker.
   override val index = 91
   override val type1 = Ground
   override val maxPP = 10
@@ -920,6 +881,43 @@ class Dig extends PhysicalMove with SingleStrike {
     mrb
   }
 }
+
+class SkyAttack extends PhysicalMove with SingleStrike {
+  override val index = 143
+  override val type1 = Flying
+  override val power = 140
+  override val accuracy = 0.95
+}
+
+class SkullBash extends PhysicalMove with SingleStrike {
+  override val index = 130
+  override val power = 130
+  // Normal, accuracy 100
+}
+
+class SolarBeam extends SpecialMove with SingleStrike {
+  // TODO: Move into SpecialMove section
+  override val index = 76
+  override val type1 = Grass
+  override val power = 120
+  // accuracy 100
+}
+
+class RazorWind extends PhysicalMove with SingleStrike {
+  override val index = 13
+  override val power = 80
+  override val accuracy = 0.75   // much higher later
+  // Normal
+}
+
+class Fly extends PhysicalMove with SingleStrike {
+  override val index = 19
+  override val type1 = Flying
+  override val power = 90
+  override val accuracy = 0.95
+}
+
+
 
 
 class HyperBeam extends PhysicalMove with SingleStrike {
