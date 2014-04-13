@@ -87,13 +87,13 @@ object MoveMaker {
       case 10 => new Scratch
       case 11 => new ViceGrip
       case 12 => new Guillotine
-      case 13 => new RegisterRazorWind
+      case 13 => new RegisterRazorWind  //
       case 14 => new SwordsDance
       case 15 => new Cut
       case 16 => new Gust
       case 17 => new WingAttack
       case 18 => new Whirlwind
-      case 19 => new RegisterFly
+      case 19 => new RegisterFly  //
       case 20 => new Bind
       case 21 => new Slam
       case 22 => new VineWhip
@@ -111,7 +111,7 @@ object MoveMaker {
       case 34 => new BodySlam
       case 35 => new Wrap
       case 36 => new TakeDown
-      case 37 => new Thrash
+      case 37 => new RegisterThrash  //
       case 38 => new DoubleEdge
       case 39 => new TailWhip
       case 40 => new PoisonSting
@@ -150,11 +150,11 @@ object MoveMaker {
       case 73 => new LeechSeed
       case 74 => new Growth
       case 75 => new RazorLeaf
-      case 76 => new RegisterSolarBeam
+      case 76 => new RegisterSolarBeam  //
       case 77 => new PoisonPowder
       case 78 => new StunSpore
       case 79 => new SleepPowder
-      case 80 => new PetalDance
+      case 80 => new RegisterPetalDance  //
       case 81 => new StringShot
       case 82 => new DragonRage
       case 83 => new FireSpin
@@ -165,7 +165,7 @@ object MoveMaker {
       case 88 => new RockThrow
       case 89 => new Earthquake
       case 90 => new Fissure
-      case 91 => new RegisterDig
+      case 91 => new RegisterDig  //
       case 92 => new Toxic
       case 93 => new Confusion
       case 94 => new Psychic
@@ -204,7 +204,7 @@ object MoveMaker {
       case 127 => new Waterfall
       case 128 => new Clamp
       case 129 => new Swift
-      case 130 => new RegisterSkullBash
+      case 130 => new RegisterSkullBash  //
       case 131 => new SpikeCannon
       case 132 => new Constrict
       case 133 => new Amnesia
@@ -217,7 +217,7 @@ object MoveMaker {
       case 140 => new Barrage
       case 141 => new LeechLife
       case 142 => new LovelyKiss
-      case 143 => new RegisterSkyAttack
+      case 143 => new RegisterSkyAttack  //
       case 144 => new Transform
       case 145 => new Bubble
       case 146 => new DizzyPunch
