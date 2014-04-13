@@ -966,25 +966,105 @@ trait GainPropDamageDealt extends Move {
   }
 }
 
+
 trait RegisterViolentStruggle extends Move {
   /*
-   * This trait captures the behavior of Thrash and PetalDance in Gen 1
-   * TODO: Fill this in
+   * This trait registers a user of Thrash and PetalDance.
+   *
+   * These moves cause the Trainer to lose control of their Pokemon for 3-4
+   * turns, during which they use SingleStrike attacks.
+   *
+   * A ViolentStruggle move can end in two ways:
+   * 1. The full 3-4 turns are played out, and the attacker Pokemon gets
+   *    confused.
+   * 2. The ViolentStruggle is interrupted: stop early, no confusion results.
+   *
+   * Unlike the WaitThenAttack moves, the attacking part of the move is used
+   * on the same turn that registration occurs. So in finishUsingMove, we
+   * use the SingleStrike move.
+   *
+   * The attackerMoveSlot that gets passed into any function for this will be correct,
+   * since this is the move that's registered with Pokemon.
    */
 
-  def vsType: ViolentStruggleType
+  override def startUsingMove(
+      attacker: Pokemon,
+      attackerMoveslot: Int,
+      defender: Pokemon,
+      pb: Battle) = this match {
+        case (_: RegisterThrash) =>
+          pb.weirdMoveStatusManager.tryToRegisterThrash(attacker, attackerMoveslot)
+        case (_: RegisterPetalDance) =>
+          pb.weirdMoveStatusManager.tryToRegisterPetalDance(attacker, attackerMoveslot)
+      }
 
-  abstract override def moveSpecificStuff(
-    attacker: Pokemon,
-    defender: Pokemon,
-    pb: Battle,
-    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+  // Do everything in finishUsingMove, since we have attackerMoveSlot and MRB
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder) = {
 
-    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    result.merge(mrb)
-    super.moveSpecificStuff(attacker, defender, pb, result)
+    val tempResult = new MoveResultBuilder()
+    tempResult.merge(mrb)
+
+    // Decrement PP from the Registration move
+    attacker.deductPP(attackerMoveSlot)
+
+    // Don't log the register part! Using the first attack will log itself
+
+    // Don't decrement the turn count! Using the first attack will do that
+
+    // Do the first attack of this move
+    val result = this match {
+      case (_: RegisterThrash) => (new Thrash).use(attacker, attackerMoveSlot, defender, pb)
+      case (_: RegisterPetalDance) => (new PetalDance).use(attacker, attackerMoveSlot, defender, pb)
+    }
+
+    // pass things along
+    tempResult.merge(result)
+    tempResult
   }
 }
+
+
+trait ViolentStruggleAttack extends Move {
+
+  override def startUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle) {
+
+    // Make sure that attacker is actually registered to Thrash
+    this match {
+      case (_: Thrash) => require(pb.weirdMoveStatusManager.isThrashing(attacker))
+      case (_: PetalDance) => require(pb.weirdMoveStatusManager.isPetalDancing(attacker))
+    }
+  }
+
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder) = {
+    // Don't decrement PP - this is the attack part, which is free once you register
+    pb.moveManager.updateLastMoveIndex(attacker, index)  // log the attack
+
+    val decResult = this match {
+      case (_: Thrash) =>
+        pb.weirdMoveStatusManager.tryToDecrementThrashTurns(attacker)
+      case (_: PetalDance) =>
+        pb.weirdMoveStatusManager.tryToDecrementPetalDanceTurns(attacker)
+    }
+    if (!decResult)
+      throw new Exception("Finishing using ViolentStruggleAttack, decrement failed")
+    mrb
+  }
+}
+
 
 trait RegisterWaitThenAttack extends Move {
   /*
@@ -1009,9 +1089,18 @@ trait RegisterWaitThenAttack extends Move {
       attackerMoveslot: Int,
       defender: Pokemon,
       pb: Battle) = this match {
-        case (_ : RegisterDig) => pb.weirdMoveStatusManager.tryToRegisterDig(attacker, attackerMoveslot)
-        case (_ : RegisterFly) => pb.weirdMoveStatusManager.tryToRegisterFly(attacker, attackerMoveslot)
-        // TODO: all 6 cases here
+        case (_: RegisterDig) =>
+          pb.weirdMoveStatusManager.tryToRegisterDig(attacker, attackerMoveslot)
+        case (_: RegisterFly) =>
+          pb.weirdMoveStatusManager.tryToRegisterFly(attacker, attackerMoveslot)
+        case (_: RegisterSkyAttack) =>
+          pb.weirdMoveStatusManager.tryToRegisterSkyAttack(attacker, attackerMoveslot)
+        case (_: RegisterSkullBash) =>
+          pb.weirdMoveStatusManager.tryToRegisterSkullBash(attacker, attackerMoveslot)
+        case (_: RegisterSolarBeam) =>
+          pb.weirdMoveStatusManager.tryToRegisterSolarBeam(attacker, attackerMoveslot)
+        case (_: RegisterRazorWind) =>
+          pb.weirdMoveStatusManager.tryToRegisterRazorWind(attacker, attackerMoveslot)
       }
 
   override def finishUsingMove(
