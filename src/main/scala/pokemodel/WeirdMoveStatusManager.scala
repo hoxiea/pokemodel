@@ -74,8 +74,63 @@ class IntTracker {
   }
 }
 
-class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
-  private val allPokemon = team1.team ++ team2.team
+class IntPairTracker {
+  /*
+   * This tracker provides a mapping: Pokemon -> (Int, Int), and lets you:
+   * - check for membership
+   * - add to the map
+   * - get Int1 and Int from the map, given a Pokemon
+   * - decrement Int2 (Int1 doesn't change)
+   * - remove from the mapping
+   *
+   * It's used by the ViolentStruggle moves (Thrash and Petal Dance), where we
+   * store (attackerMoveslot, turnsRemaining) for any Pokemon using one of
+   * these moves.
+   */
+
+  private val members = mutable.Map[Pokemon, (Int, Int)]()
+
+  def hasProperty(p : Pokemon) : Boolean = members contains p
+
+  def getInt1(p : Pokemon) : Option[Int] = 
+    if (hasProperty(p)) Some(members(p)._1) else None
+
+  def getInt2(p : Pokemon) : Option[Int] = 
+    if (hasProperty(p)) Some(members(p)._2) else None
+
+  def tryToRegister(p: Pokemon, pair: (Int, Int)): Boolean = {
+    // Returns whether or not p was added successfully
+    if (members contains p) {
+      false
+    } else {
+      members(p) = pair
+      true
+    }
+  }
+
+  def tryToDecrementInt2(p: Pokemon): Boolean = {
+    if (hasProperty(p)) {
+      val int1 = getInt1(p).get
+      val int2 = getInt2(p).get
+      members(p) = (int1, int2 - 1)
+      true
+    } else false
+  }
+
+  def tryToRemove(p: Pokemon): Boolean = {
+    // Returns whether or not p was removed successfully
+    if (members contains p) {
+      members -= p
+      true
+    } else false
+  }
+}
+
+
+class WeirdMoveStatusManager (b: Battle) {
+  def team1 = b.trainer1.team.team
+  def team2 = b.trainer2.team.team
+  private val allPokemon = team1 ++ team2
 
   /*
    * MIST
@@ -240,6 +295,57 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
   def tryToRemoveRazorWind(p: Pokemon): Boolean = razorWindSet.tryToRemove(p)
 
 
+  /****** VIOLENT STRUGGLES ******/
+  /* THRASH */
+  val thrashSet = new IntPairTracker()
+  def isThrashing(p : Pokemon) : Boolean = thrashSet.hasProperty(p)
+
+  def getRegisteredThrashMoveslot(p : Pokemon) : Option[Int] =
+    thrashSet.getInt1(p)
+  def getThrashTurnsLeft(p : Pokemon) : Option[Int] =
+    thrashSet.getInt2(p)
+
+  def tryToRegisterThrash(p: Pokemon, moveslot: Int): Boolean = {
+    require(1 <= moveslot && moveslot <= 4)
+    require(!isThrashing(p))  // p shouldn't be selecting Register if thrashing
+    val numTurns = Utils.intBetween(3, 5)  // 3 or 4, 50/50
+    thrashSet.tryToRegister(p, (moveslot, numTurns))
+  }
+
+  def tryToDecrementThrashTurns(p: Pokemon): Boolean = {
+    // The only way for CONFUSED to kick in is if this method decrements
+    // turnsRemaining to 0; any weird status thing that cancels Thrash outright
+    // will use tryToRemoveThrash. So we'll confuse here
+    val success = thrashSet.tryToDecrementInt2(p)
+    // TODO: CONFUSION + REMOVE IF DECREMENT TO 0
+    success
+  }
+
+  def tryToRemoveThrash(p: Pokemon): Boolean =
+    thrashSet.tryToRemove(p)
+
+  /* PETAL DANCE */
+  private val petalDanceSet = new IntPairTracker()
+  def isPetalDancing(p : Pokemon) : Boolean = petalDanceSet.hasProperty(p)
+
+  def getRegisteredPetalDanceMoveslot(p : Pokemon) : Option[Int] =
+    petalDanceSet.getInt1(p) 
+  def getPetalDanceTurnsLeft(p : Pokemon) : Option[Int] =
+    petalDanceSet.getInt2(p)
+
+  def tryToRegisterPetalDance(p: Pokemon, moveslot: Int): Boolean = {
+    require(1 <= moveslot && moveslot <= 4)
+    require(!isPetalDancing(p))  // p shouldn't be selecting Register if dancing
+    val numTurns = Utils.intBetween(3, 5)  // 3 or 4, 50/50
+    petalDanceSet.tryToRegister(p, (moveslot, numTurns))
+  }
+
+  def tryToDecrementPetalDanceTurns(p: Pokemon): Boolean =
+    thrashSet.tryToDecrementInt2(p)
+  def tryToRemovePetalDance(p: Pokemon): Boolean =
+    petalDanceSet.tryToRemove(p)
+
+
   /******** NON-STANDARD BINARY STUFF **********/
   /*
    * CONVERSION
@@ -291,7 +397,7 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
    * - This count is decremented every time the target attempts to execute an attack. (Move.startUsingMove?)
    */
 
-  // Each Pokemon has a Map moveIndex -> number of turns it's disabled for
+  // Each Pokemon has a Map: moveslot -> number of turns it's disabled for
   // For example, if Pokemon p had two copies of some move to be disabled for 5 turns, 
   // in moveSlots 2 and 4, then disabledMoveMap would be (p -> (2 -> 5, 4 -> 5))
   val disabledMoveMap = mutable.Map[Pokemon, mutable.Map[Int, Int]]()  // TODO: make private after testing
@@ -349,36 +455,19 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
   }
 
   def processPokemonAttackAttempt(p: Pokemon) {
-    if(hasMoveDisabled(p)) {
-      // TODO: decrement everything in disabledMoveMap(p) by 1
+    // To be called by Battle when Pokemon p attemps to attack: decrement
+    // the number of turns left on the disable
+    if (hasMoveDisabled(p)) {
+      disabledMoveMap(p).transform((moveslot, turns) => turns - 1)
+
+      // This is the only method that decrements disable turncounts... so it's
+      // here that we'll remove things that have 0 turns left
+      val map = disabledMoveMap(p)
+      val toRemove = map.filterKeys( moveslot => map(moveslot) == 0 )
+      map --= toRemove.keys
     }
   }
 
-  private def removeAllDisables(p: Pokemon) {
-    if (disabledMoveMap.contains(p)) disabledMoveMap -= p
-  }
-
-  /*
-   * VIOLENT STRUGGLE: THRASH AND PETAL DANCE
-   * These two moves cause the Pokemon using them to go into a temporary
-   * Rage-like state where they attack for either 3 or 4 moves.
-   * While struggling, you can't switch out or do anything other than struggle.
-   * Each strike does a damage calculation and can miss.
-   * 
-   * If the Pokemon reaches the end of its 3-4 turns, it becomes CONFUSED.
-   * However, it can be interrupted by (full paralysis, hurt self due to
-   * pre-existing CONFUSED), in which case you stop and no CONFUSED.
-   * Sleep, freeze, partial trapping, and flinching pause but don't stop struggle.
-   *
-   * Since it's impossible to be using both moves simultaneously, it's enough
-   * to track all Violent Struggles in one data structure, used by the trait
-   * ViolentStruggle. However, the two moves have different powers and different
-   * types, so we'll encode which move the Pokemon is using with a simple enum.
-   */
-  private val vsMap: mutable.Map[Pokemon, (ViolentStruggleType, Int)] = mutable.Map()
-  def isThrashing(p: Pokemon): Boolean = false
-  def isPetalDancing(p: Pokemon): Boolean = false
-  def isViolentStruggling(p: Pokemon): Boolean = isThrashing(p) || isPetalDancing(p)
 
 
 
@@ -391,7 +480,6 @@ class WeirdMoveStatusManager (team1: PokemonTeam, team2: PokemonTeam) {
     tryToRemoveReflect(p)
     tryToRemoveFocusEnergy(p)
     tryToDeregisterConversion(p)
-    removeAllDisables(p)  // TODO: do disables actually clear when you switch out?
   }
 }
 
