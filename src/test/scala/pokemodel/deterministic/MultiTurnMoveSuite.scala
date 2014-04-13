@@ -13,6 +13,7 @@ import Type._
 
 class MultiTurnMoveSuite extends FlatSpec {
 
+  // DIG
   "RegisterDig" should "register the attacker with the Dig data structure" in {
     val f = fullFixture(100, 100, List(MoveDepot("registerdig")), List())  // Charizard can learn Dig
     import f._
@@ -68,6 +69,36 @@ class MultiTurnMoveSuite extends FlatSpec {
     assert (result.damageCalc > 0)
     assert (result.damageDealt > 0)
     assert (p2.currentHP() < p2.maxHP)
+  }
+
+  "RegisterThrash" should "register the attacker with the Thrash data structure" in {
+    val f = fullFixture(80, 75, List(MoveDepot("RegisterThrash")), List(), "Nidoking", "Mankey")
+    import f._
+
+    p1.useMove(1, p2, battle)
+    assert(battle.weirdMoveStatusManager.isThrashing(p1))
+  }
+  
+  it should "cause Thrash (attack) to be used, dealing damage" in {
+    val f = fullFixture(80, 75, List(MoveDepot("RegisterThrash")), List(), "Nidoking", "Mankey")
+    import f._
+
+    val result = p1.useMove(1, p2, battle)
+    assert(result.damageDealt > 0)
+  }
+
+  it should "cause the #turns remaining to drop" in {
+    // TODO: This should be a WeirdMoveStatusManager test
+    val f = fullFixture(80, 75, List(MoveDepot("RegisterThrash")), List(), "Nidoking", "Mankey")
+    import f._
+
+    assert(battle.weirdMoveStatusManager.getThrashTurnsLeft(p1).isEmpty) // not registered yet
+    p1.useMove(1, p2, battle)  // register, use first Thrash
+    val turnsAfter1 = battle.weirdMoveStatusManager.getThrashTurnsLeft(p1).get
+    (new Thrash).use(p1, 1, p2, battle)  // don't use Register again, it'll fail
+    val turnsAfter2 = battle.weirdMoveStatusManager.getThrashTurnsLeft(p1).get
+    assert(turnsAfter1 > turnsAfter2 && turnsAfter2 > 0)
+    println(battle.weirdMoveStatusManager.getThrashTurnsLeft(p1).get)
   }
   
 }
