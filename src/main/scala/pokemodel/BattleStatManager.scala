@@ -12,10 +12,12 @@ import scala.collection.mutable
  * special, accuracy, and evasion
  */
 
-class BattleStatManager (team1: PokemonTeam, team2: PokemonTeam) {
+class BattleStatManager (b: Battle) {
   // http://bulbapedia.bulbagarden.net/wiki/Stats#Stages
+  def team1 = b.trainer1.team.team
+  def team2 = b.trainer2.team.team
   private val init = List.fill(team1.length + team2.length)(0)
-  private val allPokemon = team1.team ++ team2.team
+  private val allPokemon = team1 ++ team2
 
   val attackStages:   mutable.Map[Pokemon, Int] = mutable.Map()
   val defenseStages:  mutable.Map[Pokemon, Int] = mutable.Map()

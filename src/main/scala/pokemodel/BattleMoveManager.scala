@@ -12,8 +12,8 @@ import scala.collection.mutable
  * This was implemented because Mirror Move needs it, but maybe it'll be useful elsewhere.
  */
 
-class BattleMoveManager (team1: PokemonTeam, team2: PokemonTeam) {
-  private val allPokemon = team1.team ++ team2.team
+class BattleMoveManager (val b: Battle) {
+  private val allPokemon = b.trainer1.team.team ++ b.trainer2.team.team
   private val lastMoveIndex: mutable.Map[Pokemon, Int] = mutable.Map()
 
   def getLastMove(p: Pokemon) : Option[Move] = {

@@ -46,10 +46,12 @@ import Type._
  * against a Ghost-type, they will still immobilize it.
  */
 
-class BattleStatusManager (val team1 : PokemonTeam, val team2: PokemonTeam) {
+class BattleStatusManager (val b: Battle) {
   /*
    * Structures for tracking things that last a certain (random) number of turns
    */
+  def team1 = b.trainer1.team.team
+  def team2 = b.trainer2.team.team
   private val sleepMap     = mutable.Map[Pokemon, Int]()
   private val partiallyTrappedMap = mutable.Map[Pokemon, Int]()
 

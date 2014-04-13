@@ -8,15 +8,15 @@ import scala.util.Random
 // TODO: If OneHitKO succeeds, print "One hit KO!"
 
 class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
-  val team1 = trainer1.team
-  val team2 = trainer2.team
+  def team1 = trainer1.team
+  def team2 = trainer2.team
 
   // Create and register various managers and calculators for this battle
-  val statManager = new BattleStatManager(team1, team2)  // temporary battle stats
-  val moveManager = new BattleMoveManager(team1, team2)  // keeps track of the last move used by each Pokemon
-  val statusManager = new BattleStatusManager(team1, team2)  // track SLP and VSAs
-  val moveHistory = new MoveHistory()    // MoveResult repository
-  val weirdMoveStatusManager = new WeirdMoveStatusManager(team1, team2)  // track weird moves
+  val statManager = new BattleStatManager(this)
+  val moveManager = new BattleMoveManager(this)
+  val statusManager = new BattleStatusManager(this)
+  val moveHistory = new MoveHistory()
+  val weirdMoveStatusManager = new WeirdMoveStatusManager(this)
   val dc = new DamageCalculator()
 
   var time: Int = 0
