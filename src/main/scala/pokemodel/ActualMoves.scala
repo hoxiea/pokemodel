@@ -700,6 +700,7 @@ class Rage extends PhysicalMove {
   override val power = 20
   // Normal, 100 accuracy
 
+  // TODO: implement Rage
   override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
@@ -728,60 +729,16 @@ class Rage extends PhysicalMove {
 class RegisterThrash extends PhysicalMove with RegisterViolentStruggle {
   override val index = 37
   override val maxPP = 10
-  // Normal, 100 accuracy
-  override def vsType = THRASH
-
-  override def moveSpecificStuff(
-    attacker: Pokemon,
-    defender: Pokemon,
-    pb: Battle,
-    mrb: MoveResultBuilder = new MoveResultBuilder()) = {
-
-    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
-    result.merge(mrb)
-    super.moveSpecificStuff(attacker, defender, pb, result)
-  }
-
-  override def finishUsingMove(
-      attacker: Pokemon,
-      attackerMoveSlot: Int,
-      defender: Pokemon,
-      pb: Battle,
-      mrb: MoveResultBuilder) = {
-    // Don't log the register part!
-    // Instead, use Thrash, decrement PP, and let Thrash log itself
-    attacker.deductPP(attackerMoveSlot)
-    (new Thrash).use(attacker, attackerMoveSlot, defender, pb)
-    mrb
-  }
 }
 
-class Thrash extends PhysicalMove with SingleStrike {
+class Thrash extends PhysicalMove with SingleStrike with ViolentStruggleAttack {
+  // SingleStrike takes care of dealing damage via moveSpecificStuff
+  // ViStrAt takes care of logging and decrementing #turns Thrashing left via 
+  //   startUsingMove and finishUsingMove
   override val index = 37
   override val maxPP = 999
   override val power = 120
   // Normal, 100 accuracy
-
-  override def startUsingMove(
-      attacker: Pokemon,
-      attackerMoveSlot: Int,
-      defender: Pokemon,
-      pb: Battle) {
-
-    // Make sure that attacker is actually registered to Thrash
-  }
-
-  override def finishUsingMove(
-      attacker: Pokemon,
-      attackerMoveSlot: Int,
-      defender: Pokemon,
-      pb: Battle,
-      mrb: MoveResultBuilder) = {
-    // Don't decrement PP - this is the attack part, which is free once you register
-    // TODO: log yourself
-    // TODO: decrement the number of turns left in WeirdMoveStatMan
-    mrb
-  }
 }
 
 class RegisterPetalDance extends SpecialMove with RegisterViolentStruggle {
@@ -789,8 +746,6 @@ class RegisterPetalDance extends SpecialMove with RegisterViolentStruggle {
   override val index = 80
   override val type1 = Grass
   override val maxPP = 10
-  // 100 accuracy
-  override def vsType = PETALDANCE
 }
 
 class PetalDance extends SpecialMove {
@@ -801,6 +756,7 @@ class PetalDance extends SpecialMove {
   override val power = 120
   // 100 accuracy
 }
+
 
 /* WAIT/CHARGE/DIG/FLY/ETC, THEN ATTACK */
 // Registrations: the maxPP matters, as you can only register if you have PP,
@@ -831,7 +787,7 @@ class RegisterSolarBeam extends SpecialMove with RegisterWaitThenAttack {
   override val maxPP = 10
 }
 
-class RegisterRazorWind extends PhysicalMove with RegisterWaitThenAttack {
+class RegisterRazorWind extends SpecialMove with RegisterWaitThenAttack {
   override val index = 13
   override val maxPP = 10
 }
@@ -847,77 +803,47 @@ class Dig extends PhysicalMove with SingleStrike with AttackAfterWaiting {
   override val maxPP = 10
   override val power = 100  // lower in later games
   // 100 accuracy
-
-  // Make sure actually dug
-  override def startUsingMove(
-      attacker: Pokemon,
-      attackerMoveSlot: Int,
-      defender: Pokemon,
-      pb: Battle) {
-    require(pb.weirdMoveStatusManager.isDug(attacker),
-      "using Dig attack without having been Dug!")
-  }
-
-  // SINGLESTRIKE logic kicks in here, dealing damage
-
-  override def finishUsingMove(
-      attacker: Pokemon,
-      attackerMoveSlot: Int,
-      defender: Pokemon,
-      pb: Battle,
-      mrb: MoveResultBuilder): MoveResultBuilder = {
-    // deduct PP
-    val correctMoveslot =
-      pb.weirdMoveStatusManager.getRegisteredDigMoveslot(attacker).get
-    attacker.deductPP(correctMoveslot)
-
-    // register as last Move used
-    pb.moveManager.updateLastMoveIndex(attacker, index)
-
-    // remove Dug status for attacker
-    val removed = pb.weirdMoveStatusManager.tryToRemoveDig(attacker)
-    if (!removed)
-      throw new Exception(s"tried to unDig ${attacker.name}; no dice")
-    mrb
-  }
 }
 
-class SkyAttack extends PhysicalMove with SingleStrike {
+class SkyAttack extends PhysicalMove with SingleStrike with AttackAfterWaiting {
+  // The damage-dealing part of SkyAttack (turn 2)
   override val index = 143
   override val type1 = Flying
   override val power = 140
   override val accuracy = 0.95
 }
 
-class SkullBash extends PhysicalMove with SingleStrike {
+class SkullBash extends PhysicalMove with SingleStrike with AttackAfterWaiting {
+  // The damage-dealing part of SkullBash (turn 2)
   override val index = 130
   override val power = 130
   // Normal, accuracy 100
 }
 
-class SolarBeam extends SpecialMove with SingleStrike {
-  // TODO: Move into SpecialMove section
+class SolarBeam extends SpecialMove with SingleStrike with AttackAfterWaiting {
+  // The damage-dealing part of SolarBeam (turn 2)
   override val index = 76
   override val type1 = Grass
   override val power = 120
   // accuracy 100
 }
 
-class RazorWind extends PhysicalMove with SingleStrike {
+class RazorWind extends SpecialMove with SingleStrike with AttackAfterWaiting {
+  // The damage-dealing part of RazorWind (turn 2)
   override val index = 13
+  override val type1 = Grass
   override val power = 80
   override val accuracy = 0.75   // much higher later
   // Normal
 }
 
-class Fly extends PhysicalMove with SingleStrike {
+class Fly extends PhysicalMove with SingleStrike with AttackAfterWaiting {
+  // The damage-dealing part of Fly (turn 2)
   override val index = 19
   override val type1 = Flying
   override val power = 90
   override val accuracy = 0.95
 }
-
-
 
 
 class HyperBeam extends PhysicalMove with SingleStrike {
