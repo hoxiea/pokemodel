@@ -18,14 +18,6 @@ Weird stuff about missing and secondary effects
 = Petal Dance: like Thrash, but Special
 
 
-- Multi-turn moves
-= Sky Attack: do nothing on turn it's used, then deal damage on next turn
-= Skull Bash: like Sky Attack
-= Solar Beam: like SkyAttack but SpecialMove
-= Razor Wind: like SkyAttack but SpecialMove
-= Fly: disappear for a turn (affected by Bide, Swift, and Transform), then deal damage
-= Dig: like Fly
-
 
 - Partially Trapping moves
 = Bind: hit for 2, 3, 4, 5 TURNS w.p. (.375, .375, .125, .125).  Getting a critical hit on the first one causes all to deal the same amount of damage.  WSSC
@@ -35,9 +27,6 @@ Weird stuff about missing and secondary effects
 
 
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
-- CUSTOM
-= Disable: almost done, a couple TODOs to fill in
-
 STATUS MOVES (any type, don't deal damage directly):
 - CUSTOM
 = Mimic: copy a randomly selected move of the opponent's

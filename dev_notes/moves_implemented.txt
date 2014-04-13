@@ -93,6 +93,14 @@ PHYSICAL MOVES (Normal, Fighting, Flying, Ground, Rock, Bug, Ghost, Poison):
 = Explosion: deal damage, kill the user, halve the opponent's defenses, etc.
 = Selfdestruct: deal damage, kill the user, halve the opponent's defenses, etc.
 
+- Multi-turn moves
+= Sky Attack: do nothing on turn it's used, then deal damage on next turn
+= Skull Bash: like Sky Attack
+= Solar Beam: like SkyAttack but SpecialMove
+= Razor Wind: like SkyAttack but SpecialMove
+= Fly: disappear for a turn (affected by Bide, Swift, and Transform), then deal damage
+= Dig: like Fly
+
 
 
 SPECIAL MOVES (Water, Grass, Fire, Ice, Electric, Psychic, Dragon):
@@ -200,8 +208,7 @@ STATUS MOVES (any type, don't deal damage directly):
 = Focus Energy: multiply the user's Crit Hit ratio by 4 (except in Gen 1 it divided by 4 instead)
 *= LeechSeed: they lose 1/16 HP, you gain the same amount they lose, with some special conditions
 = Metronome: randomly selects a move (other than itself and Struggle) and then executes the attack with normal priority
-
-
+*= Disable: TODO test Disable
 
 
 
