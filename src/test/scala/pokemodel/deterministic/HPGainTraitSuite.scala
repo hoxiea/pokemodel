@@ -20,7 +20,7 @@ class HPGainTraitSuite extends FlatSpec with Matchers {
     assert(charizard.currentHP() == charizard.maxHP)
     val result = charizard.useMove(1, venusaur, battle)
     result.numTimesHit should be (1)
-    assert(result.damageCalc > 0)
+    assert(result.rawDamage > 0)
     assert(result.hpGained == 0, "(health gained)")
     assert(charizard.currentHP() == charizard.maxHP)
   }
@@ -31,7 +31,7 @@ class HPGainTraitSuite extends FlatSpec with Matchers {
     charizard.takeDamage(20)
     val result = charizard.useMove(1, venusaur, battle)
     result.numTimesHit should be (1)
-    assert(result.damageCalc > 0)
+    assert(result.rawDamage > 0)
     assert(result.hpGained == 20, "(health gained)")
     assert(charizard.currentHP() == charizard.maxHP)
   }
@@ -84,7 +84,7 @@ class HPGainTraitSuite extends FlatSpec with Matchers {
     val result = p1.useMove(1, p2, battle)  // Hypno uses dreameater
 
     assert(result.numTimesHit == 0, "numTimesHit")
-    assert(result.damageCalc == 0, "damageCalc")  // SingleStrike fails, no DC involved
+    assert(result.rawDamage == 0, "rawDamage")  // SingleStrike fails, no DC involved
     assert(result.damageDealt == 0, "damageDealt")
     assert(result.hpGained == 0, "hpGained")
   }
@@ -104,7 +104,7 @@ class HPGainTraitSuite extends FlatSpec with Matchers {
 
     val result = p1.useMove(1, p2, battle)  // Hypno uses dreameater
     assert(result.numTimesHit == 1, "numTimesHit")
-    assert(result.damageCalc > 0, "damageCalc")  // SingleStrike fails, no DC involved
+    assert(result.rawDamage > 0, "rawDamage")  // SingleStrike fails, no DC involved
     assert(result.damageDealt > 0, "damageDealt")
     assert(result.hpGained == result.damageDealt / 2, "hpGained")
     assert(p1.currentHP() > startingHP, "hp actually restored")

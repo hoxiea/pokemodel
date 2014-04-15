@@ -25,4 +25,9 @@ class MoveMakerSuite extends FlatSpec {
     assert (MoveDepot("Bubble Beam").index == 61)
   }
 
+  it should "try adding 'Register' to the front of a move if it's not immediately found" in {
+    assert (MoveDepot("solarbeam").index == 76)
+  }
+  
+
 }

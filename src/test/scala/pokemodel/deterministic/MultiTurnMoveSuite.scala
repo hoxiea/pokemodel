@@ -66,7 +66,7 @@ class MultiTurnMoveSuite extends FlatSpec {
     val result = new Dig().use(p1, 5, p2, battle)
     assert (result.moveType == Ground)
     assert (result.numTimesHit == 1)
-    assert (result.damageCalc > 0)
+    assert (result.rawDamage > 0)
     assert (result.damageDealt > 0)
     assert (p2.currentHP() < p2.maxHP)
   }

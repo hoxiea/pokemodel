@@ -7,8 +7,13 @@ import TakeDamageResult._
 /*
  * After implementing Moves that mutated Battles/Pokemon but didn't return any
  * values, it became apparent that knowing how much damage was done, whether
- * you hit or not, KO, etc. could be useful. This class just captures all that
- * good stuff.
+ * you hit or not, KO, etc. could be useful in at least 2 cases:
+ * 1. Testing. Easily making sure that the damage dealt was in the appropriate
+ *    range, that a status ailment is inflicted a certain % of the time, that
+ *    a substitute was KOed when it was supposed to be, etc.
+ * 2. Moves that require a history.
+ *
+ * A MoveResult captures all the information needed for both cases.
  *
  * There are two ways to get your hands on a MoveResultBuilder, which each move
  * is responsible for returning and completing. The first is to call
@@ -19,7 +24,7 @@ import TakeDamageResult._
  *
  * The following values are provided by DamageCalculator:
  * - moveIndex
- * - damageCalc
+ * - rawDamage
  * - numTimesHit = 1
  * - damageDealt
  * - critHit
@@ -42,16 +47,15 @@ import TakeDamageResult._
  * Another crucial operation on MoveResultBuilders is the ability to combine
  * them.  For example, a move like Thunder is implemented as something that's
  * both SingleStrike and StatusChange. So whatever happens with the
- * StatusChange (nvsa or vsa) should get passed to the SingleStrike trait,
- * which can then do a damage calculation and merge in the results of the
- * StatusChange.
+ * SingleStrike should get passed to the StatusChange trait, which should then
+ * merge in its own information to the SingleStrike result, if necessary.
  */
 
 class MoveResult (
   val moveIndex: Int,    // which move was used?
-  val damageCalc: Int,   // what's the max damage this move could deal, from DamageCalc?
+  val rawDamage: Int,   // what's the max damage this move could deal, from DamageCalc?
   val numTimesHit: Int,  // how many times did the move hit? usually 1
-  val damageDealt: Int,  // how much damage was actually dealt (on the last hit)?
+  val damageDealt: Int,  // how much damage was actually dealt (on the last strike)?
   val hpGained: Int,     // how much HP did the user gain?
   val critHit: Boolean,  // did you get a critical hit?
   val STAB: Boolean,     // was there a STAB in play?
@@ -70,7 +74,7 @@ class MoveResult (
   override def toString: String = {
     val repr = new StringBuilder()
     repr.append(s"moveIndex = $moveIndex (${MoveDepot(moveIndex)})\n")
-    repr.append(s"damageCalc = $damageCalc\n")
+    repr.append(s"rawDamage = $rawDamage\n")
     repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
     repr.append(s"hpGained = $hpGained\n")
@@ -94,7 +98,7 @@ class MoveResult (
 class MoveResultBuilder {
   // defaults: a Normal move with an invalid index and no effect on the world
   var moveIndex = -1
-  var damageCalc = 0
+  var rawDamage = 0
   var numTimesHit = 0
   var damageDealt = 0
   var hpGained = 0
@@ -121,9 +125,9 @@ class MoveResultBuilder {
     moveIndex = x
     this
   }
-  def damageCalc(x: Int): MoveResultBuilder = {
-    require(x >= 0, "MRB.damageCalc")
-    damageCalc = x
+  def rawDamage(x: Int): MoveResultBuilder = {
+    require(x >= 0, "MRB.rawDamage")
+    rawDamage = x
     this
   }
   def numTimesHit(x: Int): MoveResultBuilder = {
@@ -204,7 +208,7 @@ class MoveResultBuilder {
   def toMoveResult: MoveResult = {
     new MoveResult(
       moveIndex,
-      damageCalc,
+      rawDamage,
       numTimesHit,
       damageDealt,
       hpGained,
@@ -227,7 +231,7 @@ class MoveResultBuilder {
   /* merge is a crucial method here, as described in the top comment */
   def merge(other: MoveResult): MoveResultBuilder = {
     moveIndex(moveIndex     max other.moveIndex)
-    damageCalc(damageCalc   max other.damageCalc)
+    rawDamage(rawDamage   max other.rawDamage)
     numTimesHit(numTimesHit max other.numTimesHit)
     damageDealt(damageDealt max other.damageDealt)
     hpGained(hpGained       max other.hpGained)
@@ -300,7 +304,7 @@ class MoveResultBuilder {
   override def toString: String = {
     val repr = new StringBuilder()
     repr.append(s"moveIndex = $moveIndex (${MoveDepot(moveIndex)})\n")
-    repr.append(s"damageCalc = $damageCalc\n")
+    repr.append(s"rawDamage = $rawDamage\n")
     repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
     repr.append(s"hpGained = $hpGained\n")

@@ -107,7 +107,7 @@ class AttackTraitSuite extends FlatSpec with Matchers {
     val f = singleMoveFixture(new TestPhysicalMultiStrike)
     import f._
     val result = charizard.useMove(1, venusaur, battle)
-    assert(result.damageDealt <= result.damageCalc)
+    assert(result.damageDealt <= result.rawDamage)
   }
 
   it should "deal total damage as given by totalDamageDealt on a full-health enemy" in {
@@ -213,7 +213,7 @@ class AttackTraitSuite extends FlatSpec with Matchers {
     val f = singleMoveFixture(new TestSpecialDoubleStrike with AlwaysCritHit)
     import f._
     val result = charizard.useMove(1, venusaur, battle)  // now use the move
-    assert(venusaur.maxHP - venusaur.currentHP() == result.damageCalc * 2)
+    assert(venusaur.maxHP - venusaur.currentHP() == result.rawDamage * 2)
   }
 
   it should "stop after 1 strike if it breaks a substitute" in {
@@ -271,7 +271,7 @@ class AttackTraitSuite extends FlatSpec with Matchers {
     reduceHPTo(venusaur, 30)
     val result = charizard.useMove(1, venusaur, battle)
     assert (result.KO, "KO")
-    assert (result.damageCalc == 40)
+    assert (result.rawDamage == 40)
     assert (result.damageDealt == 30)
   }
 
@@ -314,7 +314,7 @@ class AttackTraitSuite extends FlatSpec with Matchers {
     val result = p1.useMove(1, p2, battle)
     assert(!result.subKO, "subKO")
     assert(!result.KO, "KO")
-    assert(result.damageCalc == 0, "dCalc")  // Damage Calculator takes types into effect
+    assert(result.rawDamage == 0, "dCalc")  // Damage Calculator takes types into effect
     assert(result.damageDealt == 0, "dDealt")
     assert(result.selfKO, "selfKO")
     assert(p2.currentHP() == p2.maxHP, "enemy full health")
@@ -347,7 +347,7 @@ class AttackTraitSuite extends FlatSpec with Matchers {
     import f._
     battle.statManager.setSpeedStage(charizard, -6)  // slooooooooowwwwww
     val result = charizard.useMove(1, venusaur, battle)
-    assert(result.damageCalc == 0)  // never even consult the DamageCalculator
+    assert(result.rawDamage == 0)  // never even consult the DamageCalculator
     assert(result.damageDealt == 0)
     assert(result.numTimesHit == 0)
     assert(!result.KO)

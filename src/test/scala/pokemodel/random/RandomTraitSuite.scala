@@ -14,11 +14,11 @@ object DamageEqualsUserLevelSpec extends Properties("DamageEqualsUserLevel") {
         import f._
 
         val result = p1.useMove(1, p2, battle)
-        result.damageCalc == level && result.damageDealt == level
+        result.rawDamage == level && result.damageDealt == level
       }
   }
 
-  property("correct damageCalc and damageDealt against weakened enemy if appropriate") =
+  property("correct rawDamage and damageDealt against weakened enemy if appropriate") =
     forAll(pokemonLevel) {
       level => {
         val f = fullFixture(level, 100, List(new TestDEUL), List(MoveDepot("substitute")))
@@ -27,7 +27,7 @@ object DamageEqualsUserLevelSpec extends Properties("DamageEqualsUserLevel") {
         reduceHPTo(p2, enemyHP)
 
         val result = p1.useMove(1, p2, battle)
-        result.damageCalc == level && 
+        result.rawDamage == level && 
         result.damageDealt == (level min enemyHP)
       }
     }

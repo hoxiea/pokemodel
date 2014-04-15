@@ -3,8 +3,10 @@ package pokemodel
 import scala.collection.mutable
 
 /*
- * A BattleMoveManager is responsible for storing the last Move that each
- * active Pokemon has used.  Actually, the move's index is stored (in 1..165).
+ * A BattleMoveManager is responsible for storing the last Move index that each
+ * active Pokemon has used.
+ *
+ * This functionality is required for MirrorMove.
  *
  * TODO: using a move m should update lastMoveIndex with m.index for that Pokemon
  *  getLastMove

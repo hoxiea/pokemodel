@@ -4,7 +4,6 @@ import Type._
 import MoveType._
 import BattleStat._
 import TakeDamageResult._
-import ViolentStruggleType._
 import CritHitType._
 import scala.util.Random
 
@@ -641,7 +640,7 @@ class SuperFang extends PhysicalMove {
       val damageResult = defender.takeDamage(damageToDeal)
 
       // Build an MRB from scratch, since we skipped damage calculator
-      result.damageCalc(damageToDeal)
+      result.rawDamage(damageToDeal)
       result.numTimesHit(1)
       result.damageDealt(damageToDeal)
       // no hpGained, critHit, STAB/mult, SA, stat
@@ -733,7 +732,7 @@ class RegisterThrash extends PhysicalMove with RegisterViolentStruggle {
 
 class Thrash extends PhysicalMove with SingleStrike with ViolentStruggleAttack {
   // SingleStrike takes care of dealing damage via moveSpecificStuff
-  // ViStrAt takes care of logging and decrementing #turns Thrashing left via 
+  // ViStrAt takes care of logging and decrementing #turns Thrashing left via
   //   startUsingMove and finishUsingMove
   override val index = 37
   override val maxPP = 999
@@ -1326,7 +1325,7 @@ class Psywave extends SpecialMove {
     // Add the effects of hitting if necessary
     if (pb.moveHits(attacker, defender, this)) {
       val damageAmount = ((Random.nextDouble + .5) * attacker.level).toInt min 1
-      result.damageCalc(damageAmount)
+      result.rawDamage(damageAmount)
       val damageToDeal = damageAmount min defender.currentHP()
       val damageResult = defender.takeDamage(damageToDeal)
 
@@ -1966,7 +1965,34 @@ class MirrorMove extends StatusMove {
   override val type1 = Flying
   override val maxPP = 20
 
-  // TODO: implement MirrorMove
+  override def moveSpecificStuff(
+      attacker: Pokemon,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder = new MoveResultBuilder()) = {
+
+    val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    // Get the move used most recently by defender
+    val m = pb.moveManager.getLastMove(defender)
+    println(s"m = $m")
+
+    // Use it against defender, if it exists
+    val mirrorResult = m match {
+      case None => mrb.toMoveResult
+      case Some(move) => {
+        val r = move.use(attacker, 5, defender, pb)
+        r
+        // 5 == ignored, no PP to deduct for mirrored move
+      }
+    }
+
+    result.merge(mirrorResult)
+    result
+    // Using the move will automatically log the move, if it's a logging move
+    // This doesn't capture the result of using the new move, though
+  }
+
+
   /*
    * MirrorMove would get the updateLastMoveIndex wrong, since the order would be:
    * MirrorMove.startUsingMove()
@@ -1977,9 +2003,15 @@ class MirrorMove extends StatusMove {
    * Move.finishUsingMove()     => sets it back to incorrect value
    * So just don't update lastMoveUsed after calling MirrorMove!
    */
-  // override def finishUsingMove(attacker: Pokemon, defender: Pokemon, pb: Battle) = {
-  //   currentPP -= 1
-  // }
+  override def finishUsingMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mrb: MoveResultBuilder) = {
+    attacker.deductPP(attackerMoveSlot)  // this is Metronome PP, should be decremented
+    mrb
+  }
 }
 
 class Transform extends StatusMove {

@@ -42,9 +42,9 @@ class DamageCalculator {
       // CRITICAL HIT
       result.critHit(true)
 
-      // Calculate how much the critical hit could do - MRB.damageCalc
+      // Calculate how much the critical hit could do - MRB.rawDamage
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
-      result.damageCalc(chd)
+      result.rawDamage(chd)
 
       // Calculate how much damage the Pokemon should actually deal - MRB.damageDealt
       val damageToDeal = chd min defender.currentHP()
@@ -53,9 +53,9 @@ class DamageCalculator {
       result
 
     } else {
-      // Calculate how much the regular hit could do - MRB.damageCalc
+      // Calculate how much the regular hit could do - MRB.rawDamage
       val rhd = calcRegularHitDamage(attacker, defender, move, battle)
-      result.damageCalc(rhd)
+      result.rawDamage(rhd)
 
       // Calculate how much damage the Pokemon should actually deal - MRB.damageDealt
       val damageToDeal = rhd min defender.currentHP()

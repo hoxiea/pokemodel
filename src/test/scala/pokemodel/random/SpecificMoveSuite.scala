@@ -20,4 +20,12 @@ class SpecificMoveSuite extends FlatSpec {
     val result = p1.useMove(1, p2, battle)
     // println(result)
   }
+
+  it should "always fail if Counter is the random move selected" in {
+    val f = fullFixture(100, 100, List(MoveDepot("metronome")), List(), "Alakazam", "Venusaur")
+    import f._
+
+    val result = p1.useMove(1, p2, battle)
+    // println(result)
+  }
 }

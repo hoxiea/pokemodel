@@ -56,27 +56,59 @@ object TestingInfrastructure {
     p2Moves: List[Move],
     p1Name: String = "Charizard",
     p2Name: String = "Venusaur") =
-    new {
-      val pb1 = new PokemonBuilder(p1Name, p1Level).maxOut().learnMoves(p1Moves)
-      val p1 = new Pokemon(pb1)
-      val pb2 = new PokemonBuilder(p2Name, p2Level).maxOut().learnMoves(p2Moves)
-      val p2 = new Pokemon(pb2)
-      val team1 = new PokemonTeam(p1)
-      val team2 = new PokemonTeam(p2)
-      val trainer1 = new UseFirstAvailableMove(team1)
-      val trainer2 = new UseFirstAvailableMove(team2)
-      val battle = new Battle(trainer1, trainer2)
-      // don't actually attack, so that you can make mutations first
-    }
+      new {
+        val pb1 = new PokemonBuilder(p1Name, p1Level).maxOut().learnMoves(p1Moves)
+        val p1 = new Pokemon(pb1)
+        val pb2 = new PokemonBuilder(p2Name, p2Level).maxOut().learnMoves(p2Moves)
+        val p2 = new Pokemon(pb2)
+        val team1 = new PokemonTeam(p1)
+        val team2 = new PokemonTeam(p2)
+        val trainer1 = new UseFirstAvailableMove(team1)
+        val trainer2 = new UseFirstAvailableMove(team2)
+        val battle = new Battle(trainer1, trainer2)
+        // don't actually attack, so that you can make mutations first
+      }
+
+  // These two helpers are used in megaFixture
+  private def movenamesToMoves(movenames: List[String]): List[Move] =
+    movenames.map(name => MoveDepot(name))
+
+  private def processZip(combined: ((String, Int), List[Move])): Pokemon = {
+    val (pokemonName, pokemonLevel) = combined._1
+    val pb = new PokemonBuilder(pokemonName, pokemonLevel).maxOut()
+    pb.learnMoves(combined._2)
+    new Pokemon(pb)
+  }
+  
+  def megaFixture(
+    p1Info: List[(String, Int)],  // (pokemonName, level)
+    p2Info: List[(String, Int)],  // (pokemonName, level)
+    p1Movenames: List[List[String]],     // move names for each Pokemon in p1s
+    p2Movenames: List[List[String]]) =   // move names for each Pokemon in p2s
+      new {
+        assert(p1Info.length == p1Movenames.length)
+        assert(p2Info.length == p2Movenames.length)
+        private val p1Moves: List[List[Move]] = p1Movenames.map(movenamesToMoves)
+        private val p2Moves: List[List[Move]] = p2Movenames.map(movenamesToMoves)
+        private val p1s = p1Info.zip(p1Moves).map(processZip)
+        private val p2s = p2Info.zip(p2Moves).map(processZip)
+
+        val team1 = new PokemonTeam(p1s)
+        val team2 = new PokemonTeam(p2s)
+        val trainer1 = new UseFirstAvailableMove(team1)
+        val trainer2 = new UseFirstAvailableMove(team2)
+        val battle = new Battle(trainer1, trainer2)
+      }
+
 
   /* HELPER FUNCTIONS */
   def totalDamageDealt(msResult: MoveResult) =
-    // For a MultiStrike move, damageCalc is the value returned by the
+    // For a MultiStrike move, rawDamage is the value returned by the
     // DamageCalculator, which would ideally be how much damage is dealt
     // numTimesHit times. But MultiStrike moves are designed to stop if they
     // break a sub or KO the opponent. This function tells you how much damage
     // the MultiStrike move whose result is msResult dealt total.
-    (msResult.numTimesHit - 1) * msResult.damageCalc + msResult.damageDealt
+    (msResult.numTimesHit - 1) * msResult.rawDamage + msResult.damageDealt
 
   def reduceHPTo(p: Pokemon, newHP: Int) {
     // Quick way to reduce the HP of Pokemon p down to newHP

@@ -36,6 +36,26 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
     !weirdMoveStatusManager.isFlying(defender)
   }
 
+  // Determining what kind of control a Trainer has over his active Pokemon
+  def outOfControl(t: Trainer): Boolean = {
+    require(t == trainer1 || t == trainer2)
+    weirdMoveStatusManager.isRaging(t.team.activePokemon) ||
+    weirdMoveStatusManager.isThrashing(t.team.activePokemon) ||
+    weirdMoveStatusManager.isPetalDancing(t.team.activePokemon) ||
+    weirdMoveStatusManager.isDug(t.team.activePokemon) ||
+    weirdMoveStatusManager.isFlying(t.team.activePokemon) ||
+    weirdMoveStatusManager.isSolarBeaming(t.team.activePokemon) ||
+    weirdMoveStatusManager.isRazorWinding(t.team.activePokemon) ||
+    weirdMoveStatusManager.isSkullBashing(t.team.activePokemon) ||
+    weirdMoveStatusManager.isSkyAttacking(t.team.activePokemon) ||
+    weirdMoveStatusManager.hasHyperBeamDelay(t.team.activePokemon)
+  }
+
+  def semiControl(t: Trainer): Boolean = {
+    require(t == trainer1 || t == trainer2)
+    false
+  }
+
   /* NON-VOLATIVE STATUS EFFECTS
    * Burn, Freeze, Paralysis, Poison, Badly Poison, and Sleep
    * These remain until the Pokemon is healed at a Pokecenter (which can't
@@ -58,9 +78,8 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   }
 
   /* METHODS FOR MAKING THE BATTLE HAPPEN */
-  def takeNextTurn() : Unit = {
-    val tp = new TurnProcessor(this)
-    tp.processTurn()
+  def takeNextTurn() {
+
     var team1Fainted = false
     var team2Fainted = false
 
@@ -71,7 +90,22 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
    * 2. Limited choice. You can switch, or you can do things like continue a
    *    Move in progress, try to attack if your Asleep, etc.
    * 3. Full control. Use any of your available moves, or switch.
+   *
+   * There are therefore 9 combinations that the 2 Trainers can be in:
+   * (1, 1): nothing to do, faster Pokemon goes first
+   * (1, 2): switch goes first, then faster/alert Pokemon
+   * (1, 3): switch goes first, then faster/alert Pokemon
+   * (2, 1): switch goes first, then faster/alert Pokemon (same as (1,2))
+   * (2, 2):
+   * (2, 3):
+   * (3, 1):
+   * (3, 2):
+   * (3, 3): Check priorities, then break ties with Pokemon speed
    */
+  val trainer1Control =
+    if (outOfControl(trainer1)) 1
+    else if (semiControl(trainer1)) 2
+    else 3
 
     // Process any status ailments that take effect at the beginning of the round: SLP, PAR
 
@@ -207,4 +241,6 @@ object Glitch {
    * detailed in ActualMoves.scala#HyperBeam.
    */
   val hyperbeamRechargeGlitch = true
+
+  // TODO: Even >1.0 chanceOfHitting moves only hit with probability 255/256
 }

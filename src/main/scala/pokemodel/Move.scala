@@ -6,7 +6,6 @@ import MoveType._
 import BattleStat._
 import CritHitType._
 import TakeDamageResult._
-import ViolentStruggleType._
 import scala.util.Random
 import Battle.{verbose=>VERBOSE}
 
@@ -323,7 +322,7 @@ trait ConstantDamage extends Move {
     // Add the effects of hitting if necessary
     if (pb.moveHits(attacker, defender, this)) {
 
-      result.damageCalc(damageAmount)
+      result.rawDamage(damageAmount)
       val damageToDeal = damageAmount min defender.currentHP()
       val damageResult = defender.takeDamage(damageToDeal)
 
@@ -397,7 +396,7 @@ trait MultiStrike extends Move {
                        else if (r <= (0.375 + 0.375 + 0.125)) 4
                        else 5
       val result = pb.dc.calc(attacker, defender, this, pb)
-      val damageEachStrike = result.damageDealt  // don't use damageCalc!
+      val damageEachStrike = result.damageDealt  // don't use rawDamage!
 
       // Figure out what sequence of damages we should actually deal
       // Pokemon.currentHP() returns the HP of the substitute if one exists,
@@ -772,7 +771,7 @@ trait OneHitKO extends Move {
       val damageToDeal = defender.currentHP()
       val damageResult = defender.takeDamage(damageToDeal)
 
-      result.damageCalc(damageToDeal)
+      result.rawDamage(damageToDeal)
       result.numTimesHit(1)
       result.damageDealt(damageToDeal)
       result.processTakeDamageResult(defender, damageResult)
@@ -854,7 +853,7 @@ trait DamageEqualsUserLevel extends Move {
       val damageResult = defender.takeDamage(damageToDeal)
 
       // Build an MRB from scratch
-      result.damageCalc(attacker.level)
+      result.rawDamage(attacker.level)
       result.numTimesHit(1)
       result.damageDealt(damageToDeal)
       // no hpGained, critHit, STAB, typeMult, nvsa, vsa, stat changes

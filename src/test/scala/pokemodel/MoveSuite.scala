@@ -19,7 +19,7 @@ class MoveSuite extends FlatSpec with Matchers {
     val f = singleMoveFixture(MoveDepot("struggle"))
     import f._
     val result = charizard.useMove(1, venusaur, battle)
-    assert(result.damageCalc == result.damageDealt)
+    assert(result.rawDamage == result.damageDealt)
     assert(venusaur.currentHP() == venusaur.maxHP - result.damageDealt)
     assert(charizard.maxHP - charizard.currentHP() == result.damageDealt / 2)
   }

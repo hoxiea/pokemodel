@@ -8,7 +8,7 @@ class PokemonSuite extends FunSuite {
     val p = new Pokemon(pb)
     assert(p.level == 50)
     assert(p.index == 1)
-    assert(p.name == "Bulbasaur")
+    assert(p.name == "bulbasaur")
   }
 
   test("basic Pokemon creation, by name") {
@@ -16,7 +16,16 @@ class PokemonSuite extends FunSuite {
     val p = new Pokemon(pb)
     assert(p.level == 50)
     assert(p.index == 25)
-    assert(p.name == "Pikachu")
+    assert(p.name == "pikachu")
+  }
+
+  test("PokemonBuilder should accept varying capitalization and spacing") {
+    val pb1 = new PokemonBuilder("Pikachu", 50)
+    val pb2 = new PokemonBuilder("charizard", 100)
+    val pb3 = new PokemonBuilder("aLaKaZaM", 65)
+    val pb4 = new PokemonBuilder("gold   EEN", 65)
+    val pb5 = new PokemonBuilder("NIDORANF", 65)
+    // no exceptions == good enough for me
   }
 
   test("create Pokemon, limited health") {

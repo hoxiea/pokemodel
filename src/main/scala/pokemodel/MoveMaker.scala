@@ -1,5 +1,7 @@
 package pokemodel
 
+import scala.util.{Try, Success, Failure}
+
 /*
  * This file handles the creation of move instances (MoveMaker), and provides
  * access to a canonical implementation of each Move (MoveDepot).
@@ -47,10 +49,20 @@ object MoveDepot {
   }
 
   def apply(moveName: String): Move = {
+    // Will automatically add "Register" to the front of the move if the first
+    // attempt fails - useful for solarbeam, thrash, etc.
     val processed = processMoveName(moveName)
-    require(moveNameMap contains processed,
-      s"illegal move name $moveName for MoveDepot")
-    moveNameMap(processed)
+    val attempt = Try(moveNameMap(processed))
+    attempt match {
+      case Success(m) => m
+      case Failure(ex) => {
+        val attempt2 = Try(moveNameMap("register" + processed))
+        attempt2 match {
+          case Success(m) => m
+          case Failure(ex) => throw ex
+        }
+      }
+    }
   }
 
   // Easy way to get maxPP for a move

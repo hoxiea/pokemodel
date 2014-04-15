@@ -32,6 +32,14 @@ STATUS MOVES (any type, don't deal damage directly):
 = Mimic: copy a randomly selected move of the opponent's
 = Substitute: use 25% of maxHP to create a substitute with 1 HP more than the amount of HP lost by the user.  Duplicate the user's current stat modifiers, allow self-modification of stats, but disallow any stat-modifying attacks and side effects of opponent's moves.  Other weird stuff too
 = Transform: change the user's type, stats, stat mods, current moves, and species to that of the target, WSSC
-= MirrorMove: use the last move used by the target, WSSC
 = Rest: restore max HP, fall asleep and awaken two turns after it's used, WSSC
 = Toxic: badly poison, WSSC
+
+
+
+REQUIRE HISTORY
+= MirrorMove: use the last move used by the target, WSSC
+
+= Counter (IMPLEMENTED)
+Priority -1 => go second in the round, then return twice damage dealt from certain types, WSSC
+

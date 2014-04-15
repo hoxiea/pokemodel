@@ -1,7 +1,6 @@
 package pokemodel
 
 import scala.collection.mutable
-import ViolentStruggleType._
 
 /*
  * A WeirdMoveStatusManager handles all of the strange moves that require data structures
@@ -379,7 +378,9 @@ class WeirdMoveStatusManager (b: Battle) {
    * RAGE
    * Rage is a move that lasts until the end of the battle, locking you into the
    * raging Pokemon. Every time you get hit, 
+   * TODO: Finish Rage!
    */
+  def isRaging(p: Pokemon) = false
 
   /*
    * DISABLE
