@@ -280,23 +280,70 @@ class HistoryMoveSuite extends FlatSpec {
   }
 
   it should "be unaffected by switching out and then back in" in {
-    assert(1 == 0)
-  }
+    val f = megaFixture(
+      List(("Charizard", 100), ("Magikarp", 100)), List(("Venusaur", 100)),
+      List(List("Counter"), List("Splash")), List(List("Tackle")))
+    import f._
+    assert(team1.activePokemon.name == "charizard")
 
-  it should "be unaffected by using a multi-turn move if no damage taken in the meantime" in {
-    assert(1 == 0)
+    val tackleRes = team2.useMove(1, team1, battle)  // tackle Charizard
+    assert(team1.activePokemon.currentHP() < team1.activePokemon.maxHP)
+
+    team1.switch(2, battle)
+    assert(team1.activePokemon.name == "magikarp")
+    team1.useMove(1, team2, battle)  // splash splash
+    team1.switch(1, battle)  // charizard back
+    assert(team1.activePokemon.name == "charizard")
+
+    val counterRes = team1.useMove(1, team2, battle)
+    assert(counterRes.numTimesHit == 1)
+    assert(counterRes.rawDamage == tackleRes.damageDealt * 2, "test1")
+    assert(counterRes.damageDealt > 0, "test2")
+    assert(team1.activePokemon.currentHP() < team1.activePokemon.maxHP, "test3")
   }
 
   it should "only use the last hit of a DoubleStrike attack" in {
-    assert(1 == 0)
+    val f = singleMoveFixture(MoveDepot("counter"))
+    import f._
+    
+    val r = MoveDepot("doublekick").use(venusaur, 5, charizard, battle)  // Fighting
+    val counterRes = charizard.useMove(1, venusaur, battle)
+    assert(counterRes.numTimesHit == 1)
+    assert(counterRes.rawDamage == r.damageDealt * 2)  // damageDealt refers to last strike
+    // DoubleStrike on full-health Charizard will hit twice, both same damage
+    // Counter will take one strike, double it, and send it back to Venusaur
+    // So this cute relationship holds:
+    assert(charizard.maxHP - charizard.currentHP() == venusaur.maxHP - venusaur.currentHP())
   }
 
   it should "only use the last hit of a MultiStrike attack" in {
-    assert(1 == 0)
+    val f = singleMoveFixture(MoveDepot("counter"))
+    import f._
+    
+    // same damage each strike, 100% accuracy
+    val r = (new TestPhysicalMultiStrike).use(venusaur, 5, charizard, battle)
+    val t = totalDamageDealt(r)
+    val counterRes = charizard.useMove(1, venusaur, battle)
+    assert(counterRes.damageDealt == 2 * r.damageDealt)
+    if (r.numTimesHit > 2)
+      assert(counterRes.damageDealt < t)
   }
 
-  it should "deal the amount of damage the underlying Pokemon would have taken if damage wasn't absorbed by a sub" in {
-    assert(1 == 0)
+  it should "counter the amount of damage the underlying Pokemon would have taken if damage wasn't absorbed by a sub" in {
+    // We need a Pokemon that knows both Counter AND Substitute
+    val f = fullFixture(100, 100, 
+      List(MoveDepot("counter"), MoveDepot("substitute")), List(MoveDepot("tackle")))
+    import f._
+
+    reduceHPTo(p1, 99)
+    p1.useMove(2, p2, battle) // charizard makes a sub
+    assert(p1.currentHP(false) == 90) // sub has 90 HP
+    assert(p1.currentHP(true) == 10)  // charizard has 10 HP
+
+    val r = p2.useMove(1, p1, battle)  // tackle charizard
+    val counterRes = p1.useMove(1, p2, battle)  // Counter tackle
+    assert(counterRes.numTimesHit == 1)
+    assert(counterRes.damageDealt == 20)
   }
 
   "Bide" should "have priority 1" in {

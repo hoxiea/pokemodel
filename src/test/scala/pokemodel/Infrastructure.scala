@@ -105,13 +105,15 @@ object TestingInfrastructure {
 
 
   /* HELPER FUNCTIONS */
-  def totalDamageDealt(msResult: MoveResult) =
+  def totalDamageDealt(msResult: MoveResult) = {
     // For a MultiStrike move, rawDamage is the value returned by the
     // DamageCalculator, which would ideally be how much damage is dealt
     // numTimesHit times. But MultiStrike moves are designed to stop if they
     // break a sub or KO the opponent. This function tells you how much damage
     // the MultiStrike move whose result is msResult dealt total.
+    require(msResult.numTimesHit > 1)
     (msResult.numTimesHit - 1) * msResult.rawDamage + msResult.damageDealt
+  }
 
   def reduceHPTo(p: Pokemon, newHP: Int) {
     // Quick way to reduce the HP of Pokemon p down to newHP

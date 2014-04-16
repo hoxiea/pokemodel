@@ -6,10 +6,11 @@ class PokemonTeam(val team: List[Pokemon]) {
   def this(singlePokemon: Pokemon) = this(List(singlePokemon))
 
   // activeIndex is what we track/change
-  // it's between 0 and 5, since Lists are 0-indexed in Scala
-  // initialize to first living Pokemon; change later using switch
-  var activeIndex: Int = team.indexWhere(_.currentHP() > 0)
-  def activePokemon: Pokemon = team(activeIndex)
+  // it's between 1 and 6
+  private var activeIndex: Int = 1 + team.indexWhere(_.currentHP() > 0)
+
+  // Since Lists are 0-indexed in Scala, we substract 1 here
+  def activePokemon: Pokemon = team(activeIndex - 1)
 
   def switch(newIndex: Int, pb: Battle) = {
     require(1 <= newIndex && newIndex <= 6, s"PT.switch takes a value between 1 and 6")
@@ -21,7 +22,7 @@ class PokemonTeam(val team: List[Pokemon]) {
     // TODO: process the switching out of the current active Pokemon in all managers/trackers
 
     // Update the index
-    activeIndex = newIndex - 1      // activeIndex is 0-indexed, switch is 1-indexed
+    activeIndex = newIndex
 
     // TODO: process switch-in for the new Pokemon
     activePokemon.takeStatusAilmentDamage()

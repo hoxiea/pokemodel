@@ -368,8 +368,6 @@ trait Recoil extends Move {
 }
 
 
-
-
 trait MultiStrike extends Move {
   /* Hit the opponent 2, 3, 4, or 5 times
    * In Gen 1, the probabilities were (0.375, 0.375, 0.125, 0.125) respectively
