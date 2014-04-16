@@ -214,20 +214,69 @@ class HistoryMoveSuite extends FlatSpec {
     assert(counterRes.dUnderlying == 10, "test3")
   }
 
-  it should "work against a Ghost-type Pokemon that deals Normal damage" in {
-    assert(1 == 0)
+  it should "deal full damage against a Ghost-type Pokemon" in {
+    // The Ghost doesn't actually have to deal the last damage
+    val f = fullFixture(100, 100,
+      List(MoveDepot("counter")), List(),
+      "Charizard", "Gastly")
+    import f._
+
+    // hit charizard with 20HP of Normal damage
+    val res = MoveDepot("sonicboom").use(p2, 5, p1, battle)
+    val counterRes = p1.useMove(1, p2, battle)
+
+    assert(counterRes.numTimesHit == 1)
+    assert(counterRes.rawDamage == res.damageDealt * 2, "test1")
+    assert(counterRes.damageDealt == counterRes.rawDamage, "test2")
+    assert(counterRes.damageDealt > 0, "test3")
+    assert(p2.currentHP() < p2.maxHP, "test4")
   }
 
   it should "use the most recent attack when damaging" in {
-    assert(1 == 0)
+    val f = singleMoveFixture(MoveDepot("counter"))
+    import f._
+
+    MoveDepot("sonicboom").use(venusaur, 5, charizard, battle)
+    val res2 = MoveDepot("tackle").use(venusaur, 5, charizard, battle)
+    val counterRes = charizard.useMove(1, venusaur, battle)
+
+    // make sure the tackle is the one that's countered
+    assert(counterRes.numTimesHit == 1)
+    assert(counterRes.rawDamage == res2.damageDealt * 2, "test1")
+    assert(counterRes.damageDealt > 0, "test2")
+    assert(venusaur.currentHP() < venusaur.maxHP, "test3")
   }
 
   it should "deal the same amount of damage twice in a row if no damage is taken in between" in {
-    assert(1 == 0)
+    val f = singleMoveFixture(MoveDepot("counter"))
+    import f._
+
+    MoveDepot("sonicboom").use(venusaur, 5, charizard, battle)
+    val counterRes1 = charizard.useMove(1, venusaur, battle)
+    val intermedHP = venusaur.currentHP()
+    val counterRes2 = charizard.useMove(1, venusaur, battle)
+    assert(counterRes1.rawDamage == counterRes2.rawDamage, "test1")
+    assert(counterRes1.damageDealt == counterRes2.damageDealt, "test2")
+    assert(intermedHP < venusaur.maxHP, "test3")
+    assert(intermedHP > venusaur.currentHP(), "test4")
   }
 
-  it should "counter recoil damage if that's the most recent damage" in {
-    assert(1 == 0)
+  it should "counter recoil damage if that's the most recent damage TAKEN" in {
+    val f = singleMoveFixture(MoveDepot("counter"))
+    import f._
+
+    val venResult = charizard.useMove(5, venusaur, battle)  // Charizard struggles
+    val intermedHP = venusaur.currentHP()
+    assert(battle.counterMan.lastDamageDealtMR(charizard).isDefined)
+    val charResult = battle.counterMan.lastDamageDealtMR(charizard).get  // Struggle MR
+    assert(charResult.damageDealt == (venResult.damageDealt * 0.5).toInt)
+
+    // Charizard can then Counter the recoil damage it took
+    val counterRes = charizard.useMove(1, venusaur, battle)
+    assert(counterRes.numTimesHit == 1)
+    assert(counterRes.rawDamage == charResult.damageDealt * 2, "test1")
+    assert(counterRes.damageDealt > 0, "test2")
+    assert(venusaur.currentHP() < intermedHP, "test3")
   }
 
   it should "be unaffected by switching out and then back in" in {

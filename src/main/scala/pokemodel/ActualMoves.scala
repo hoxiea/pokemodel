@@ -27,8 +27,7 @@ class Struggle extends PhysicalMove with Recoil with SingleStrike {
       defender: Pokemon,
       pb: Battle,
       mrb: MoveResultBuilder) = {
-    // Don't deduct a PP! Just log it
-    pb.moveManager.updateLastMoveIndex(attacker, index)
+    // Don't deduct a PP! And logging handled elsewhere
     mrb
   }
 }

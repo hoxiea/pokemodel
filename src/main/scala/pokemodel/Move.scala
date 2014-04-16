@@ -324,7 +324,16 @@ trait Recoil extends Move {
    * Substitutes don't absorb recoil damage, so we bypass the substitute. And
    * since we're going to be dealing damage directly to the underlying Pokemon,
    * that's the quantity of HP we need to use to truncate
+   *
+   * Note that Recoil damage needs to count as the last quantity of damage
+   * taken for Counter. Note also that the implementation below assumes that
+   * Recoil damage to the attacker has the same type as the attack that caused
+   * the Recoil. In Gen1, this doesn't matter, since all recoil-causing moves
+   * are either Normal or Fighting, the two types that Counter works against.
+   * But later Gens feature moves of other types that cause Recoil; are those
+   * recoil damages Counter-able? Again, doesn't matter here, but hard to say.
    */
+
   def recoilProportion: Double
 
   abstract override def moveSpecificStuff(
@@ -333,7 +342,7 @@ trait Recoil extends Move {
       pb: Battle,
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
-    val bypassSub = true
+    val bypassSub = true  // Recoil hurts underlying Pokemon
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     result.merge(mrb)  // need to know how much damage was dealt; don't mutate mrb!
     val damageToTake = (result.damageDealt * recoilProportion).toInt min attacker.currentHP(bypassSub)
@@ -343,7 +352,18 @@ trait Recoil extends Move {
       result.selfKO(true)
       assert(!attacker.isAlive)
     }
-    super.moveSpecificStuff(attacker, defender, pb, result)  // already merged
+
+    // result is ready to go and describes the attack done to defender
+    // However, we need to register the attacker-taking-damage with
+    // pb's CounterManager, so that Recoil damage can be countered
+    val cResult = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    cResult.rawDamage(damageToTake)
+    cResult.damageDealt(damageToTake min attacker.currentHP(false))
+    cResult.dUnderlying(damageToTake min attacker.currentHP(true))
+    pb.counterMan.tryToRegisterDamageTaken(attacker, cResult.toMoveResult)
+
+    // With that done, we pass result along for the recoil-inducing attack
+    super.moveSpecificStuff(attacker, defender, pb, result)
   }
 }
 
