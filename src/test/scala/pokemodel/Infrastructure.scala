@@ -28,7 +28,10 @@ object TestingInfrastructure {
     new {
       val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m)
       val charizard = new Pokemon(pb1)
-      val pb2 = new PokemonBuilder("Venusaur", 100).maxOut().move(1, "substitute")
+      val pb2 = new PokemonBuilder("Venusaur", 100).maxOut()
+                    .move(1, "substitute")
+                    .move(2, "tackle")
+                    .move(3, "vinewhip")
       val venusaur = new Pokemon(pb2)
       val team1 = new PokemonTeam(charizard)
       val team2 = new PokemonTeam(venusaur)
@@ -120,4 +123,13 @@ object TestingInfrastructure {
   /* STUFF FOR RANDOM TESTING VIA SCALACHECK */
   val pokemonLevel = Gen.choose(5,100)   // inclusive on both ends
   val pokemonIndex = Gen.choose(1,150)   // inclusive on both ends
+
+  val randomMove = for {
+    moveIndex <- Gen.choose(1, 165)
+  } yield MoveDepot(moveIndex)
+
+  val randomPokemon = for {
+    i <- Gen.choose(1, 150)  // pokemonIndex
+    l <- Gen.choose(1, 100)  // level
+  } yield new Pokemon(new PokemonBuilder(i, l).maxOut().addRandomMoves()) 
 }
