@@ -146,9 +146,23 @@ abstract class Move {
       pb: Battle,
       mrb: MoveResultBuilder): MoveResultBuilder = {
 
-    pb.moveManager.updateLastMoveIndex(attacker, index)
     attacker.deductPP(attackerMoveSlot)
     mrb
+  }
+
+  /* Function called after move-specific stuff happens
+   * This is nice because it gets the MRB from moveSpecificStuff and can
+   * piggyback onto it even further if it wants to.
+   * But by default, it just passed along what it received, to be converted
+   * into a MoveResult and returned by 'use' below
+   */
+  def registerMove(
+      attacker: Pokemon,
+      attackerMoveSlot: Int,
+      defender: Pokemon,
+      pb: Battle,
+      mr: MoveResult) {
+    pb.counterMan.tryToRegisterDamageTaken(defender, mr)
   }
 
   final def use(
@@ -160,7 +174,9 @@ abstract class Move {
     startUsingMove(attacker, attackerMoveSlot, defender, pb)
     val mssMRB = moveSpecificStuff(attacker, defender, pb, mrb)
     val fumMRB = finishUsingMove(attacker, attackerMoveSlot, defender, pb, mssMRB)
-    fumMRB.toMoveResult
+    val finalResult = fumMRB.toMoveResult
+    registerMove(attacker, attackerMoveSlot, defender, pb, finalResult)
+    finalResult
   }
 
   override def toString() = {
@@ -221,46 +237,6 @@ class StatusMove extends Move {
 }
 
 
-/*
- * These allow you to change the type of a move on the fly. For example,
- * val m1 = new TestPhysicalSingleStrike with Electric
- * val m2 = new TestPhysicalSingleStrike with PsychicT
- * Very useful for testing effectivenesses, etc.
- */
-trait Normal extends Move   { override val type1 = Normal }
-trait Fighting extends Move { override val type1 = Fighting }
-trait Flying extends Move   { override val type1 = Flying }
-trait Poison extends Move   { override val type1 = Poison }
-trait Ground extends Move   { override val type1 = Ground }
-trait Rock extends Move     { override val type1 = Rock }
-trait Bug extends Move      { override val type1 = Bug }
-trait Ghost extends Move    { override val type1 = Ghost }
-trait Fire extends Move     { override val type1 = Fire }
-trait Water extends Move    { override val type1 = Water }
-trait Grass extends Move    { override val type1 = Grass }
-trait Electric extends Move { override val type1 = Electric }
-trait PsychicT extends Move  { override val type1 = Psychic }  // avoid conflict with move Psychic
-trait Ice extends Move      { override val type1 = Ice }
-trait Dragon extends Move   { override val type1 = Dragon }
-
-// Likewise, handy ways to change the base power on the fly
-trait Power40 extends Move  { override val power = 40 }
-trait Power80 extends Move  { override val power = 80 }
-trait Power120 extends Move { override val power = 120 }
-trait Power160 extends Move { override val power = 160 }
-trait Power200 extends Move { override val power = 200 }
-
-// Quick way to get more critical hits, for testing purposes
-trait NeverCritHit extends Move  { override val critHitRate = NEVER }
-trait HighCritHit extends Move   { override val critHitRate = HIGH }
-trait AlwaysCritHit extends Move { override val critHitRate = ALWAYS }
-
-// High priority, for testing purposes
-trait Priority1 extends Move  { override val priority = 1 }
-trait Priority2 extends Move  { override val priority = 2 }
-
-// Super useful for Metronome
-trait PriorityNormal extends Move  { override val priority = 0 }
 
 
 /* Next, capture common behaviors of Moves - damage, stats, status, etc. */
@@ -280,7 +256,8 @@ trait SingleStrike extends Move {
 
     def statusAilmentSituationOK: Boolean =
       requiredNVSAs.isEmpty ||
-      defender.statusAilment.isDefined && requiredNVSAs.contains(defender.statusAilment.get)
+      defender.statusAilment.isDefined &&
+      requiredNVSAs.contains(defender.statusAilment.get)
 
     if (pb.moveHits(attacker, defender, this) && statusAilmentSituationOK) {
       val result = pb.dc.calc(attacker, defender, this, pb)
@@ -322,12 +299,14 @@ trait ConstantDamage extends Move {
     // Add the effects of hitting if necessary
     if (pb.moveHits(attacker, defender, this)) {
 
-      result.rawDamage(damageAmount)
       val damageToDeal = damageAmount min defender.currentHP()
+      val dUnderlying  = damageAmount min defender.currentHP(true)
       val damageResult = defender.takeDamage(damageToDeal)
 
       result.numTimesHit(1)
+      result.rawDamage(damageAmount)
       result.damageDealt(damageToDeal)
+      result.dUnderlying(dUnderlying)
 
       // no crithits, STAB, moveType, typeMult, statusChange, statChange
       result.processTakeDamageResult(defender, damageResult)
@@ -849,13 +828,16 @@ trait DamageEqualsUserLevel extends Move {
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if (pb.moveHits(attacker, defender, this)) {
-      val damageToDeal = attacker.level min defender.currentHP()
+      val rawDamage = attacker.level
+      val damageToDeal = rawDamage min defender.currentHP()
+      val dUnderlying = rawDamage min defender.currentHP(true)
       val damageResult = defender.takeDamage(damageToDeal)
 
       // Build an MRB from scratch
-      result.rawDamage(attacker.level)
       result.numTimesHit(1)
+      result.rawDamage(rawDamage)
       result.damageDealt(damageToDeal)
+      result.dUnderlying(dUnderlying)
       // no hpGained, critHit, STAB, typeMult, nvsa, vsa, stat changes
       result.processTakeDamageResult(defender, damageResult)
     }
@@ -891,7 +873,9 @@ trait SuicideDamage extends Move {
     if (pb.moveHits(attacker, defender, this)) {
       val dcResult = pb.dc.calc(attacker, defender, this, pb)
       result.merge(dcResult)
-      val damageResult = defender.takeDamage(result.damageDealt)
+
+      val damageToDeal = dcResult.damageDealt
+      val damageResult = defender.takeDamage(damageToDeal)
       result.processTakeDamageResult(defender, damageResult)
       // numTimesHit == 1, no hpGained, no statusAilments, no stat changes
     }
