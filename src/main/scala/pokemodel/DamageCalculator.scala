@@ -46,9 +46,15 @@ class DamageCalculator {
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
       result.rawDamage(chd)
 
-      // Calculate how much damage the Pokemon should actually deal - MRB.damageDealt
-      val damageToDeal = chd min defender.currentHP()
+      // Calculate how much damage the hit should actually deal - MRB.damageDealt
+      val damageToDeal = chd min defender.currentHP(false)
       result.damageDealt(damageToDeal)
+
+      // Calculate how much damage the hit would deal:
+      // - If $defender has a sub, to the underlying Pokemon
+      // - If $defender lacks a sub, to $defender
+      val damageUnderlying = chd min defender.currentHP(true)  // bypass sub
+      result.dUnderlying(damageUnderlying)
 
       result
 
@@ -60,6 +66,12 @@ class DamageCalculator {
       // Calculate how much damage the Pokemon should actually deal - MRB.damageDealt
       val damageToDeal = rhd min defender.currentHP()
       result.damageDealt(damageToDeal)
+
+      // Calculate how much damage the hit would deal:
+      // - If $defender has a sub, to the underlying Pokemon
+      // - If $defender lacks a sub, to $defender
+      val damageUnderlying = rhd min defender.currentHP(true)  // bypass sub
+      result.dUnderlying(damageUnderlying)
 
       result
     }
