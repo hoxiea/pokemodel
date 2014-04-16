@@ -134,7 +134,7 @@ Number, Name, Type, Category, Contest, PP, Power, Accuracy, Weird
 133, Amnesia, Psychic, Status, Cute, 20, NA, NA, False
 134, Kinesis, Psychic, Status, Smart, 15, NA, 80%, False
 135, Soft-Boiled, Normal, Status, Beauty, 10, NA, NA, False
-136, High Jump Kick, Fighting, Physical, Cool, 10, 130, 90%, True
+136, Hi Jump Kick, Fighting, Physical, Cool, 10, 130, 90%, True
 137, Glare, Normal, Status, Tough, 30, NA, 100%, True
 138, Dream Eater, Psychic, Special, Smart, 15, 100, 100%, False
 139, Poison Gas, Poison, Status, Smart, 40, NA, 90%, True

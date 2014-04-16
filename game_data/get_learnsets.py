@@ -14,7 +14,7 @@ NUM_MOVES = 165
 #   Charmander_(Pok%C3%A9mon)/Generation_I_learnset
 # But of course, that's only for Charmander. So let's get a list of Pokemon
 # names to use
-pokemon = dict()
+pokemon = dict()   # pokemon_index: Int -> pokemon_name: String
 pokemon_file = open("base_stats_types.csv")
 for line in pokemon_file:
     if line.startswith("Number"):
@@ -40,11 +40,11 @@ def standardize(s):
     return s.replace(" ", "").replace("-", "").lower()
 
 
-movename_to_num = dict()
+movename_to_num = dict()  # moveName: String -> moveIndex: Int
 move_file = open("moves.csv")
 for line in move_file:
     if line.startswith("Number"):
-        continue
+        continue  # skip first line
     line = line.strip().split(", ")
     move_index = int(line[0])
     move_name = line[1]
@@ -87,7 +87,13 @@ for index in pokemon:
     # 3. Instead, let's group the entries, drop the ones from Pokemon Yellow,
     # and then grab the remaining moves
     not_yellow = [entry for entry in grouped if not entry[0].endswith("Y")]
-    moves = [standardize(entry[1]) for entry in not_yellow
+
+    # fix a problem that Vaporean == 106 was having
+    valid_starts = ("T", "H", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+    valid = [entry for entry in not_yellow
+             if entry[0].startswith(valid_starts)]
+
+    moves = [standardize(entry[1]) for entry in valid
              if entry[1] is not None]
     moves = list(set(moves))    # get rid of duplicates
     try:
@@ -104,7 +110,8 @@ assert len(learnset) == 151
 
 
 def format_learnset(ls):
-    string_array = ["{0}|{1}".format(item[0], str(item[1])) for item in ls]
+    string_array = ["{0}|{1}".format(item[0], str(item[1])).decode("utf-8")
+                    for item in ls]
     return ", ".join(string_array)
 
 
@@ -112,4 +119,5 @@ learnset_file = open("learnsets.csv", "w")
 for index in learnset:
     s = str(index) + ": " + format_learnset(learnset[index])
     learnset_file.write(s + "\n")
+    print "Done with {0}".format(index)
 learnset_file.close()
