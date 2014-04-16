@@ -2,10 +2,13 @@ package pokemodel
 
 import org.scalatest._
 import TestingInfrastructure._
+import Type._
+
+import org.scalacheck._
 
 /*
- * This file contains tests for the three moves that rely on former Battle
- * history: MirrorMove, Counter, and Bide.
+ * This file contains deterministic tests for the three moves that rely on
+ * former Battle history: MirrorMove, Counter, and Bide.
  */
 
 class HistoryMoveSuite extends FlatSpec {
@@ -21,9 +24,9 @@ class HistoryMoveSuite extends FlatSpec {
 
   it should "fail if used after a new Pokemon has switched in" in {
     val f = megaFixture(
-      List(("Fearow", 100)), 
-      List(("Venusaur", 80), ("Machamp", 75)), 
-      List(List("MirrorMove")), 
+      List(("Fearow", 100)),
+      List(("Venusaur", 80), ("Machamp", 75)),
+      List(List("MirrorMove")),
       List(List("RegisterSolarbeam", "VineWhip"), List("KarateChop", "SeismicToss"))
     )
     import f._
@@ -42,7 +45,7 @@ class HistoryMoveSuite extends FlatSpec {
   }
 
   it should "succeed in the simplest case possible: DragonRage first, MM second" in {
-    val f = fullFixture(100, 100, 
+    val f = fullFixture(100, 100,
       List(MoveDepot("mirrormove")), List(MoveDepot("dragonrage")),
       "Fearow", "Dragonite")
     import f._
@@ -50,25 +53,165 @@ class HistoryMoveSuite extends FlatSpec {
     // vals: team1/team2, trainer1/trainer2, battle
     team2.useMove(1, team1, battle)               // Dragonite uses DragonRage
     val result = team1.useMove(1, team2, battle)  // Fearow uses MirrorMove
-    println(result)
     assert(p2.currentHP() < p2.maxHP)
   }
 
+  private def counterFailed(mr: MoveResult): Boolean = {
+    mr.numTimesHit == 0 &&
+    mr.rawDamage == 0 &&
+    mr.damageDealt == 0 &&
+    mr.dUnderlying == 0
+  }
 
   "Counter" should "fail if no damage was previously dealt to the user" in {
-    assert(1 == 0)
+    val f = fullFixture(100, 100,
+      List(MoveDepot("counter")),
+      List(MoveDepot("Growl"), MoveDepot("SwordsDance"), MoveDepot("Growth"))
+    )
+    import f._
+
+    // use a bunch of non-damaging moves
+    p2.useMove(1, p1, battle)
+    p2.useMove(2, p1, battle)
+    p2.useMove(3, p1, battle)
+
+    val result = p1.useMove(1, p2, battle) // use Counter
+    assert(counterFailed(result))
   }
 
   it should "fail if the previous damage dealt wasn't Normal- or Fighting-type damage" in {
-    assert(1 == 0)
+    val f = fullFixture(100, 100, List(MoveDepot("counter")), List(MoveDepot("VineWhip")))
+    import f._
+    p2.useMove(1, p1, battle)
+    assert(battle.counterMan.lastDamageDealtMR(p1).isDefined) // has a damage history, but wrong type
+    val result = p1.useMove(1, p2, battle) // use Counter
+    assert(counterFailed(result))
   }
 
   it should "deal twice the damage received if damage received was Normal-type" in {
-    assert(1 == 0)
+    val f = fullFixture(100, 100, List(MoveDepot("counter")), List(MoveDepot("tackle")))
+    import f._
+    val tackleResult = p2.useMove(1, p1, battle)
+    assert(battle.counterMan.lastDamageDealtMR(p1).isDefined)
+    assert(battle.counterMan.lastDamageDealtMR(p1).get == tackleResult)
+    assert(tackleResult.moveType == Normal)
+
+    val result = p1.useMove(1, p2, battle) // use Counter
+    assert(result.numTimesHit == 1)
+    assert(result.damageDealt == 2 * tackleResult.damageDealt)
+    assert(p2.currentHP() < p2.maxHP)
   }
 
   it should "deal twice the damage received if damage received was Fighting-type" in {
-    assert(1 == 0)
+    val f = fullFixture(100, 100,
+      List(MoveDepot("counter")), List(MoveDepot("seismictoss")),
+      "Charizard", "Mankey")
+    import f._
+
+    val stResult = p2.useMove(1, p1, battle)
+    assert(battle.counterMan.lastDamageDealtMR(p1).isDefined)
+    assert(battle.counterMan.lastDamageDealtMR(p1).get == stResult)
+    assert(stResult.moveType == Fighting)
+
+    val result = p1.useMove(1, p2, battle) // use Counter
+    assert(result.numTimesHit == 1)
+    assert(result.damageDealt == 2*stResult.damageDealt, "Counter damageDealt")
+    assert(p2.currentHP() < p2.maxHP)
+  }
+
+  it should "work against Struggle" in {
+    val f = singleMoveFixture(MoveDepot("counter"))
+    import f._
+
+    val struggleRes = venusaur.useMove(5, charizard, battle)
+    assert(battle.counterMan.lastDamageDealtMR(charizard).isDefined)
+    assert(battle.counterMan.lastDamageDealtMR(charizard).get == struggleRes)
+
+    val counterRes = charizard.useMove(1, venusaur, battle)
+    assert(counterRes.damageDealt > 0)
+    assert(counterRes.numTimesHit == 1)
+  }
+
+  it should "work against HiJumpKick" in {
+    val f = fullFixture(100, 100,
+      List(MoveDepot("counter")), List(MoveDepot("hijumpkick")),
+      "Charizard", "Hitmonlee")
+    import f._
+
+    val hjRes = p2.useMove(1, p1, battle)
+    assert(battle.counterMan.lastDamageDealtMR(p1).isDefined)
+    assert(battle.counterMan.lastDamageDealtMR(p1).get == hjRes)
+
+    val counterRes = p1.useMove(1, p2, battle)
+    assert(counterRes.rawDamage == hjRes.damageDealt * 2)
+    assert(counterRes.rawDamage >= counterRes.damageDealt)
+    assert(counterRes.numTimesHit == 1)
+  }
+
+  it should "work against Strength" in {
+    val f = fullFixture(100, 100,
+      List(MoveDepot("counter")), List(MoveDepot("Strength")),
+      "Charizard", "Rhyhorn")
+    import f._
+
+    val res = p2.useMove(1, p1, battle)
+    assert(battle.counterMan.lastDamageDealtMR(p1).isDefined)
+    assert(battle.counterMan.lastDamageDealtMR(p1).get == res)
+
+    val counterRes = p1.useMove(1, p2, battle)
+    assert(counterRes.rawDamage == res.damageDealt * 2)
+    assert(counterRes.rawDamage >= counterRes.damageDealt)
+    assert(counterRes.numTimesHit == 1)
+  }
+
+  it should "get its MRB damage values correct if defender has low HP" in {
+    val f = fullFixture(100, 100,
+      List(MoveDepot("counter")), List(MoveDepot("Strength")),
+      "Charizard", "Rhyhorn")
+    import f._
+    val enemyHP = 20
+    reduceHPTo(p2, enemyHP)
+
+    val res = p2.useMove(1, p1, battle)
+    val counterRes = p1.useMove(1, p2, battle)
+    assert(counterRes.numTimesHit == 1)
+    assert(counterRes.rawDamage == res.damageDealt * 2)
+    assert(counterRes.damageDealt == enemyHP)
+    assert(counterRes.dUnderlying == enemyHP)
+  }
+
+  it should "get its MRB damage values correct if defender's sub is broken" in {
+    val f = subFixture(MoveDepot("counter"))
+    import f._
+    val pokHP = 10
+    val subHP = 20
+    reduceHPTo(venusaur, subHP)  // actually detracts from sub
+    assert(venusaur.currentHP() == subHP)
+    assert(venusaur.currentHP(true) == pokHP)  // from subFixture
+
+    val res = venusaur.useMove(2, charizard, battle)  // move2 is tackle
+    val counterRes = charizard.useMove(1, venusaur, battle)
+    assert(counterRes.numTimesHit == 1)
+    assert(counterRes.subKO)
+    assert(!counterRes.KO)
+    assert(counterRes.rawDamage == res.damageDealt * 2)
+    assert(counterRes.damageDealt == subHP)
+    assert(counterRes.dUnderlying == pokHP)
+  }
+
+  it should "get its MRB damage values correct if defender's sub isn't broken" in {
+    val f = subFixture(MoveDepot("counter"))
+    import f._
+
+    // hit charizard with 20HP of Normal damage
+    val res = MoveDepot("sonicboom").use(venusaur, 5, charizard, battle)
+    val counterRes = charizard.useMove(1, venusaur, battle)
+    assert(counterRes.numTimesHit == 1)
+    assert(!counterRes.subKO, "subKO")
+    assert(!counterRes.KO, "KO")
+    assert(counterRes.rawDamage == res.damageDealt * 2, "test1")
+    assert(counterRes.damageDealt == counterRes.rawDamage, "test2")
+    assert(counterRes.dUnderlying == 10, "test3")
   }
 
   it should "work against a Ghost-type Pokemon that deals Normal damage" in {
@@ -111,7 +254,7 @@ class HistoryMoveSuite extends FlatSpec {
     val m = MoveDepot("Bide")
     assert(m.priority == 1)
   }
-  
+
   it should "cause the user to be registered with the BideManager if not already registered" in {
     assert(false)
   }
@@ -119,7 +262,7 @@ class HistoryMoveSuite extends FlatSpec {
   it should "cause a PP to be deducted immediately" in {
     assert(false)
   }
-  
+
   it should "cause no more than 1 PP to be deducted if you continue moving towards attack" in {
     assert(false)
   }
@@ -135,4 +278,59 @@ class HistoryMoveSuite extends FlatSpec {
   it should "be able to hit a Digging Pokemon" in {
     assert(false)
   }
+}
+
+object CounterSpec extends Properties("Counter") {
+  import Prop.{forAll, BooleanOperators}
+
+  property("Counter should deal 2x damage back against Normal damaging move") = {
+    forAll(randomMove) {
+      m => {
+        (m.type1 == Normal) ==> {
+          val opponentWhoCanLearnM: Int = LearnsetData.getPokemonIndexWhoCanLearn(m.index)
+          val f = fullFixture(
+            100, 100,
+            List(MoveDepot("counter")), List(m),
+            "Charizard", PokeData.idToName(opponentWhoCanLearnM))
+          import f._
+
+          val enemyResult = p2.useMove(1, p1, battle)
+          (battle.counterMan.lastDamageDealtMR(p1).isDefined)
+          if (p1.isAlive && p2.isAlive) {  // it was failing on Explosion, since p2 was dead
+            val result = p1.useMove(1, p2, battle) // Counter the Normal move
+            if (enemyResult.damageDealt > 0)
+              (result.damageDealt == enemyResult.damageDealt * 2)
+            else
+              (result.damageDealt == 0)
+          } else (1 == 1)
+        }
+      }
+    }
+  }
+
+  // property("Counter should deal 2x damage back against Fighting damaging move") = {
+  //   forAll(randomMove) {
+  //     m => {
+  //       (m.type1 == Fighting) ==> {
+  //         val opponentWhoCanLearnM: Int = LearnsetData.getPokemonIndexWhoCanLearn(m.index)
+  //         val f = fullFixture(
+  //           100, 100,
+  //           List(MoveDepot("counter")), List(m),
+  //           "Charizard", PokeData.idToName(opponentWhoCanLearnM))
+  //         import f._
+
+  //         val enemyResult = p2.useMove(1, p1, battle)
+  //         (battle.counterMan.lastDamageDealtMR(p1).isDefined)
+  //         if (p1.isAlive && p2.isAlive) {  // it was failing on Explosion, since p2 was dead
+  //           val result = p1.useMove(1, p2, battle) // Counter the Fighting move
+  //           if (enemyResult.damageDealt > 0)
+  //             (result.damageDealt == enemyResult.damageDealt * 2)
+  //           else
+  //             (result.damageDealt == 0)
+  //         } else (1 == 1)
+  //       }
+  //     }
+  //   }
+  // }
+
 }
