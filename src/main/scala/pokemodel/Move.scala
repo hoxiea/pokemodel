@@ -98,7 +98,6 @@ import Battle.{verbose=>VERBOSE}
 abstract class Move {
   val index : Int                // in 1 .. 165, plus Test Moves
   val type1 : Type.Value         // moves only have 1 type
-  val moveType : MoveType.Value  // PHYSICAL, SPECIAL, or STATUS
   val power : Int                // base power of the move
   val maxPP : Int
 
@@ -202,7 +201,6 @@ class PhysicalMove extends Move {
   override val type1 = Normal
   override val power = 0
   override val maxPP = 0
-  override val moveType = PHYSICALMOVE
   override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
@@ -215,7 +213,6 @@ class SpecialMove extends Move {
   override val type1 = Normal
   override val power = 0
   override val maxPP = 0
-  override val moveType = SPECIALMOVE
   override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,
@@ -228,7 +225,6 @@ class StatusMove extends Move {
   override val type1 = Normal
   override val power = 0
   override val maxPP = 0
-  override val moveType = STATUSMOVE
   override def moveSpecificStuff(
     attacker: Pokemon,
     defender: Pokemon,

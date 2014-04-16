@@ -42,11 +42,11 @@ class DamageCalculator {
       // CRITICAL HIT
       result.critHit(true)
 
-      // Calculate how much the critical hit could do - MRB.rawDamage
+      // Calculate #damage the critical hit could do - MRB.rawDamage
       val chd = calcCriticalHitDamage(attacker, defender, move, battle)
       result.rawDamage(chd)
 
-      // Calculate how much damage the hit should actually deal - MRB.damageDealt
+      // Calculate #damage the hit should actually deal - MRB.damageDealt
       val damageToDeal = chd min defender.currentHP(false)
       result.damageDealt(damageToDeal)
 
@@ -59,11 +59,11 @@ class DamageCalculator {
       result
 
     } else {
-      // Calculate how much the regular hit could do - MRB.rawDamage
+      // Calculate #damage the regular hit could do - MRB.rawDamage
       val rhd = calcRegularHitDamage(attacker, defender, move, battle)
       result.rawDamage(rhd)
 
-      // Calculate how much damage the Pokemon should actually deal - MRB.damageDealt
+      // Calculate #damage the Pokemon should actually deal - MRB.damageDealt
       val damageToDeal = rhd min defender.currentHP()
       result.damageDealt(damageToDeal)
 
@@ -149,21 +149,28 @@ class DamageCalculator {
     battle: Battle): Int = {
 
     // http://bulbapedia.bulbagarden.net/wiki/Damage_modification#Damage_formula
-    val effectiveAttack = move.moveType match {
-      case PHYSICALMOVE => battle.statManager.getEffectiveAttack(attacker)
-      case SPECIALMOVE  => battle.statManager.getEffectiveSpecialAttack(attacker)
-      case STATUSMOVE   => throw new Exception("A Status move called calcRegularHitDamage!")
+    val effectiveAttack = move match {
+      case (_: PhysicalMove) =>
+        battle.statManager.getEffectiveAttack(attacker)
+      case (_: SpecialMove) =>
+        battle.statManager.getEffectiveSpecialAttack(attacker)
+      case (_: StatusMove)  =>
+        throw new Exception("A Status move called calcRegularHitDamage!")
     }
 
-    val effectiveDefense = move.moveType match {
-      case PHYSICALMOVE => battle.statManager.getEffectiveDefense(defender, battle)
-      case SPECIALMOVE  => battle.statManager.getEffectiveSpecialDefense(defender, battle)
-      case STATUSMOVE   => throw new Exception("A Status move called calcRegularHitDamage!")
+    val effectiveDefense = move match {
+      case (_: PhysicalMove) =>
+        battle.statManager.getEffectiveDefense(defender, battle)
+      case (_: SpecialMove) =>
+        battle.statManager.getEffectiveSpecialDefense(defender, battle)
+      case (_: StatusMove) =>
+          throw new Exception("A Status move called calcRegularHitDamage!")
     }
 
     val STAB = stabBonus(attacker, move)
     val typeMod = calculateTypeMultiplier(move.type1, defender)
-    damageFormula(attacker.level, effectiveAttack, effectiveDefense, move.power, STAB, typeMod)
+    damageFormula(attacker.level, effectiveAttack, effectiveDefense, move.power,
+        STAB, typeMod)
   }
 
   private def calcCriticalHitDamage(
@@ -178,15 +185,17 @@ class DamageCalculator {
      * - Ignore halved attack from BRN
      * - Ignore all stat mods, even beneficial ones, for both Pokemon
      */
-    val attack = move.moveType match {
-      case PHYSICALMOVE => attacker.attack
-      case SPECIALMOVE  => attacker.special
-      case STATUSMOVE   => throw new Exception("A Status move called calcCriticalHitDamage!")
+    val attack = move match {
+      case (_: PhysicalMove) => attacker.attack
+      case (_: SpecialMove) => attacker.special
+      case (_: StatusMove) =>
+        throw new Exception("A Status move called calcCriticalHitDamage!")
     }
-    val defense = move.moveType match {
-      case PHYSICALMOVE => defender.defense
-      case SPECIALMOVE  => defender.special
-      case STATUSMOVE   => throw new Exception("A Status move called calcCriticalHitDamage!")
+    val defense = move match {
+      case (_: PhysicalMove) => defender.defense
+      case (_: SpecialMove) => defender.special
+      case (_: StatusMove) =>
+        throw new Exception("A Status move called calcCriticalHitDamage!")
     }
     val STAB = stabBonus(attacker, move)
     val typeMod = calculateTypeMultiplier(move.type1, defender)
