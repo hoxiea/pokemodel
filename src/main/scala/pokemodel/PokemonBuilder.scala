@@ -180,7 +180,7 @@ class PokemonBuilder (val index: Int, val level: Int) {
       "must have 1 <= pokemonMoveIndex <= 4 in PBuilder.move()")
     require(LearnsetData.learnsets(index).contains(m.index)
             || m.index == 999     // 999 -> test move
-            || m.index == 165     // Struggle, useful for testing + everyone can learn
+            // || m.index == 165     // Struggle, useful for testing + everyone can learn
             || m.toString.contains("$$"), // mixing in traits seems to change the name
             s"$name can't learn $m")
     pokemonMoveIndex match {
