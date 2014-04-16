@@ -8,7 +8,7 @@ object TestingInfrastructure {
   trait Accuracy50 extends Move {override val accuracy = 0.50}
   trait Accuracy30 extends Move {override val accuracy = 0.30}
   trait Accuracy10 extends Move {override val accuracy = 0.10}
-  
+
   def singleMoveFixture(m: Move) =
     new {
       val pb1 = new PokemonBuilder("Charizard", 100).maxOut().move(1, m)
@@ -38,13 +38,13 @@ object TestingInfrastructure {
       val trainer1 = new UseFirstAvailableMove(team1)
       val trainer2 = new UseFirstAvailableMove(team2)
       val battle = new Battle(trainer1, trainer2)
-      
+
       // get the sub ready to go
       // 363/4 == 90 == cost of making a substitute
       // So get it to 100 HP, then make sub => sub has 91 HP, venusaur has 10 HP
       val maxHP = 363
       val newHP = 100
-      assert(venusaur.maxHP == maxHP)  
+      assert(venusaur.maxHP == maxHP)
       reduceHPTo(venusaur, newHP)
       venusaur.makeSub()
       assert(venusaur.hasSub)
@@ -82,7 +82,7 @@ object TestingInfrastructure {
     pb.learnMoves(combined._2)
     new Pokemon(pb)
   }
-  
+
   def megaFixture(
     p1Info: List[(String, Int)],  // (pokemonName, level)
     p2Info: List[(String, Int)],  // (pokemonName, level)
@@ -133,5 +133,5 @@ object TestingInfrastructure {
   val randomPokemon = for {
     i <- Gen.choose(1, 150)  // pokemonIndex
     l <- Gen.choose(1, 100)  // level
-  } yield new Pokemon(new PokemonBuilder(i, l).maxOut().addRandomMoves()) 
+  } yield new Pokemon(new PokemonBuilder(i, l).maxOut().addRandomMoves())
 }

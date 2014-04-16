@@ -138,14 +138,16 @@ class HistoryMoveSuite extends FlatSpec {
       "Charizard", "Hitmonlee")
     import f._
 
-    val hjRes = p2.useMove(1, p1, battle)
-    assert(battle.counterMan.lastDamageDealtMR(p1).isDefined)
-    assert(battle.counterMan.lastDamageDealtMR(p1).get == hjRes)
-
+    val hjRes = p2.useMove(1, p1, battle)  // 90% accuracy
     val counterRes = p1.useMove(1, p2, battle)
+    if (hjRes.numTimesHit == 1) {
+      assert(battle.counterMan.lastDamageDealtMR(p1).isDefined)
+      assert(battle.counterMan.lastDamageDealtMR(p1).get == hjRes)
+      assert(counterRes.numTimesHit == 1)
+    }
+
     assert(counterRes.rawDamage == hjRes.damageDealt * 2)
     assert(counterRes.rawDamage >= counterRes.damageDealt)
-    assert(counterRes.numTimesHit == 1)
   }
 
   it should "work against Strength" in {
@@ -206,12 +208,13 @@ class HistoryMoveSuite extends FlatSpec {
     // hit charizard with 20HP of Normal damage
     val res = MoveDepot("sonicboom").use(venusaur, 5, charizard, battle)
     val counterRes = charizard.useMove(1, venusaur, battle)
-    assert(counterRes.numTimesHit == 1)
-    assert(!counterRes.subKO, "subKO")
-    assert(!counterRes.KO, "KO")
-    assert(counterRes.rawDamage == res.damageDealt * 2, "test1")
-    assert(counterRes.damageDealt == counterRes.rawDamage, "test2")
-    assert(counterRes.dUnderlying == 10, "test3")
+    if (res.numTimesHit == 1) {  // SonicBoom has 90% accuracy
+      assert(counterRes.dUnderlying == 10, "test1")
+    }  
+    assert(!counterRes.subKO, "test2")
+    assert(!counterRes.KO, "test3")
+    assert(counterRes.rawDamage == res.damageDealt * 2, "test4")    // true hit or miss
+    assert(counterRes.damageDealt == counterRes.rawDamage, "test5") // true hit or miss
   }
 
   it should "deal full damage against a Ghost-type Pokemon" in {
@@ -225,11 +228,12 @@ class HistoryMoveSuite extends FlatSpec {
     val res = MoveDepot("sonicboom").use(p2, 5, p1, battle)
     val counterRes = p1.useMove(1, p2, battle)
 
-    assert(counterRes.numTimesHit == 1)
-    assert(counterRes.rawDamage == res.damageDealt * 2, "test1")
-    assert(counterRes.damageDealt == counterRes.rawDamage, "test2")
-    assert(counterRes.damageDealt > 0, "test3")
-    assert(p2.currentHP() < p2.maxHP, "test4")
+    if (counterRes.numTimesHit == 1) {  // 90% accuracy
+      assert(counterRes.damageDealt > 0, "test1")
+      assert(p2.currentHP() < p2.maxHP, "test2")
+    }
+    assert(counterRes.rawDamage == res.damageDealt * 2, "test3")
+    assert(counterRes.damageDealt == counterRes.rawDamage, "test4")
   }
 
   it should "use the most recent attack when damaging" in {
@@ -251,7 +255,7 @@ class HistoryMoveSuite extends FlatSpec {
     val f = singleMoveFixture(MoveDepot("counter"))
     import f._
 
-    MoveDepot("sonicboom").use(venusaur, 5, charizard, battle)
+    (new TestConstant20).use(venusaur, 5, charizard, battle)
     val counterRes1 = charizard.useMove(1, venusaur, battle)
     val intermedHP = venusaur.currentHP()
     val counterRes2 = charizard.useMove(1, venusaur, battle)

@@ -54,6 +54,17 @@ class TestPhysicalSingleStrike extends PhysicalMove with SingleStrike {
 }
 
 // CONSTANT DAMAGE
+class TestConstant20 extends PhysicalMove with ConstantDamage {
+  override val index = 999
+  override val maxPP = 20
+  override def damageAmount = 20
+}
+
+class TestConstant40 extends PhysicalMove with ConstantDamage {
+  override val index = 999
+  override val maxPP = 40
+  override def damageAmount = 40
+}
 
 // MULTI STRIKE
 class TestPhysicalMultiStrike extends PhysicalMove with MultiStrike {
