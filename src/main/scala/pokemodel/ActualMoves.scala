@@ -1,7 +1,6 @@
 package pokemodel
 
 import Type._
-import MoveType._
 import BattleStat._
 import TakeDamageResult._
 import CritHitType._

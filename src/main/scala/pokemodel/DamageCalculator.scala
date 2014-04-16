@@ -2,7 +2,6 @@ package pokemodel
 
 import scala.util.Random
 import CritHitType._
-import MoveType._
 import Battle.{verbose=>VERBOSE}
 
 class DamageCalculator {
@@ -25,7 +24,7 @@ class DamageCalculator {
    * correct value for damageDealt is the way to go
    */
 
-  def calc(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle): MoveResultBuilder = {
+  def calc(attacker: Pokemon, defender: Pokemon, move: Move, battle: Battle) = {
     // The key method, through which all damages are calculated
     // Returns a partially-completed MoveResultBuilder
 
@@ -33,52 +32,32 @@ class DamageCalculator {
 
     val result = new MoveResultBuilder()
                     .moveIndex(move.index)
-                    .numTimesHit(1)  // misses and multistrikes can mutate this
+                    .numTimesHit(1)  // misses and multistrikes can change
                     .STAB(stabBonus(attacker, move) == 1.5)
                     .moveType(move.type1)
                     .typeMult(calculateTypeMultiplier(move.type1, defender))
 
-    if (Random.nextDouble < criticalChance) {
-      // CRITICAL HIT
-      result.critHit(true)
-
-      // Calculate #damage the critical hit could do - MRB.rawDamage
-      val chd = calcCriticalHitDamage(attacker, defender, move, battle)
-      result.rawDamage(chd)
-
-      // Calculate #damage the hit should actually deal - MRB.damageDealt
-      val damageToDeal = chd min defender.currentHP(false)
-      result.damageDealt(damageToDeal)
-
-      // Calculate how much damage the hit would deal:
-      // - If $defender has a sub, to the underlying Pokemon
-      // - If $defender lacks a sub, to $defender
-      val damageUnderlying = chd min defender.currentHP(true)  // bypass sub
-      result.dUnderlying(damageUnderlying)
-
-      result
-
-    } else {
-      // Calculate #damage the regular hit could do - MRB.rawDamage
-      val rhd = calcRegularHitDamage(attacker, defender, move, battle)
-      result.rawDamage(rhd)
-
-      // Calculate #damage the Pokemon should actually deal - MRB.damageDealt
-      val damageToDeal = rhd min defender.currentHP()
-      result.damageDealt(damageToDeal)
-
-      // Calculate how much damage the hit would deal:
-      // - If $defender has a sub, to the underlying Pokemon
-      // - If $defender lacks a sub, to $defender
-      val damageUnderlying = rhd min defender.currentHP(true)  // bypass sub
-      result.dUnderlying(damageUnderlying)
-
-      result
+    def processRawDamage(rd: Int, r: MoveResultBuilder, d: Pokemon) {
+      // Update MRB r with various damage values, based on raw damage rd
+      // Used in both CritHit and RegHit branches below
+      r.rawDamage(rd)
+      r.damageDealt(rd min d.currentHP(false))
+      r.dUnderlying(rd min d.currentHP(true))
     }
+
+    if (Random.nextDouble < criticalChance) {
+      result.critHit(true)
+      val rawCritDam = calcCriticalHitDamage(attacker, defender, move, battle)
+      processRawDamage(rawCritDam, result, defender)
+    } else {
+      val rawRegDam = calcRegularHitDamage(attacker, defender, move, battle)
+      processRawDamage(rawRegDam, result, defender)
+    }
+    result
   }
 
 
-  /* HELPER FUNCTIONS */
+  /* DC HELPER FUNCTIONS */
   def stabBonus(attacker: Pokemon, move: Move): Double = {
     if (attacker.type1 == move.type1 || attacker.type2 == move.type1) 1.5
     else 1.0

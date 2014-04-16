@@ -2,7 +2,6 @@ package pokemodel
 
 import scala.collection.mutable
 import Type._
-import MoveType._
 import BattleStat._
 import CritHitType._
 import TakeDamageResult._
