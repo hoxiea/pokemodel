@@ -250,30 +250,29 @@ class Counter extends PhysicalMove {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     if (pb.moveHits(attacker, defender, this)) {
       // Get the last MoveResult from the battle
-      val mr: MoveResult = pb.moveHistory.mostRecent
-      if (mr.moveType == Normal || mr.moveType == Fighting) {
-        val damageToDeal = mr.damageDealt * 2  // here comes the pain
-        val damageResult = defender.takeDamage(damageToDeal)
+      val mro = pb.counterMan.lastDamageDealtMR(attacker)  // Option[MR]
+      mro match {
+        case Some(mr) if (mr.moveType == Normal || mr.moveType == Fighting) => {
+          val rawDamage = mr.dUnderlying * 2
+          val damageToDeal = rawDamage min defender.currentHP()
+          val dUnderlying  = rawDamage min defender.currentHP(true)
+          val damageResult = defender.takeDamage(damageToDeal)
 
-        // update result
-        result.damageDealt(damageToDeal)
-        result.numTimesHit(1)
-        // hpGained, critHit, STAB, typeMult are irrelevant
-        result.moveType(type1)
-        // Even if it was a Normal move that causes status change, Counter just does damage
-        result.processTakeDamageResult(defender, damageResult)
-        result.merge(mrb)
-        super.moveSpecificStuff(attacker, defender, pb, result)
-      } else {
-        // attack type was wrong, so just pass along what you received, keeping moveIndex
-        result.merge(mrb)
-        super.moveSpecificStuff(attacker, defender, pb, result)
+          // update result
+          result.rawDamage(rawDamage)
+          result.damageDealt(damageToDeal)
+          result.dUnderlying(dUnderlying)
+          result.numTimesHit(1)
+          // hpGained, critHit, STAB, typeMult are irrelevant
+          result.processTakeDamageResult(defender, damageResult)
+        }
+        case _ => {
+          // attack failed or was of the wrong Type - don't add anything to result
+        }
       }
-    } else {
-      // attack missed, so just pass along what you received, keeping moveIndex
-      result.merge(mrb)
-      super.moveSpecificStuff(attacker, defender, pb, result)
     }
+    result.merge(mrb)
+    super.moveSpecificStuff(attacker, defender, pb, result)
   }
 }
 
@@ -635,14 +634,16 @@ class SuperFang extends PhysicalMove {
     if (pb.moveHits(attacker, defender, this)) {
       // The damage is not altered by weakness, resistance, or immunity.
       // Doesn't receive STAB.
-      val damageToDeal = (defender.currentHP() / 2) max 1
-      assert (damageToDeal <= defender.currentHP())
+      val rawDamage = (defender.currentHP() / 2) max 1
+      val damageToDeal = rawDamage min defender.currentHP()
+      val dUnderlying = rawDamage min defender.currentHP(true)
       val damageResult = defender.takeDamage(damageToDeal)
 
       // Build an MRB from scratch, since we skipped damage calculator
-      result.rawDamage(damageToDeal)
       result.numTimesHit(1)
+      result.rawDamage(damageToDeal)
       result.damageDealt(damageToDeal)
+      result.dUnderlying(dUnderlying)
       // no hpGained, critHit, STAB/mult, SA, stat
       result.processTakeDamageResult(defender, damageResult)
     }
@@ -658,6 +659,7 @@ class HiJumpKick extends PhysicalMove with SingleStrikeLoseHPOnMiss {
   override val maxPP = 10
   override val power = 85
   override val accuracy = 0.9
+  // Normal in Gen1
   override def hpToLoseOnMiss = 1
   override def typesMissAgainst = Set(Ghost)
 }
@@ -1974,7 +1976,6 @@ class MirrorMove extends StatusMove {
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
     // Get the move used most recently by defender
     val m = pb.moveManager.getLastMove(defender)
-    println(s"m = $m")
 
     // Use it against defender, if it exists
     val mirrorResult = m match {
