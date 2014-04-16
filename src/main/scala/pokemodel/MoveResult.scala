@@ -27,6 +27,7 @@ import TakeDamageResult._
  * - rawDamage
  * - numTimesHit = 1
  * - damageDealt
+ * - dUnderlying
  * - critHit
  * - STAB
  * - moveType
@@ -53,9 +54,10 @@ import TakeDamageResult._
 
 class MoveResult (
   val moveIndex: Int,    // which move was used?
-  val rawDamage: Int,   // what's the max damage this move could deal, from DamageCalc?
+  val rawDamage: Int,    // what's the max damage this move could deal, from DamageCalc?
   val numTimesHit: Int,  // how many times did the move hit? usually 1
-  val damageDealt: Int,  // how much damage was actually dealt (on the last strike)?
+  val damageDealt: Int,  // #damage actually dealt (on the last strike)
+  val dUnderlying: Int,  // #damage the last strike would had dealt to enemy, if enemy didn't have a sub
   val hpGained: Int,     // how much HP did the user gain?
   val critHit: Boolean,  // did you get a critical hit?
   val STAB: Boolean,     // was there a STAB in play?
@@ -77,6 +79,7 @@ class MoveResult (
     repr.append(s"rawDamage = $rawDamage\n")
     repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
+    repr.append(s"dUnderlying = $dUnderlying\n")
     repr.append(s"hpGained = $hpGained\n")
     repr.append(s"critHit = $critHit\n")
     repr.append(s"STAB = $STAB\n")
@@ -101,6 +104,7 @@ class MoveResultBuilder {
   var rawDamage = 0
   var numTimesHit = 0
   var damageDealt = 0
+  var dUnderlying = 0
   var hpGained = 0
   var critHit = false
   var STAB = false
@@ -138,6 +142,11 @@ class MoveResultBuilder {
   def damageDealt(x: Int): MoveResultBuilder = {
     require(x >= 0, "MRB.damageDealt")
     damageDealt = x
+    this
+  }
+  def dUnderlying(x: Int): MoveResultBuilder = {
+    require(x >= 0, "MRB.dUnderlying")
+    dUnderlying = x
     this
   }
   def hpGained(x: Int): MoveResultBuilder = {
@@ -211,6 +220,7 @@ class MoveResultBuilder {
       rawDamage,
       numTimesHit,
       damageDealt,
+      dUnderlying,
       hpGained,
       critHit,
       STAB,
@@ -234,6 +244,7 @@ class MoveResultBuilder {
     rawDamage(rawDamage   max other.rawDamage)
     numTimesHit(numTimesHit max other.numTimesHit)
     damageDealt(damageDealt max other.damageDealt)
+    dUnderlying(dUnderlying max other.dUnderlying)
     hpGained(hpGained       max other.hpGained)
 
     critHit(critHit || other.critHit)
@@ -307,6 +318,7 @@ class MoveResultBuilder {
     repr.append(s"rawDamage = $rawDamage\n")
     repr.append(s"numTimesHit = $numTimesHit\n")
     repr.append(s"damageDealt = $damageDealt\n")
+    repr.append(s"dUnderlying = $dUnderlying\n")
     repr.append(s"hpGained = $hpGained\n")
     repr.append(s"critHit = $critHit\n")
     repr.append(s"STAB = $STAB\n")
