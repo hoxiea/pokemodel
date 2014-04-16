@@ -230,5 +230,4 @@ class DamageCalculatorSuite extends FunSuite {
     val result = charizard.useMove(1, venusaur, battle)
     assert(!result.critHit)
   }
-
 }
