@@ -16,9 +16,9 @@ class MoveSuite extends FlatSpec with Matchers {
   }
 
   "Struggle" should "deal damage and cause 50% recoil damage" in {
-    val f = singleMoveFixture(MoveDepot("struggle"))
+    val f = singleMoveFixture(MoveDepot("scratch"))  // irrelevant
     import f._
-    val result = charizard.useMove(1, venusaur, battle)
+    val result = charizard.useMove(5, venusaur, battle)
     assert(result.rawDamage == result.damageDealt)
     assert(venusaur.currentHP() == venusaur.maxHP - result.damageDealt)
     assert(charizard.maxHP - charizard.currentHP() == result.damageDealt / 2)
@@ -30,24 +30,24 @@ class MoveSuite extends FlatSpec with Matchers {
     // 50% of the damage actually dealt, not the potential damage. So give the
     // opponent 11 HP and make sure we only lose 5 using Struggle (checks
     // round-down)
-    val f = singleMoveFixture(MoveDepot("struggle"))
+    val f = singleMoveFixture(MoveDepot("scratch"))  // irrelevant
     import f._
     val opponentHP = 11
     reduceHPTo(venusaur, opponentHP)
 
-    val result = charizard.useMove(1, venusaur, battle)
+    val result = charizard.useMove(5, venusaur, battle)
     assert(!venusaur.isAlive, "opponent")
     assert(result.KO, "opponent")
     assert(charizard.maxHP - charizard.currentHP() == opponentHP / 2, "self")
   }
 
   it should "selfKO if you use it with low HP" in {
-    val f = singleMoveFixture(MoveDepot("struggle"))
+    val f = singleMoveFixture(MoveDepot("scratch"))  // irrelevant
     import f._
     val newHP = 11
     reduceHPTo(charizard, newHP)
 
-    val result = charizard.useMove(1, venusaur, battle)
+    val result = charizard.useMove(5, venusaur, battle)
     // venusaur should survive
     assert(venusaur.isAlive)
     assert(!result.KO)
@@ -59,29 +59,27 @@ class MoveSuite extends FlatSpec with Matchers {
   }
 
   it should "not have a PP deducted when it's used as Move5" in {
-    val f = singleMoveFixture(MoveDepot("struggle"))
+    val f = singleMoveFixture(MoveDepot("scratch"))  // irrelevant
     import f._
     val ppBefore = charizard.pp5.get
-    battle.takeNextTurn()  // no moves, everyone Struggles
-    assert(charizard.currentHP() < charizard.maxHP)
-    assert(venusaur.currentHP() < venusaur.maxHP)
+    charizard.useMove(5, venusaur, battle)
     assert(charizard.pp5.get == ppBefore)
   }
 
   it should "deal Normal-type damage, i.e. half effective against Rock" in {
-    val f = fullFixture(100, 100, List(MoveDepot("struggle")), List(), "Charizard", "Geodude")
+    val f = fullFixture(100, 100, List(MoveDepot("scratch")), List(), "Charizard", "Geodude")
     import f._
 
-    val result = p1.useMove(1, p2, battle)
+    val result = p1.useMove(5, p2, battle)
     assert(result.typeMult == 0.5)
     assert(p1.maxHP - p1.currentHP() == result.damageDealt / 2)
   }
 
   it should "deal Normal-type damage, i.e. not effective against Ghost" in {
-    val f = fullFixture(100, 100, List(MoveDepot("struggle")), List(), "Charizard", "Gengar")
+    val f = fullFixture(100, 100, List(MoveDepot("scratch")), List(), "Charizard", "Gengar")
     import f._
 
-    val result = p1.useMove(1, p2, battle)
+    val result = p1.useMove(5, p2, battle)
     assert(result.typeMult == 0.0)
     assert(p2.maxHP == p2.currentHP())  // p2 didn't lose any health
     assert(p1.maxHP - p1.currentHP() == result.damageDealt / 2)
