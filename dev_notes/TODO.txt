@@ -1,14 +1,11 @@
 GENERAL
-- read more about testing, and do more testing with less work
-- randomized testing? could be so nice and useful
 - process all TODOs in code
+- Make a Manager abstract class with an abstract method switchOut(p: Pokemon) that all managers inherit from
 
 POKEMON/MOVES
 - Continue implementing weird Moves
 
 BATTLES
-- Define a Battle.canBeHit(p: Pokemon) method that checks all of its various data structures for all conditions that would prohibit connecting (Dig, Fly, etc.)
-- Once Battle.canBeHit is in place, clean up the code that most Move traits/implementations use to figure out if they should proceed with the attack. Maybe pass in a parameter about whether or not it's a move that depends on accuracy?
 - Get MoveHistory vs MoveManager figured out. Look at what all Moves that need a history actually need, and then implement it
 
 

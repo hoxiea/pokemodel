@@ -76,20 +76,23 @@ Let's split this up into some cases, where P1 is the Pokemon Countering and P2 i
 => Deal 100HP to P1sub, subKO. That attack would have dealt 120HP to P1, though, so can Counter for 120*2.
 6. P1 has 10HP, P1sub has 100HP, Opponent hits with Normal/Fighting attack that deals 120 HP.
 => SubKO. That attack would only have dealt 10HP to P1, so P1 can Counter for 10*2?
+7. P1 has 10HP, P1sub has 100HP, Opponent hits with Normal/Fighting Multistrike attack: 3 hits, 40DP each.
+=> Deal (40, 40, 20) to sub. SubKO. Attack would only have dealt 10HP to P1, so P1 can Counter for 10*2?
 
 ---
 
 This suggests that a MoveResult should actually store 3 different kinds of damages:
-1. DamageCalc  = the raw damage value returned by the damage formula
-2. DamageDealt = how much damage the last strike dealt to either the sub (if present) or the enemy (if no sub)
+1. rawDamage  = the raw damage value returned by the damage formula
+2. damageDealt = how much damage the last strike dealt to either the sub (if present) or the enemy (if no sub)
                = min(DamageCalc, p1.currentHP(false))
-2. DamageToUnderlying = how much damage the last strike would have dealt to the underlying Pokemon, whether or not it has a substitute  
+2. dUnderlying = how much damage the last strike would have dealt to the underlying Pokemon, whether or not it has a substitute  
                       == min(DamageCalc, p1.currentHP(true))
 BE CAREFUL ABOUT MULTISTRIKE STUFF! LAST STRIKE ONLY!
 
 In Case 4, these values would be (85, 85, 85)
 In Case 5, these values would be (120, 100, 120)
 In Case 6, these values would be (120, 100, 10)
+In Case 7, these values would be (40, 20, 10)
 
 Once these new MoveResults are floating around, we just need to map each Pokemon in the battle
 to the last damage-dealing hit they've received.
