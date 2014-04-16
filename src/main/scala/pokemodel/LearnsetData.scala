@@ -38,7 +38,17 @@ object LearnsetData {
     require(1 <= index && index <= 151)
     val potentials = getLearnset(index).toList
     Random.shuffle(potentials).take(4)
-    // TODO: could be more efficient, this is O(#moves for Pokemon $index)
     // FACT: take returns the whole list if fewer than 4 elements, so no worries there
+    // TODO: could be more efficient, this is O(#moves for Pokemon $index)
+  }
+
+  def getPokemonIndexWhoCanLearn(mi: Int): Int = {
+    // given moveIndex mi, return the index of a Pokemon that can learn Move mi
+    require(1 <= mi && mi <= 165)
+    for ((pi, learnset) <- learnsets) {
+      if (learnset contains mi)
+        return pi
+    }
+    return -1
   }
 }
