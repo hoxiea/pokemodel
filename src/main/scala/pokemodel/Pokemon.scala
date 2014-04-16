@@ -273,6 +273,8 @@ class Pokemon(builder: PokemonBuilder) {
 
   def useMove(index: Int, enemy: Pokemon, battle: Battle): MoveResult = {
     require(1 <= index && index <= 5, s"illegal index $index passed to useMove - $name $level")
+    require(isAlive, "dead Pokemon tried to use a Move")
+    require(enemy.isAlive, "tried to use Move on a dead enemy")
 
     index match {
       case 5 => move5.use(this, 5, enemy, battle)  // can always use
@@ -371,7 +373,9 @@ class Pokemon(builder: PokemonBuilder) {
     val repr = new StringBuilder()
     repr.append(s"$name, level $level\n")
     repr.append(s"Type1 = $type1, Type2 = $type2\n")
-    repr.append(s"HP = $currHP / $maxHP, Status = $statusAilment\n")
+    val subInfo = if (hasSub) s"sub ${currentHP()}" else ""
+    repr.append(s"HP = $currHP / $maxHP ($subInfo) \n")
+    repr.append(s"Status = $statusAilment\n")
     repr.append(s"A|D|Spd|Spcl = $attack $defense $speed $special\n")
     repr.append(s"IV (A|D|Spd|Spcl|HP) = $attackIV $defenseIV $speedIV $specialIV $hpIV\n")
     repr.append(s"EV (A|D|Spd|Spcl|HP) = $attackEV $defenseEV $speedEV $specialEV $hpEV\n")
