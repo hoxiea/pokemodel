@@ -2,6 +2,51 @@ There are a few moves in the game that use past actions to figure out what to
 do.  In this document, I list these moves and describe their precise reliance
 on the past.
 
+----------------
+
+COUNTER
+In Gen 1, Counter acts upon the last DAMAGE DEALT to the Pokemon using Counter.
+Switching, full paralysis, and using a multi-turn move will not reset the last amount of damage done.
+The same damage-receiving can be Countered multiple times, as long as the damage-receiving isn't replaced.
+So we need to keep track of, for each Pokemon, the Type and DamageDealt for the last DamageDealt>0 strike.
+
+This is an interesting statement:
+"An attack absorbed by a Substitute can be countered for the amount of damage it would have done to the user had the user not had a Substitute."
+
+Let's split this up into some cases, where P1 is the Pokemon Countering and P2 is attacking P1:
+1. P1 doesn't have a substitute. 
+=> Proceed as usual.
+2. P2 deals damage, P1 creates a Substitute, P2 attacks and misses, P1 uses Counter.
+=> The substitute didn't absorb any damage, proceed as usual with that first "P2 deals damage."
+3. Have Sub, Opponent hits with wrong moveType and hurts Sub.
+=> Counter can't do anything with this hit, since it was the wrong Type. Counter will fail here.
+4. P1 has 150HP, P1sub has 100HP, Opponent hits with Normal/Fighting attack that deals 85 HP.
+=> P1sub has 15HP, Counter can reply with 85*2 damage dealt.
+
+5. P1 has 150HP, P1sub has 100HP, Opponent hits with Normal/Fighting attack that deals 120 HP.
+=> Deal 100HP to P1sub, subKO. That attack would have dealt 120HP to P1, though, so can Counter for 120*2.
+6. P1 has 10HP, P1sub has 100HP, Opponent hits with Normal/Fighting attack that deals 120 HP.
+=> SubKO. That attack would only have dealt 10HP to P1, so P1 can Counter for 10*2?
+7. P1 has 10HP, P1sub has 100HP, Opponent hits with Normal/Fighting Multistrike attack: 3 hits, 40DP each.
+=> Deal (40, 40, 20) to sub. SubKO. Attack would only have dealt 10HP to P1, so P1 can Counter for 10*2?
+
+This suggests that a MoveResult should actually store 3 different kinds of damages:
+1. rawDamage  = the raw damage value returned by the damage formula
+2. damageDealt = how much damage the last strike dealt to either the sub (if present) or the enemy (if no sub)
+               = min(DamageCalc, p1.currentHP(false))
+3. dUnderlying = how much damage the last strike would have dealt to the underlying Pokemon, whether or not it has a substitute == min(DamageCalc, p1.currentHP(true))
+BE CAREFUL ABOUT MULTISTRIKE STUFF! LAST STRIKE ONLY!
+
+In Case 4, these values would be (85, 85, 85)
+In Case 5, these values would be (120, 100, 120)
+In Case 6, these values would be (120, 100, 10)
+In Case 7, these values would be (40, 20, 10)
+
+Once these new MoveResults are floating around, we just need to map each Pokemon in the battle
+to the last damage-dealing hit they've received.
+
+--------------
+
 MIRRORMOVE
 MM causes the user to use the last move that the target used.
 A move called by MM counts as the last move used.
@@ -18,6 +63,7 @@ If MM is used during the first turn of a multi-turn move, MM ignores that and lo
 So here, we just need to track the most recently used attack by each Pokemon.
 Switching out removes any registered attack.
 
+---------------
 
 BIDE
 Bide has priority +1, so it tends to be the first move to go.
@@ -53,49 +99,3 @@ Switching tries to remove the switching Pokemon from the Bide manager.
 
 
 
-COUNTER
-In Gen 1, Counter acts upon the last DAMAGE DEALT to the Pokemon using Counter.
-Switching, full paralysis, and using a multi-turn move will not reset the last amount of damage done.
-The same damage-receiving can be Countered multiple times, as long as the damage-receiving isn't replaced.
-So we need to keep track of, for each Pokemon, the Type and DamageDealt for the last DamageDealt>0 strike.
-
-This is an interesting statement:
-"An attack absorbed by a Substitute can be countered for the amount of damage it would have done to the user had the user not had a Substitute."
-
-Let's split this up into some cases, where P1 is the Pokemon Countering and P2 is attacking P1:
-1. P1 doesn't have a substitute. 
-=> Proceed as usual.
-2. P2 deals damage, P1 creates a Substitute, P2 attacks and misses, P1 uses Counter.
-=> The substitute didn't absorb any damage, proceed as usual with that first "P2 deals damage."
-3. Have Sub, Opponent hits with wrong moveType and hurts Sub.
-=> Counter can't do anything with this hit, since it was the wrong Type. Counter will fail here.
-4. P1 has 150HP, P1sub has 100HP, Opponent hits with Normal/Fighting attack that deals 85 HP.
-=> P1sub has 15HP, Counter can reply with 85*2 damage dealt.
-
-5. P1 has 150HP, P1sub has 100HP, Opponent hits with Normal/Fighting attack that deals 120 HP.
-=> Deal 100HP to P1sub, subKO. That attack would have dealt 120HP to P1, though, so can Counter for 120*2.
-6. P1 has 10HP, P1sub has 100HP, Opponent hits with Normal/Fighting attack that deals 120 HP.
-=> SubKO. That attack would only have dealt 10HP to P1, so P1 can Counter for 10*2?
-7. P1 has 10HP, P1sub has 100HP, Opponent hits with Normal/Fighting Multistrike attack: 3 hits, 40DP each.
-=> Deal (40, 40, 20) to sub. SubKO. Attack would only have dealt 10HP to P1, so P1 can Counter for 10*2?
-
----
-
-This suggests that a MoveResult should actually store 3 different kinds of damages:
-1. rawDamage  = the raw damage value returned by the damage formula
-2. damageDealt = how much damage the last strike dealt to either the sub (if present) or the enemy (if no sub)
-               = min(DamageCalc, p1.currentHP(false))
-2. dUnderlying = how much damage the last strike would have dealt to the underlying Pokemon, whether or not it has a substitute  
-                      == min(DamageCalc, p1.currentHP(true))
-BE CAREFUL ABOUT MULTISTRIKE STUFF! LAST STRIKE ONLY!
-
-In Case 4, these values would be (85, 85, 85)
-In Case 5, these values would be (120, 100, 120)
-In Case 6, these values would be (120, 100, 10)
-In Case 7, these values would be (40, 20, 10)
-
-Once these new MoveResults are floating around, we just need to map each Pokemon in the battle
-to the last damage-dealing hit they've received.
-
-Q: Where to implement the updating?
-A: Pokemon.takeDamage could be really nice, since that's the only way to injure a Pokemon

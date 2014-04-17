@@ -1955,7 +1955,7 @@ class Rest extends StatusMove {
 
   // TODO: implement Rest, probably in the sleeping data structure
   // http://bulbapedia.bulbagarden.net/wiki/Rest_(move)
-  // On the turn that the Pokemon uses it: switch to SLP, regain all HP
+  // On the turn that the Pokemon uses it: switch to SLP and register SLP(?), regain all HP
   // Next turn: Pokemon is asleep, can Switch; choosing Fight causes it to tell you that Pokemon is asleep
   // Next turn: wake up at beginning of turn, can use an action
 }

@@ -111,7 +111,7 @@ object TestingInfrastructure {
     // numTimesHit times. But MultiStrike moves are designed to stop if they
     // break a sub or KO the opponent. This function tells you how much damage
     // the MultiStrike move whose result is msResult dealt total.
-    require(msResult.numTimesHit > 1)
+    require(msResult.numTimesHit >= 1)  // if it stops early, then only 1 strike
     (msResult.numTimesHit - 1) * msResult.rawDamage + msResult.damageDealt
   }
 
@@ -127,7 +127,7 @@ object TestingInfrastructure {
   val pokemonIndex = Gen.choose(1,150)   // inclusive on both ends
 
   val randomMove = for {
-    moveIndex <- Gen.choose(1, 165)
+    moveIndex <- Gen.choose(1, 164)  // no Struggle == 165
   } yield MoveDepot(moveIndex)
 
   val randomPokemon = for {

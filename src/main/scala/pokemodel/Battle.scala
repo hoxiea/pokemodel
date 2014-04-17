@@ -12,11 +12,11 @@ class Battle(val trainer1 : Trainer, val trainer2: Trainer) {
   def team2 = trainer2.team
 
   // Create and register various managers and calculators for this battle
-  val statManager = new BattleStatManager(this)
-  val moveManager = new BattleMoveManager(this)
-  val counterMan = new CounterManager(this)
+  val statManager   = new BattleStatManager(this)
+  val moveManager   = new BattleMoveManager(this)
+  val counterMan    = new CounterManager(this)
+  val lastMoveMan   = new LastMoveManager(this)
   val statusManager = new BattleStatusManager(this)
-  val moveHistory = new MoveHistory()
   val weirdMoveStatusManager = new WeirdMoveStatusManager(this)
   val dc = new DamageCalculator()
 
