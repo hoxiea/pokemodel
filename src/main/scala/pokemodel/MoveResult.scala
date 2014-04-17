@@ -322,6 +322,7 @@ class MoveResultBuilder {
     repr.append(s"hpGained = $hpGained\n")
     repr.append(s"critHit = $critHit\n")
     repr.append(s"STAB = $STAB\n")
+    repr.append(s"moveType = $moveType\n")
     repr.append(s"typeMult = $typeMult\n")
     repr.append(s"nvsa = $nvsa\n")
     repr.append(s"vsa = $vsa\n")

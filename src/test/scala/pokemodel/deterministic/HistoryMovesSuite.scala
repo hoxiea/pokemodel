@@ -12,50 +12,6 @@ import org.scalacheck._
  */
 
 class HistoryMoveSuite extends FlatSpec {
-  "MirrorMove" should "fail if used as the first Move of the Battle" in {
-    val f = fullFixture(100, 80, List(MoveDepot("MirrorMove")), List(), "Spearow")
-    import f._
-
-    val result = p1.useMove(1, p2, battle)
-    assert(result.numTimesHit == 0)
-    assert(result.damageDealt == 0)
-    assert(result.rawDamage == 0)
-  }
-
-  it should "fail if used after a new Pokemon has switched in" in {
-    val f = megaFixture(
-      List(("Fearow", 100)),
-      List(("Venusaur", 80), ("Machamp", 75)),
-      List(List("MirrorMove")),
-      List(List("RegisterSolarbeam", "VineWhip"), List("KarateChop", "SeismicToss"))
-    )
-    import f._
-
-    // vals: team1/team2, trainer1/trainer2, battle
-    assert(team2.activePokemon.level == 80)      // Venusaur active
-    team2.useMove(2, team1, battle)              // use VineWhip against Fearow
-    assert(team1.activePokemon.currentHP() > 0)  // Fearow survives
-    team2.switch(2, battle)                      // bring out Machamp
-    assert(team2.activePokemon.level == 75)      // Machamp active
-
-    val result = team1.useMove(1, team2, battle) // use Mirror Move vs new Pokemon
-    assert(result.numTimesHit == 0)
-    assert(result.damageDealt == 0)
-    assert(result.rawDamage == 0)
-  }
-
-  it should "succeed in the simplest case possible: DragonRage first, MM second" in {
-    val f = fullFixture(100, 100,
-      List(MoveDepot("mirrormove")), List(MoveDepot("dragonrage")),
-      "Fearow", "Dragonite")
-    import f._
-
-    // vals: team1/team2, trainer1/trainer2, battle
-    team2.useMove(1, team1, battle)               // Dragonite uses DragonRage
-    val result = team1.useMove(1, team2, battle)  // Fearow uses MirrorMove
-    assert(p2.currentHP() < p2.maxHP)
-  }
-
   private def counterFailed(mr: MoveResult): Boolean = {
     mr.numTimesHit == 0 &&
     mr.rawDamage == 0 &&
@@ -350,34 +306,108 @@ class HistoryMoveSuite extends FlatSpec {
     assert(counterRes.damageDealt == 20)
   }
 
+  //////////////////////////////////////
+
+  "MirrorMove" should "fail if used as the first Move of the Battle" in {
+    val f = fullFixture(100, 80, List(MoveDepot("MirrorMove")), List(), "Spearow")
+    import f._
+
+    val result = p1.useMove(1, p2, battle)
+    assert(battle.lastMoveMan.lastMoveUsed(p1).isEmpty, "test1")  // MM doesn't register itself ever!
+    assert(battle.lastMoveMan.lastMoveUsed(p2).isEmpty, "test2")
+    assert(result.numTimesHit == 0, "test3")
+    assert(result.damageDealt == 0, "test4")
+    assert(result.rawDamage == 0, "test5")
+    assert(result.moveType == Flying, "test6")
+  }
+
+  it should "fail if used after a new Pokemon has switched in" in {
+    val f = megaFixture(
+      List(("Fearow", 100)),
+      List(("Venusaur", 80), ("Machamp", 75)),
+      List(List("MirrorMove")),
+      List(List("RegisterSolarbeam", "VineWhip"), List("KarateChop", "SeismicToss"))
+    )
+    import f._
+
+    // vals: team1/team2, trainer1/trainer2, battle
+    assert(team2.activePokemon.level == 80)      // Venusaur active
+    team2.useMove(2, team1, battle)              // use VineWhip against Fearow
+    assert(team1.activePokemon.currentHP() > 0)  // Fearow survives
+    team2.switch(2, battle)                      // bring out Machamp
+    assert(team2.activePokemon.level == 75)      // Machamp active
+
+    val result = team1.useMove(1, team2, battle) // use Mirror Move vs Machamp
+    assert(result.numTimesHit == 0)
+    assert(result.damageDealt == 0)
+    assert(result.rawDamage == 0)
+  }
+
+  it should "deal 40 damage in the simplest case possible: DragonRage first, MM second" in {
+    val f = fullFixture(100, 100,
+      List(MoveDepot("mirrormove")), List(MoveDepot("dragonrage")),
+      "Fearow", "Dragonite")
+    import f._
+    team2.useMove(1, team1, battle)               // Dragonite uses DragonRage
+    val result = team1.useMove(1, team2, battle)  // Fearow uses MirrorMove
+    assert(p2.currentHP() == p2.maxHP - 40)
+  }
+
+  it should "register the move that's mirrored and not MirrorMove as last Move used" in {
+    val f = fullFixture(100, 100,
+      List(MoveDepot("mirrormove")), List(MoveDepot("dragonrage")),
+      "Fearow", "Dragonite")
+    import f._
+    team2.useMove(1, team1, battle)  // Dragonite uses DragonRage
+    team1.useMove(1, team2, battle)  // Fearow uses MirrorMove
+    assert(battle.lastMoveMan.lastMoveUsed(p1).isDefined)
+    assert(battle.lastMoveMan.lastMoveUsed(p2).isDefined)
+    assert(battle.lastMoveMan.lastMoveUsed(p1).get == MoveDepot("dragonRage"))
+  }
+
+  it should "provide a correct damageTaken to CounterManager when it succeeds" in {
+    val f = fullFixture(100, 100,
+      List(MoveDepot("mirrormove")), List(MoveDepot("dragonrage")),
+      "Fearow", "Dragonite")
+    import f._
+    team2.useMove(1, team1, battle)  // Dragonite uses DragonRage
+    team1.useMove(1, team2, battle)  // Fearow uses MirrorMove
+    assert(battle.counterMan.lastDamageDealtMR(team1.activePokemon).get.damageDealt == 40)
+    assert(battle.counterMan.lastDamageDealtMR(team2.activePokemon).get.damageDealt == 40) // key
+  }
+
+  // TODO: Make sure that MirrorMove fails for multi-turn moves that don't register until later
+
+  ////////////////////////////////////////
+
   "Bide" should "have priority 1" in {
     val m = MoveDepot("Bide")
     assert(m.priority == 1)
   }
 
-  it should "cause the user to be registered with the BideManager if not already registered" in {
-    assert(false)
-  }
+  // it should "cause the user to be registered with the BideManager if not already registered" in {
+  //   assert(false)
+  // }
 
-  it should "cause a PP to be deducted immediately" in {
-    assert(false)
-  }
+  // it should "cause a PP to be deducted immediately" in {
+  //   assert(false)
+  // }
 
-  it should "cause no more than 1 PP to be deducted if you continue moving towards attack" in {
-    assert(false)
-  }
+  // it should "cause no more than 1 PP to be deducted if you continue moving towards attack" in {
+  //   assert(false)
+  // }
 
-  it should "deal back 2*40*(#DragonRages)" in {
-    assert(false)
-  }
+  // it should "deal back 2*40*(#DragonRages)" in {
+  //   assert(false)
+  // }
 
-  it should "be able to hit a Flying Pokemon" in {
-    assert(false)
-  }
+  // it should "be able to hit a Flying Pokemon" in {
+  //   assert(false)
+  // }
 
-  it should "be able to hit a Digging Pokemon" in {
-    assert(false)
-  }
+  // it should "be able to hit a Digging Pokemon" in {
+  //   assert(false)
+  // }
 }
 
 object CounterSpec extends Properties("Counter") {

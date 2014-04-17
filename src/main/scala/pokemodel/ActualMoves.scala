@@ -1972,44 +1972,40 @@ class MirrorMove extends StatusMove {
       mrb: MoveResultBuilder = new MoveResultBuilder()) = {
 
     val result = new MoveResultBuilder().moveIndex(index).moveType(type1)
+    result.merge(mrb)
+
     // Get the move used most recently by defender
-    val m = pb.moveManager.getLastMove(defender)
+    val mo = pb.lastMoveMan.lastMoveUsed(defender)
 
     // Use it against defender, if it exists
-    val mirrorResult = m match {
-      case None => mrb.toMoveResult
-      case Some(move) => {
-        val r = move.use(attacker, 5, defender, pb)
-        r
-        // 5 == ignored, no PP to deduct for mirrored move
+    val mirrorResult: MoveResult = mo match {
+      case None => result.toMoveResult
+      case Some(m) => {
+        if (m.index == 119) result.toMoveResult // fails if last Move used was MirrorMove
+        else m.use(attacker, 5, defender, pb) // 5 == ignored, no PP to deduct for mirrored move
       }
     }
 
     result.merge(mirrorResult)
+    println(result)
     result
-    // Using the move will automatically log the move, if it's a logging move
-    // This doesn't capture the result of using the new move, though
   }
 
-
-  /*
-   * MirrorMove would get the updateLastMoveIndex wrong, since the order would be:
-   * MirrorMove.startUsingMove()
-   * MirrorMove.moveSpecificStuff()   => uses Move m
-   *   m.startUsingMove()
-   *   m.moveSpecificStuff()
-   *   m.finishUsingMove()            => sets lastMoveUsed to the correct value
-   * Move.finishUsingMove()     => sets it back to incorrect value
-   * So just don't update lastMoveUsed after calling MirrorMove!
+  /* The default finishUsingMove is fine - we deduct a PP from MirrorMove,
+   * which attackerMoveslot correctly addresses.
+   *
+   * If MirrorMove succeeds, then the move that it Mirrors should be recorded
+   * in lastMoveMan.
+   * If MirrorMove fails, then no lastMoveUsed should be recorded for attacker.
+   * To accomplish this, we just don't log MirrorMove.
    */
-  override def finishUsingMove(
+  override def registerMove(
       attacker: Pokemon,
       attackerMoveSlot: Int,
       defender: Pokemon,
       pb: Battle,
-      mrb: MoveResultBuilder) = {
-    attacker.deductPP(attackerMoveSlot)  // this is Metronome PP, should be decremented
-    mrb
+      mr: MoveResult) {
+    pb.counterMan.tryToRegisterDamageTaken(defender, mr)
   }
 }
 

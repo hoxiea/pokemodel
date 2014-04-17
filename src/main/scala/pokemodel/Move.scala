@@ -161,6 +161,7 @@ abstract class Move {
       pb: Battle,
       mr: MoveResult) {
     pb.counterMan.tryToRegisterDamageTaken(defender, mr)
+    pb.lastMoveMan.registerLastMoveUsed(attacker, this)
   }
 
   final def use(
